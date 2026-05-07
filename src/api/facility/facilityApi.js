@@ -1,0 +1,10 @@
+import api from '../index'
+export const getFacilityCategories = () => api.get('/facility-categories')
+export const createFacilityCategory = (payload) => api.post('/facility-categories', payload)
+export const updateFacilityCategory = (id, payload) => api.put(`/facility-categories/${id}`, payload)
+export const deleteFacilityCategory = (id) => api.delete(`/facility-categories/${id}`)
+export const getFacilities = (params) => api.get('/facilities', { params })
+export const getFacilityById = (id) => api.get(`/facilities/${id}`)
+export const createFacility = (payload) => api.post('/facilities', payload)
+export const updateFacility = (id, payload) => api.put(`/facilities/${id}`, payload)
+export const deleteFacility = (id) => api.delete(`/facilities/${id}`)
