@@ -72,7 +72,7 @@
         </el-button>
       </div>
 
-      <el-table :data="facilityList" v-loading="loading" style="width:100%" empty-text="Tidak ada fasilitas ditemukan">
+      <el-table :data="facilityList" v-loading="loading" size="small" style="width:100%" empty-text="Tidak ada fasilitas ditemukan">
         <el-table-column label="Fasilitas" min-width="220">
           <template #default="{ row }">
             <div class="facility-cell">
@@ -241,11 +241,11 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
-.breadcrumb { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-.page-title { font-size: 22px; font-weight: 700; color: var(--text-primary); }
-.page-desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.breadcrumb { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.page-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.page-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
 /* Stats */
 .stats-row {
@@ -254,14 +254,14 @@ onMounted(() => {
   gap: 0;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 16px 24px;
-  margin-bottom: 16px;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
 }
 .stat-item { text-align: center; flex: 1; }
-.stat-num { font-size: 24px; font-weight: 700; color: var(--text-primary); }
-.stat-lbl { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-.stat-divider { width: 1px; height: 36px; background: var(--border-color); margin: 0 4px; }
+.stat-num { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.stat-lbl { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+.stat-divider { width: 1px; height: 28px; background: var(--border-color); margin: 0 4px; }
 
 /* Table */
 .table-card { border-color: var(--border-color) !important; }
@@ -269,7 +269,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 
 .facility-cell { display: flex; align-items: center; gap: 12px; }
@@ -291,8 +291,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 8px;
   border-top: 1px solid var(--border-color);
 }
 .footer-info { font-size: 13px; color: var(--text-secondary); }

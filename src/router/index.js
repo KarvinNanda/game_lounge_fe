@@ -29,6 +29,13 @@ const routes = [
       { path: 'room-template', name: 'RoomTemplate', component: () => import('@/views/room_template/RoomTemplateView.vue') },
       { path: 'room-template/create', name: 'RoomTemplateCreate', component: () => import('@/views/room_template/RoomTemplateFormView.vue') },
       { path: 'room-template/:id/edit', name: 'RoomTemplateEdit', component: () => import('@/views/room_template/RoomTemplateFormView.vue') },
+      { path: 'pricing', name: 'Pricing', component: () => import('@/views/pricing/PricingView.vue') },
+      { path: 'pricing/:storeId/edit', name: 'PricingEdit', component: () => import('@/views/pricing/PricingEditView.vue') },
+      { path: 'customers', name: 'Customers', component: () => import('@/views/customer/CustomerView.vue') },
+      { path: 'play-credits', name: 'PlayCredits', component: () => import('@/views/play_credits/PlayCreditsView.vue') },
+      { path: 'promotion', name: 'Promotion', component: () => import('@/views/promotion/PromotionView.vue') },
+      { path: 'bookings', name: 'Bookings', component: () => import('@/views/booking/BookingView.vue') },
+      { path: 'sales', name: 'Sales', component: () => import('@/views/sales/SalesView.vue') },
     ]
   }
 ]

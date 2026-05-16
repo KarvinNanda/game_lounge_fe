@@ -1,51 +1,565 @@
-:root {
-  --bg-main: #0d0f1a;
-  --bg-sidebar: #111827;
-  --bg-card: #1a1d2e;
-  --bg-card-hover: #1e2235;
-  --color-primary: #7c3aed;
-  --color-primary-light: #8b5cf6;
-  --color-primary-dark: #6d28d9;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --border-color: #2a2d3e;
-  --sidebar-width: 240px;
-}
+/* ════════════════════════════════════════════════════════
+   QUANTUM GAMING CENTER — Design System v3
+   Brand: Deep Blue (#0282DE) | Cyan Accent (#19B9EE)
+   Customer palette: Navy dark × Ice blue
+════════════════════════════════════════════════════════ */
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   background-color: var(--bg-main);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Element Plus overrides */
-.el-table { --el-table-bg-color: var(--bg-card); --el-table-tr-bg-color: var(--bg-card); --el-table-header-bg-color: #1e2235; --el-table-border-color: var(--border-color); --el-table-text-color: var(--text-primary); --el-table-header-text-color: var(--text-secondary); --el-table-row-hover-bg-color: var(--bg-card-hover); }
-.el-card { --el-card-bg-color: var(--bg-card); --el-card-border-color: var(--border-color); --el-text-color-primary: var(--text-primary); }
-.el-input__wrapper { background-color: #1e2235 !important; border-color: var(--border-color) !important; box-shadow: 0 0 0 1px var(--border-color) !important; }
-.el-input__inner { color: var(--text-primary) !important; background-color: transparent !important; }
-.el-input__wrapper:hover, .el-input__wrapper.is-focus { box-shadow: 0 0 0 1px var(--color-primary) !important; }
-.el-select .el-input__wrapper { background-color: #1e2235 !important; }
-.el-select-dropdown { background-color: #1e2235; border-color: var(--border-color); }
-.el-select-dropdown__item { color: var(--text-primary); }
-.el-select-dropdown__item:hover, .el-select-dropdown__item.hover { background-color: var(--bg-card-hover); }
-.el-button--primary { background-color: var(--color-primary); border-color: var(--color-primary); }
-.el-button--primary:hover { background-color: var(--color-primary-light); border-color: var(--color-primary-light); }
-.el-drawer { background-color: var(--bg-card) !important; }
-.el-drawer__header { border-bottom: 1px solid var(--border-color); color: var(--text-primary) !important; }
-.el-form-item__label { color: var(--text-secondary) !important; }
-.el-checkbox__label { color: var(--text-primary) !important; }
-.el-radio__label { color: var(--text-primary) !important; }
-.el-tag--light { background-color: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.3); color: var(--color-primary-light); }
-.el-pagination { --el-pagination-bg-color: var(--bg-card); --el-pagination-text-color: var(--text-secondary); --el-pagination-border-radius: 6px; }
-.el-steps { --el-text-color-primary: var(--text-primary); }
-.el-step__title { color: var(--text-secondary) !important; }
-.el-step__title.is-process { color: var(--text-primary) !important; }
-.el-upload-dragger { background-color: #1e2235; border-color: var(--border-color); }
-.el-upload-dragger:hover { border-color: var(--color-primary); }
+/* ══════════════════════════════════════════════════════
+   ROOT — Dark Mode (default)
+   Navy deep-space palette from customer spec
+══════════════════════════════════════════════════════ */
+:root {
+  /* Brand — Blue */
+  --color-primary:       #0282DE;
+  --color-primary-light: #19B9EE;
+  --color-primary-dark:  #0262b0;
+  --color-primary-glow:  rgba(2,130,222,0.45);
+  --color-primary-soft:  rgba(2,130,222,0.12);
+  --color-accent:        #00B8FF;
+  --color-ice:           #7DEBFF;
+
+  /* Status */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger:  #ef4444;
+  --color-info:    #19B9EE;
+
+  /* Layout */
+  --sidebar-width: 228px;
+
+  /* Content — Dark navy
+     Contrast ratios on --bg-card (#020B2E):
+     text-primary  #F5F7FA → ~17:1  ✅ AAA
+     text-secondary #C9D4E2 → ~10:1  ✅ AAA
+     text-muted    #5a7a9a → ~3.5:1 ✅ AA large
+  */
+  --bg-main:        #010214;
+  --bg-card:        #020B2E;
+  --bg-card-hover:  #0B2350;
+  --border-color:   #0e3272;
+  --text-primary:   #F5F7FA;
+  --text-secondary: #C9D4E2;
+  --text-muted:     #5a7a9a;
+
+  /* Sidebar — full dark navy */
+  --sidebar-bg-start:      #010214;
+  --sidebar-bg-end:        #01031B;
+  --sidebar-border-color:  rgba(2,130,222,0.15);
+  --sidebar-glow-color:    rgba(2,130,222,0.4);
+  --sidebar-text:          #4a6480;
+  --sidebar-text-hover:    #7DEBFF;
+  --sidebar-text-active:   #7DEBFF;
+  --sidebar-label-color:   rgba(2,130,222,0.4);
+  --sidebar-sub-line:      rgba(2,130,222,0.2);
+  --sidebar-active-bg:     linear-gradient(90deg, rgba(2,130,222,0.25) 0%, rgba(2,130,222,0.04) 100%);
+  --sidebar-hover-bg:      rgba(2,130,222,0.08);
+  --sidebar-logo-bg:       linear-gradient(135deg, #0282DE, #0262b0);
+  --sidebar-logo-shadow:   rgba(2,130,222,0.55);
+  --sidebar-active-bar:    linear-gradient(180deg, #19B9EE, #0282DE);
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT MODE
+   White/sky blue content, slightly lighter navy sidebar
+══════════════════════════════════════════════════════ */
+body.light-mode {
+  /* Content */
+  --bg-main:        #f0f6ff;
+  --bg-card:        #ffffff;
+  --bg-card-hover:  #e4eeff;
+  --border-color:   #c0d4f0;
+  --text-primary:   #0a1a35;
+  --text-secondary: #2d4a6e;
+  --text-muted:     #5a7a9a;
+
+  /* Sidebar — lighter navy, still fully company brand */
+  --sidebar-bg-start:      #020B2E;
+  --sidebar-bg-end:        #0B2350;
+  --sidebar-border-color:  rgba(2,130,222,0.2);
+  --sidebar-glow-color:    rgba(2,130,222,0.35);
+  --sidebar-text:          #7aaccf;
+  --sidebar-text-hover:    #7DEBFF;
+  --sidebar-text-active:   #7DEBFF;
+  --sidebar-label-color:   rgba(25,185,238,0.45);
+  --sidebar-sub-line:      rgba(2,130,222,0.25);
+  --sidebar-active-bg:     linear-gradient(90deg, rgba(2,130,222,0.3) 0%, rgba(2,130,222,0.05) 100%);
+  --sidebar-hover-bg:      rgba(2,130,222,0.12);
+  --sidebar-logo-bg:       linear-gradient(135deg, #0282DE, #0262b0);
+  --sidebar-logo-shadow:   rgba(2,130,222,0.5);
+  --sidebar-active-bar:    linear-gradient(180deg, #19B9EE, #0282DE);
+}
+
+/* ══════════════════════════════════════════════════════
+   GLOBAL TYPOGRAPHY
+══════════════════════════════════════════════════════ */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1.3;
+}
+p    { color: var(--text-secondary); }
+strong, b { color: var(--text-primary); font-weight: 700; }
+
+/* ── Table ───────────────────────────────────────────── */
+.el-table {
+  --el-table-bg-color:          var(--bg-card);
+  --el-table-tr-bg-color:       var(--bg-card);
+  --el-table-header-bg-color:   var(--bg-card-hover);
+  --el-table-border-color:      var(--border-color);
+  --el-text-color-primary:      var(--text-primary);
+  --el-table-header-text-color: var(--text-secondary);
+  --el-table-row-hover-bg-color:var(--bg-card-hover);
+  --el-table-text-color:        var(--text-primary);
+  font-size: 13px;
+}
+.el-table .el-table__cell { padding: 8px 0 !important; }
+.el-table th.el-table__cell {
+  padding: 7px 0 !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.7px !important;
+  text-transform: uppercase !important;
+  color: var(--text-secondary) !important;
+}
+.el-table td.el-table__cell { color: var(--text-primary) !important; }
+
+/* ── Card ────────────────────────────────────────────── */
+.el-card {
+  --el-card-bg-color:     var(--bg-card);
+  --el-card-border-color: var(--border-color);
+  --el-text-color-primary:var(--text-primary);
+  border-radius: 10px !important;
+  transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+}
+.el-card__body { padding: 14px !important; }
+
+/* ── Input ───────────────────────────────────────────── */
+.el-input__wrapper {
+  background-color: var(--bg-card-hover) !important;
+  box-shadow: 0 0 0 1px var(--border-color) !important;
+  transition: box-shadow 0.2s !important;
+}
+.el-input__inner {
+  color: var(--text-primary) !important;
+  background: transparent !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+.el-input__inner::placeholder { color: var(--text-muted) !important; font-weight: 400 !important; }
+.el-input__wrapper:hover,
+.el-input__wrapper.is-focus { box-shadow: 0 0 0 1.5px var(--color-primary) !important; }
+.el-textarea__inner {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  font-size: 13px !important;
+  box-shadow: none !important;
+  border-radius: 6px !important;
+}
+.el-textarea__inner:focus { border-color: var(--color-primary) !important; }
+.el-input__prefix-inner { color: var(--text-muted) !important; }
+.el-input-group__prepend {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+.el-input.is-disabled .el-input__wrapper { background-color: var(--bg-main) !important; opacity: 0.8; }
+.el-input.is-disabled .el-input__inner { color: var(--text-secondary) !important; }
+
+/* ── Select ──────────────────────────────────────────── */
+.el-select .el-input__wrapper { background-color: var(--bg-card-hover) !important; }
+.el-select-dropdown {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35) !important;
+}
+.el-select-dropdown__item { color: var(--text-primary) !important; font-size: 13px !important; font-weight: 500 !important; }
+.el-select-dropdown__item:hover,
+.el-select-dropdown__item.hover,
+.el-select-dropdown__item.is-hovering { background: var(--color-primary-soft) !important; }
+.el-select-dropdown__item.is-selected,
+.el-select-dropdown__item.selected { color: var(--color-primary-light) !important; font-weight: 600 !important; }
+
+/* ── Button ──────────────────────────────────────────── */
+.el-button {
+  transition: transform 0.12s ease, box-shadow 0.15s ease !important;
+  border-radius: 7px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+}
+.el-button:active { transform: scale(0.96) !important; }
+.el-button--primary {
+  background: linear-gradient(135deg, #0282DE 0%, #0262b0 100%) !important;
+  border-color: transparent !important;
+  color: #fff !important;
+}
+.el-button--primary:hover {
+  background: linear-gradient(135deg, #19B9EE 0%, #0282DE 100%) !important;
+  box-shadow: 0 4px 20px rgba(2,130,222,0.5) !important;
+  border-color: transparent !important;
+}
+.el-button--plain {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+.el-button--plain:hover {
+  background: var(--color-primary-soft) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary-light) !important;
+}
+.el-button--success { background: linear-gradient(135deg, #10b981, #059669) !important; border-color: transparent !important; color: #fff !important; }
+.el-button--warning { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border-color: transparent !important; color: #fff !important; }
+.el-button--danger  { background: linear-gradient(135deg, #ef4444, #dc2626) !important; border-color: transparent !important; color: #fff !important; }
+
+.el-button.is-circle.is-plain {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+.el-button.is-circle.is-plain:hover {
+  background: var(--color-primary-soft) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary-light) !important;
+}
+.el-button--danger.is-circle.is-plain:hover  { background: rgba(239,68,68,0.12) !important; border-color: rgba(239,68,68,0.4) !important; color: #f87171 !important; }
+.el-button--success.is-circle.is-plain:hover { background: rgba(16,185,129,0.12) !important; border-color: rgba(16,185,129,0.4) !important; color: #34d399 !important; }
+.el-button--warning.is-circle.is-plain:hover { background: rgba(245,158,11,0.12) !important; border-color: rgba(245,158,11,0.4) !important; color: #fbbf24 !important; }
+
+/* ── Dialog ──────────────────────────────────────────── */
+.el-dialog {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 14px !important;
+  --el-dialog-padding-primary: 0;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6) !important;
+}
+.el-dialog__header { padding: 16px 20px 12px !important; border-bottom: 1px solid var(--border-color); }
+.el-dialog__title  { color: var(--text-primary) !important; font-size: 15px !important; font-weight: 700 !important; letter-spacing: 0.2px !important; }
+.el-dialog__body   { padding: 16px 20px !important; color: var(--text-primary) !important; }
+.el-dialog__footer { padding: 12px 20px 16px !important; border-top: 1px solid var(--border-color); }
+.el-overlay-dialog { backdrop-filter: blur(4px); }
+.el-overlay { background: rgba(0,0,0,0.65) !important; }
+
+/* ── Drawer ──────────────────────────────────────────── */
+.el-drawer {
+  background: var(--bg-card) !important;
+  border-left: 1px solid var(--border-color) !important;
+}
+.el-drawer__header {
+  padding: 14px 18px !important; margin-bottom: 0 !important;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary) !important;
+  font-size: 14px !important; font-weight: 700 !important; letter-spacing: 0.3px !important;
+}
+.el-drawer__body { padding: 16px !important; background: var(--bg-card) !important; }
+
+/* ── Form ────────────────────────────────────────────── */
+.el-form-item { margin-bottom: 14px; }
+.el-form-item__label {
+  color: var(--text-secondary) !important;
+  padding-bottom: 5px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+}
+.el-form-item__error { color: var(--color-danger) !important; font-size: 11px !important; font-weight: 500 !important; }
+.el-checkbox__label { color: var(--text-primary) !important; font-size: 13px !important; font-weight: 500 !important; }
+.el-radio__label    { color: var(--text-primary) !important; font-size: 13px !important; font-weight: 500 !important; }
+
+/* ── Switch ──────────────────────────────────────────── */
+.el-switch.is-checked .el-switch__core { background: var(--color-primary) !important; border-color: var(--color-primary) !important; }
+.el-switch__label { color: var(--text-secondary) !important; font-weight: 600 !important; }
+.el-switch__label.is-active { color: var(--text-primary) !important; }
+
+/* ── Checkbox ────────────────────────────────────────── */
+.el-checkbox__inner { background: var(--bg-card-hover) !important; border-color: var(--border-color) !important; transition: all 0.2s; }
+.el-checkbox.is-checked .el-checkbox__inner { background: var(--color-primary) !important; border-color: var(--color-primary) !important; }
+
+/* ── Radio ───────────────────────────────────────────── */
+.el-radio__inner { background: var(--bg-card-hover) !important; border-color: var(--border-color) !important; }
+.el-radio.is-checked .el-radio__inner { border-color: var(--color-primary) !important; }
+
+/* ── Tabs ────────────────────────────────────────────── */
+.el-tabs__header { margin-bottom: 0 !important; }
+.el-tabs__nav-wrap::after { background-color: var(--border-color) !important; height: 1px !important; }
+.el-tabs--card > .el-tabs__header { border-bottom-color: var(--border-color) !important; }
+.el-tabs--card .el-tabs__item {
+  padding: 0 18px !important; height: 36px !important; line-height: 36px !important;
+  font-size: 12.5px !important; font-weight: 600 !important;
+  background: var(--bg-card-hover) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.2s;
+}
+.el-tabs--card .el-tabs__item.is-active {
+  background: rgba(2,130,222,0.18) !important;
+  color: var(--color-primary-light) !important;
+  border-bottom-color: transparent !important;
+  font-weight: 700 !important;
+}
+.el-tabs--card .el-tabs__item:hover { color: var(--color-primary-light) !important; }
+
+/* ── Pagination ──────────────────────────────────────── */
+.el-pagination { --el-pagination-bg-color: transparent; --el-pagination-text-color: var(--text-secondary); --el-color-primary: var(--color-primary-light); }
+.el-pagination .btn-prev,
+.el-pagination .btn-next,
+.el-pagination .el-pager li {
+  background: var(--bg-card-hover) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  margin: 0 2px; transition: all 0.15s;
+}
+.el-pagination .el-pager li.is-active {
+  background: linear-gradient(135deg, #0282DE, #0262b0) !important;
+  color: #fff !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 2px 8px rgba(2,130,222,0.4) !important;
+}
+
+/* ── Tags ────────────────────────────────────────────── */
+.el-tag {
+  border-radius: 5px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.2px !important;
+  animation: fadeIn 0.18s ease;
+}
+.el-tag--success { background: rgba(16,185,129,0.15) !important;  color:#2dd4aa !important;  border-color:rgba(16,185,129,0.3) !important; }
+.el-tag--danger  { background: rgba(239,68,68,0.15)  !important;  color:#fb7185 !important;  border-color:rgba(239,68,68,0.3) !important; }
+.el-tag--warning { background: rgba(245,158,11,0.15) !important;  color:#fcd34d !important;  border-color:rgba(245,158,11,0.3) !important; }
+.el-tag--info    { background: rgba(2,130,222,0.15)   !important; color:#7DEBFF !important;  border-color:rgba(2,130,222,0.3) !important; }
+.el-tag--default,
+.el-tag:not([class*="el-tag--"]) {
+  background: rgba(2,130,222,0.15) !important;
+  color: var(--color-primary-light) !important;
+  border-color: rgba(2,130,222,0.3) !important;
+}
+
+/* ── Progress ────────────────────────────────────────── */
+.el-progress-bar__outer { background: var(--border-color) !important; border-radius: 10px !important; }
+.el-progress-bar__inner { background: linear-gradient(90deg, #0282DE, #19B9EE) !important; }
+
+/* ── Avatar ──────────────────────────────────────────── */
+.el-avatar {
+  background: linear-gradient(135deg, rgba(2,130,222,0.35), rgba(2,98,176,0.25)) !important;
+  color: var(--color-primary-light) !important;
+  font-weight: 700 !important;
+}
+
+/* ── Tooltip ─────────────────────────────────────────── */
+.el-tooltip__popper {
+  background: var(--bg-card-hover) !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-primary) !important;
+  font-size: 11.5px !important; font-weight: 600 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35) !important;
+}
+
+/* ── Input Number ────────────────────────────────────── */
+.el-input-number .el-input__wrapper { background: var(--bg-card-hover) !important; }
+.el-input-number__decrease,
+.el-input-number__increase {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-secondary) !important;
+}
+
+/* ── Date / Time Picker ──────────────────────────────── */
+.el-picker__popper {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+}
+.el-date-table td { color: var(--text-primary) !important; }
+.el-date-table td.disabled .el-date-table-cell__text { color: var(--text-muted) !important; }
+.el-date-picker__header-label { color: var(--text-primary) !important; font-weight: 700 !important; }
+.el-picker-panel__icon-btn { color: var(--text-secondary) !important; }
+
+/* ── Upload ──────────────────────────────────────────── */
+.el-upload-dragger {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--border-color) !important;
+  border-radius: 8px !important;
+}
+.el-upload-dragger:hover { border-color: var(--color-primary) !important; }
+
+/* ── Message Box ─────────────────────────────────────── */
+.el-message-box {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.55) !important;
+}
+.el-message-box__title   { color: var(--text-primary) !important; font-weight: 700 !important; }
+.el-message-box__content { color: var(--text-secondary) !important; font-size: 13px !important; }
+
+/* ── Dropdown menu ───────────────────────────────────── */
+.el-dropdown-menu {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px !important; padding: 4px !important;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.35) !important;
+}
+.el-dropdown-menu__item { color: var(--text-primary) !important; border-radius: 6px !important; font-size: 13px !important; font-weight: 500 !important; }
+.el-dropdown-menu__item:hover { background: var(--color-primary-soft) !important; color: var(--color-primary-light) !important; }
+
+/* ── Popover ─────────────────────────────────────────── */
+.el-popover {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ── Empty ───────────────────────────────────────────── */
+.el-empty__description { color: var(--text-muted) !important; }
+
+/* ── Scrollbar ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ══════════════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════════════ */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.stats-row  { animation: fadeSlideUp 0.25s ease both; animation-delay: 0.05s; }
+.table-card { animation: fadeSlideUp 0.28s ease both; animation-delay: 0.10s; }
+.pricing-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 30px rgba(2,130,222,0.2) !important;
+}
+
+/* ══════════════════════════════════════════════════════
+   LIGHT MODE — El-Plus overrides
+   Content stays white/sky, sidebar uses CSS vars (handled in AdminLayout)
+══════════════════════════════════════════════════════ */
+body.light-mode .el-table {
+  --el-table-bg-color:          #ffffff;
+  --el-table-tr-bg-color:       #ffffff;
+  --el-table-header-bg-color:   #e8f2ff;
+  --el-table-border-color:      #c0d4f0;
+  --el-table-row-hover-bg-color:#d4eaff;
+  --el-table-text-color:        #0a1a35;
+  --el-text-color-primary:      #0a1a35;
+}
+body.light-mode .el-table td.el-table__cell { color: #0a1a35 !important; }
+body.light-mode .el-table th.el-table__cell { color: #2d4a6e !important; }
+
+body.light-mode .el-button--plain {
+  background: #e4eeff !important;
+  border-color: #c0d4f0 !important;
+  color: #2d4a6e !important;
+}
+body.light-mode .el-button--plain:hover {
+  background: rgba(2,130,222,0.1) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+}
+body.light-mode .el-button.is-circle.is-plain {
+  background: #e4eeff !important;
+  border-color: #c0d4f0 !important;
+  color: #2d4a6e !important;
+}
+body.light-mode .el-tabs--card .el-tabs__item { background: #e4eeff !important; color: #2d4a6e !important; }
+body.light-mode .el-tabs--card .el-tabs__item.is-active { background: rgba(2,130,222,0.15) !important; color: #0262b0 !important; }
+body.light-mode .el-input-number__decrease,
+body.light-mode .el-input-number__increase { background: #e4eeff !important; border-color: #c0d4f0 !important; color: #2d4a6e !important; }
+body.light-mode .el-upload-dragger { background: #e4eeff !important; border-color: #c0d4f0 !important; }
+body.light-mode .el-form-item__label { color: #2d4a6e !important; }
+body.light-mode .el-radio__label,
+body.light-mode .el-checkbox__label { color: #0a1a35 !important; }
+body.light-mode .el-switch__label   { color: #2d4a6e !important; }
+body.light-mode .el-input__inner    { color: #0a1a35 !important; }
+body.light-mode .el-input__inner::placeholder { color: #7aaccf !important; }
+body.light-mode .el-textarea__inner { color: #0a1a35 !important; }
+body.light-mode .el-select-dropdown { box-shadow: 0 8px 24px rgba(2,130,222,0.15) !important; }
+body.light-mode .el-select-dropdown__item { color: #0a1a35 !important; }
+body.light-mode .el-message-box__content { color: #2d4a6e !important; }
+body.light-mode .el-popover { box-shadow: 0 8px 24px rgba(2,130,222,0.15) !important; }
+body.light-mode .el-pagination .btn-prev,
+body.light-mode .el-pagination .btn-next,
+body.light-mode .el-pagination .el-pager li {
+  background: #e4eeff !important;
+  color: #2d4a6e !important;
+  border-color: #c0d4f0 !important;
+}
+body.light-mode .el-tooltip__popper {
+  background: #0a1a35 !important;
+  border-color: #0a1a35 !important;
+  color: #F5F7FA !important;
+}
+
+/* Light mode tags — darker for contrast on white */
+body.light-mode .el-tag--success { color:#065f46 !important; background:rgba(16,185,129,0.12) !important; border-color:rgba(16,185,129,0.25) !important; }
+body.light-mode .el-tag--danger  { color:#991b1b !important; background:rgba(239,68,68,0.10) !important;  border-color:rgba(239,68,68,0.22) !important; }
+body.light-mode .el-tag--warning { color:#92400e !important; background:rgba(245,158,11,0.12) !important; border-color:rgba(245,158,11,0.25) !important; }
+body.light-mode .el-tag--info    { color:#0262b0 !important; background:rgba(2,130,222,0.10) !important;  border-color:rgba(2,130,222,0.22) !important; }
+body.light-mode .el-tag--default,
+body.light-mode .el-tag:not([class*="el-tag--"]) { color:#0262b0 !important; background:rgba(2,130,222,0.10) !important; border-color:rgba(2,130,222,0.22) !important; }
+
+/* ══════════════════════════════════════════════════════
+   BOOKING CALENDAR — Light mode block overrides
+   Blocks need solid, saturated colors to be visible on
+   the white/sky-blue (#f0f6ff) content background.
+   These are here (not in BookingView scoped) to avoid
+   :global() compound-selector compilation issues.
+══════════════════════════════════════════════════════ */
+body.light-mode .block-upcoming {
+  background: #0282DE !important;
+  color: #ffffff !important;
+  border-color: #0262b0 !important;
+}
+body.light-mode .block-ongoing {
+  background: #10B981 !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+}
+body.light-mode .block-completed {
+  background: #64748B !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+}
+body.light-mode .block-cancelled {
+  background: #EF4444 !important;
+  color: #ffffff !important;
+  border-color: #DC2626 !important;
+  text-decoration: line-through !important;
+}
+body.light-mode .block-name { color: #ffffff !important; }
+body.light-mode .block-time { color: rgba(255,255,255,0.88) !important; }
+
+/* Booking grid — light mode slot hover & group header */
+body.light-mode .empty-slot.clickable:hover { background: rgba(2,130,222,0.1) !important; }
+body.light-mode .group-header-row           { background: rgba(2,130,222,0.05) !important; }

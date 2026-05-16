@@ -35,7 +35,7 @@
         </el-button>
       </div>
 
-      <el-table :data="filteredRoles" v-loading="loading" style="width:100%" empty-text="Belum ada role">
+      <el-table :data="filteredRoles" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada role">
         <el-table-column label="Role" min-width="200">
           <template #default="{ row }">
             <div>
@@ -330,23 +330,23 @@ onMounted(fetchRoles)
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
-.breadcrumb { font-size:12px; color:var(--text-muted); margin-bottom:4px; }
-.page-title { font-size:22px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:13px; color:var(--text-secondary); margin-top:4px; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
+.page-title { font-size:18px; font-weight:700; color:var(--text-primary); }
+.page-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
 
 .stats-row {
   display:flex; align-items:center;
   background:var(--bg-card); border:1px solid var(--border-color);
-  border-radius:10px; padding:16px 24px; margin-bottom:16px;
+  border-radius:8px; padding:10px 16px; margin-bottom:12px;
 }
 .stat-item { text-align:center; flex:1; }
-.stat-num { font-size:24px; font-weight:700; color:var(--text-primary); }
-.stat-lbl { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-.stat-divider { width:1px; height:36px; background:var(--border-color); margin:0 4px; }
+.stat-num { font-size:18px; font-weight:700; color:var(--text-primary); }
+.stat-lbl { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+.stat-divider { width:1px; height:28px; background:var(--border-color); margin:0 4px; }
 
 .table-card { border-color:var(--border-color) !important; }
-.table-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.table-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 
 .cell-name { font-size:13px; font-weight:600; color:var(--text-primary); }
 .cell-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }

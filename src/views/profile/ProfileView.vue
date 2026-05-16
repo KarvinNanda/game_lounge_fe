@@ -199,10 +199,10 @@ const changePassword = async () => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; }
-.breadcrumb { font-size:12px; color:var(--text-muted); margin-bottom:4px; }
-.page-title { font-size:22px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:13px; color:var(--text-secondary); margin-top:4px; }
+.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
+.page-title { font-size:18px; font-weight:700; color:var(--text-primary); }
+.page-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
 
 .profile-layout { display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:start; }
 .left-col { display:flex; flex-direction:column; gap:16px; }
