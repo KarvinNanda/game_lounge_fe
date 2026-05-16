@@ -15,6 +15,9 @@ Dibangun dengan **Vue 3 + Vite + Element Plus**.
 | Pinia | ^3.0 | State management |
 | Element Plus | ^2.13 | UI component library |
 | Axios | ^1.16 | HTTP client |
+| ECharts | ^6.0 | Charting library (Sales Dashboard) |
+| xlsx | ^0.18 | Export data ke file Excel |
+| jsPDF + autotable | ^4.2 | Export data ke file PDF |
 | Node.js | >=20.19 | Runtime requirement |
 
 ---
@@ -55,12 +58,6 @@ npm run build
 
 Output ada di folder `dist/`.
 
-### 5. Preview Build
-
-```bash
-npm run preview
-```
-
 ---
 
 ## Scripts
@@ -79,74 +76,92 @@ npm run preview
 
 ```
 game_lounge_fe/
-├── public/                        # Static assets (served as-is)
+├── public/
 ├── src/
-│   ├── api/                       # Semua modul pemanggilan API
-│   │   ├── index.js               # Axios instance + interceptors (auth token, 401 redirect)
-│   │   ├── uploadApi.js           # POST /upload — upload file ke backend
+│   ├── api/                            # Semua modul pemanggilan API
+│   │   ├── index.js                    # Axios instance + interceptors (auth token, 401 redirect)
+│   │   ├── uploadApi.js                # POST /upload — upload file ke backend
 │   │   ├── auth/
-│   │   │   └── authApi.js         # login, logout, getMe
+│   │   │   └── authApi.js              # login, logout, getMe
+│   │   ├── booking/
+│   │   │   └── bookingApi.js           # CRUD booking, dashboard kalender, sessions-ending-soon
+│   │   ├── customer/
+│   │   │   └── customerApi.js          # CRUD customers (member & regular)
 │   │   ├── facility/
-│   │   │   └── facilityApi.js     # CRUD facility categories + facilities
+│   │   │   └── facilityApi.js          # CRUD facility categories + facilities
+│   │   ├── play_credits/
+│   │   │   └── playCreditsApi.js       # CRUD paket & penjualan play credits
+│   │   ├── pricing/
+│   │   │   └── pricingApi.js           # Kelola harga per cabang & flash sale
+│   │   ├── promotion/
+│   │   │   └── promotionApi.js         # CRUD voucher & promo
 │   │   ├── role/
-│   │   │   └── roleApi.js         # CRUD roles
+│   │   │   └── roleApi.js              # CRUD roles + permissions
 │   │   ├── room_template/
-│   │   │   └── roomTemplateApi.js # CRUD room templates
+│   │   │   └── roomTemplateApi.js      # CRUD room templates
+│   │   ├── sales/
+│   │   │   └── salesApi.js             # Summary, trend, & daftar transaksi penjualan
 │   │   ├── staff/
-│   │   │   └── staffApi.js        # CRUD staff
+│   │   │   └── staffApi.js             # CRUD staff
 │   │   └── store/
-│   │       └── storeApi.js        # CRUD stores
+│   │       └── storeApi.js             # CRUD stores
 │   │
 │   ├── assets/
-│   │   ├── logo.png               # Logo aplikasi (favicon, sidebar, login)
-│   │   └── theme.css              # Dark theme CSS variables + Element Plus overrides
+│   │   ├── logo.png                    # Logo (favicon, sidebar, login page)
+│   │   └── theme.css                   # Design system: CSS vars + Element Plus overrides
 │   │
 │   ├── layouts/
-│   │   └── AdminLayout.vue        # Layout utama: sidebar nav + header + router-view
+│   │   └── AdminLayout.vue             # Sidebar nav + header + router-view + bell notification
 │   │
 │   ├── router/
-│   │   └── index.js               # Definisi routes + navigation guard (auth check)
+│   │   └── index.js                    # Definisi routes + navigation guard (auth check)
 │   │
 │   ├── stores/
-│   │   └── authStore.js           # Pinia store: token, staff data, login/logout/fetchMe
+│   │   └── authStore.js                # Pinia: token, staff data, login/logout/fetchMe
 │   │
 │   ├── utils/
-│   │   └── imageHelper.js         # getImageUrl() + uploadImage() helper
+│   │   └── imageHelper.js              # getImageUrl() + uploadImage()
 │   │
 │   ├── views/
 │   │   ├── auth/
-│   │   │   └── LoginView.vue      # Halaman login
-│   │   │
+│   │   │   └── LoginView.vue
+│   │   ├── booking/
+│   │   │   └── BookingView.vue         # Kalender grid booking + form baru + detail panel
+│   │   ├── customer/
+│   │   │   └── CustomerView.vue        # List customer, tambah/edit, riwayat booking & credits
 │   │   ├── dashboard/
-│   │   │   └── DashboardView.vue  # Halaman dashboard (placeholder)
-│   │   │
+│   │   │   └── DashboardView.vue       # (placeholder)
 │   │   ├── facility/
-│   │   │   ├── FacilityCategoryView.vue  # CRUD kategori fasilitas (drawer)
-│   │   │   ├── FacilityView.vue          # List fasilitas + filter + stats
-│   │   │   └── FacilityFormView.vue      # Form tambah/edit fasilitas + upload icon
-│   │   │
+│   │   │   ├── FacilityCategoryView.vue
+│   │   │   ├── FacilityView.vue
+│   │   │   └── FacilityFormView.vue
+│   │   ├── play_credits/
+│   │   │   └── PlayCreditsView.vue     # Kelola paket & penjualan play credits
+│   │   ├── pricing/
+│   │   │   ├── PricingView.vue         # List pricing per cabang
+│   │   │   └── PricingEditView.vue     # Edit slot harga + flash sale
 │   │   ├── profile/
-│   │   │   └── ProfileView.vue    # Profil user yang login + ganti password
-│   │   │
+│   │   │   └── ProfileView.vue
+│   │   ├── promotion/
+│   │   │   └── PromotionView.vue       # CRUD voucher & promo (booking / play credits / keduanya)
 │   │   ├── role/
-│   │   │   └── RoleView.vue       # CRUD roles + permission groups (drawer)
-│   │   │
+│   │   │   └── RoleView.vue
 │   │   ├── room_template/
-│   │   │   ├── RoomTemplateView.vue      # List room templates + stats
-│   │   │   └── RoomTemplateFormView.vue  # Form tambah/edit room + facility selector + upload foto
-│   │   │
+│   │   │   ├── RoomTemplateView.vue
+│   │   │   └── RoomTemplateFormView.vue
+│   │   ├── sales/
+│   │   │   └── SalesView.vue           # Sales Dashboard: stats, trend chart, revenue breakdown, export
 │   │   ├── staff/
-│   │   │   └── StaffView.vue      # List staff + filter + drawer tambah/edit
-│   │   │
+│   │   │   └── StaffView.vue
 │   │   └── store/
-│   │       ├── StoreView.vue       # List stores + jam operasional + tanggal merah
-│   │       └── StoreCreateView.vue # Wizard 4 step: info → jam operasional → room setup → review
+│   │       ├── StoreView.vue
+│   │       └── StoreCreateView.vue     # Wizard 4 step: info → jam operasional → room setup → review
 │   │
-│   ├── App.vue                    # Root component, fetchMe() on mount jika token ada
-│   └── main.js                    # Entry point: setup Vue, Pinia, Router, Element Plus
+│   ├── App.vue
+│   └── main.js
 │
-├── .env                           # Environment variables (VITE_API_URL)
-├── index.html                     # HTML entry point + favicon
+├── index.html                          # HTML entry + FOUC-prevention script (dark/light bg)
+├── .env                                # VITE_API_URL
 ├── package.json
 └── vite.config.js
 ```
@@ -158,9 +173,16 @@ game_lounge_fe/
 | Path | Komponen | Keterangan |
 |---|---|---|
 | `/login` | `LoginView` | Halaman login (public) |
-| `/dashboard` | `DashboardView` | Dashboard utama |
+| `/sales` | `SalesView` | **Sales Dashboard** — landing page utama |
+| `/dashboard` | `DashboardView` | Dashboard alternatif (placeholder) |
 | `/profile` | `ProfileView` | Profil user yang login |
-| `/facility-category` | `FacilityCategoryView` | Kelola kategori fasilitas |
+| `/bookings` | `BookingView` | Kalender booking ruangan |
+| `/pricing` | `PricingView` | List harga per cabang |
+| `/pricing/:storeId/edit` | `PricingEditView` | Edit slot harga & flash sale |
+| `/customers` | `CustomerView` | Kelola data customer |
+| `/play-credits` | `PlayCreditsView` | Paket & penjualan play credits |
+| `/promotion` | `PromotionView` | Voucher & promo |
+| `/facility-category` | `FacilityCategoryView` | Kategori fasilitas |
 | `/facility` | `FacilityView` | List fasilitas |
 | `/facility/create` | `FacilityFormView` | Tambah fasilitas |
 | `/facility/:id/edit` | `FacilityFormView` | Edit fasilitas |
@@ -169,11 +191,38 @@ game_lounge_fe/
 | `/room-template/:id/edit` | `RoomTemplateFormView` | Edit room template |
 | `/store` | `StoreView` | List stores |
 | `/store/create` | `StoreCreateView` | Buat store baru (wizard 4 step) |
-| `/store/:id/edit` | `StoreCreateView` | Edit store (wizard 4 step) |
+| `/store/:id/edit` | `StoreCreateView` | Edit store |
 | `/staff` | `StaffView` | Kelola staff |
 | `/role` | `RoleView` | Kelola roles & permissions |
 
-> Semua route kecuali `/login` memerlukan autentikasi. Jika tidak ada token, otomatis redirect ke `/login`.
+> Semua route kecuali `/login` memerlukan autentikasi. Jika tidak ada token → redirect ke `/login`.
+
+---
+
+## Sidebar Navigation
+
+```
+Dashboard              ← /sales (Sales Dashboard, selalu paling atas)
+
+STORE
+  └── Store Management
+        ├── Facility Category
+        ├── Facilities
+        ├── Rooms
+        └── Stores
+
+BUSINESS
+  ├── Bookings
+  ├── Pricing
+  ├── Customers
+  ├── Play Credits
+  └── Promotion
+
+SYSTEM
+  └── Settings
+        ├── Staff
+        └── Roles
+```
 
 ---
 
@@ -182,7 +231,82 @@ game_lounge_fe/
 - Token disimpan di `localStorage` key `token`
 - Setiap request otomatis menambahkan header `Authorization: Bearer <token>` via Axios interceptor
 - Jika response `401`, token dihapus dan user di-redirect ke `/login`
-- Saat app pertama mount, jika token ada tapi data staff kosong (misalnya setelah refresh halaman), otomatis memanggil `GET /auth/me`
+- Saat app pertama mount, jika token ada tapi data staff kosong (setelah refresh halaman), otomatis memanggil `GET /auth/me`
+
+---
+
+## Tema (Dark / Light Mode)
+
+Aplikasi mendukung dua tema yang bisa diswitch dari header (tombol bulan/matahari):
+
+| Mode | Background | Sidebar |
+|---|---|---|
+| Dark (default) | `#010214` navy gelap | Full dark navy |
+| Light | `#f0f6ff` sky blue | Lighter navy (tetap brand) |
+
+**Implementasi:**
+- `body.light-mode` class ditambahkan saat light mode aktif
+- Seluruh warna menggunakan CSS custom properties (`var(--bg-main)`, `var(--text-primary)`, dll.) yang didefinisikan di `src/assets/theme.css`
+- Preferensi disimpan di `localStorage` key `theme`
+- `index.html` mengandung inline script untuk mencegah white flash saat load di dark mode
+
+**Brand palette:**
+```
+Primary:  #0282DE  (blue)
+Light:    #19B9EE  (cyan)
+Dark:     #0262b0  (dark blue)
+Success:  #10B981
+Warning:  #F59E0B
+Danger:   #EF4444
+```
+
+---
+
+## Modul Booking
+
+Fitur kalender grid interaktif untuk manajemen jadwal ruangan.
+
+**Endpoint yang digunakan:**
+| Fungsi | Endpoint |
+|---|---|
+| Kalender dashboard | `GET /bookings/dashboard` |
+| Detail booking | `GET /bookings/:id` |
+| Buat booking baru | `POST /bookings` |
+| Batalkan booking | `PATCH /bookings/:id/cancel` |
+| Tandai selesai | `PATCH /bookings/:id/complete` |
+| Sesi hampir habis | `GET /bookings/sessions-ending-soon` |
+| Play credits tersedia | `GET /bookings/available-credits` |
+| Hitung harga | `POST /pricing/calculate` |
+| Voucher tersedia | `GET /vouchers/customer-available` |
+
+**Fitur:**
+- Kalender grid horizontal (timeline 10:00–02:00 lintas tengah malam)
+- New Booking Mode: klik slot kosong → form booking muncul di panel kanan
+- Detail panel: lihat info, cancel, complete booking
+- Voucher dropdown dengan preview diskon (kalkulasi client-side)
+- Bell notification: polling setiap 60 detik ke `sessions-ending-soon`
+
+---
+
+## Modul Sales Dashboard
+
+Halaman `/sales` adalah landing page utama setelah login.
+
+**Endpoint yang digunakan:**
+| Fungsi | Endpoint |
+|---|---|
+| Stats + revenue breakdown | `GET /sales/summary` |
+| Data trend chart | `GET /sales/trend` |
+| Daftar transaksi | `GET /sales/transactions` |
+
+**Fitur:**
+- Filter period: Today / Yesterday / This Week / This Month / Custom date range
+- 5 stat cards: Total Revenue, Booking Revenue, Credits Revenue, Total Transaksi, Rata-rata
+- Sales Trend: line chart multi-series (ECharts) dengan granularitas daily/weekly/monthly
+- Revenue by Type: donut chart booking vs play credits
+- Revenue by Branch & Revenue by Room Type: tabel dengan mini progress bar
+- Export ke Excel (`.xlsx`) dan PDF (landscape, dengan summary header)
+- Modal detail transaksi dengan pagination & filter
 
 ---
 
@@ -191,20 +315,15 @@ game_lounge_fe/
 Upload dilakukan 2 tahap:
 
 1. **Preview lokal** — `URL.createObjectURL(file)` untuk tampilan instan
-2. **Upload saat submit** — file dikirim ke `POST /upload` sebagai `multipart/form-data`, backend mengembalikan path permanen
+2. **Upload saat submit** — file dikirim ke `POST /upload` sebagai `multipart/form-data`
 
 ```js
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
 
-// Upload file → return path: "/assets/img/stores/abc123.jpg"
 const path = await uploadImage(file, 'stores')
-
-// Konversi path relatif ke full URL untuk ditampilkan di <img>
 const url = getImageUrl('/assets/img/stores/abc123.jpg')
 // → "http://localhost:8080/assets/img/stores/abc123.jpg"
 ```
-
-**Folder upload per fitur:**
 
 | Fitur | Folder |
 |---|---|
@@ -214,24 +333,8 @@ const url = getImageUrl('/assets/img/stores/abc123.jpg')
 
 ---
 
-## Sidebar Navigation
-
-```
-Store
-  ├── Facility Category
-  ├── Facilities
-  ├── Rooms
-  └── Stores
-
-Settings
-  ├── Staff
-  └── Roles
-```
-
----
-
 ## Environment Variables
 
-| Variable | Default | Keterangan |
-|---|---|---|
-| `VITE_API_URL` | `http://localhost:8080/api/v1` | Base URL backend API |
+| Variable | Keterangan |
+|---|---|
+| `VITE_API_URL` | Base URL backend API (contoh: `http://localhost:8080/api/v1`) |

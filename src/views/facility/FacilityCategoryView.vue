@@ -180,18 +180,18 @@ onMounted(fetchCategories)
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
 }
-.breadcrumb { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-.page-title { font-size: 22px; font-weight: 700; color: var(--text-primary); }
-.page-desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.breadcrumb { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
+.page-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.page-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
 .table-card { border-color: var(--border-color) !important; }
 .table-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 .total-label { font-size: 13px; color: var(--text-muted); }
 
