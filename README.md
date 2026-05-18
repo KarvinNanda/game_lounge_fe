@@ -290,15 +290,6 @@ Sidebar group otomatis ter-expand jika route yang aktif termasuk di dalamnya (de
 
 ---
 
-## Autentikasi
-
-- Token disimpan di `localStorage` key `token`
-- Setiap request otomatis menambahkan `Authorization: Bearer <token>` via Axios interceptor
-- Response `401` → token dihapus, redirect ke `/login`
-- Saat refresh halaman, jika token ada tapi data staff kosong, otomatis memanggil `GET /auth/me`
-
----
-
 ## Modul Booking
 
 Kalender grid interaktif untuk manajemen jadwal ruangan.
