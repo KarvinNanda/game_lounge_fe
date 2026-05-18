@@ -240,6 +240,7 @@ onMounted(async () => {
 .page-desc { font-size:13px; color:var(--text-secondary); margin-top:4px; }
 
 .form-layout { display:grid; grid-template-columns:1fr 320px; gap:16px; }
+@media (max-width:639px) { .form-layout { grid-template-columns:1fr; } }
 .form-card { border-color:var(--border-color) !important; }
 .form-section-title { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--border-color); }
 
