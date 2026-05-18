@@ -26,7 +26,7 @@
               <h3 style="font-size:16px;font-weight:700;margin-bottom:4px">Play Credits Package</h3>
               <p style="font-size:12px;color:var(--text-secondary)">Kelola paket play credits yang tersedia untuk dijual</p>
             </div>
-            <el-button type="primary" @click="openPackageForm(null)">
+            <el-button v-if="can('play_credits.create')" type="primary" @click="openPackageForm(null)">
               <el-icon><Plus /></el-icon> Create New Package
             </el-button>
           </div>
@@ -43,6 +43,27 @@
 
           <!-- Package Table -->
           <el-card shadow="never">
+            <div v-if="isMobile" class="m-card-list" style="margin-bottom:12px">
+              <div class="m-card" v-for="row in packageList" :key="row.id">
+                <div class="m-card-icon">
+                  <img v-if="row.icon_url" :src="getImageUrl(row.icon_url)" style="width:40px;height:40px;border-radius:8px;object-fit:cover" />
+                  <el-icon v-else size="18" style="color:var(--color-primary)"><Coin /></el-icon>
+                </div>
+                <div class="m-card-body">
+                  <div class="m-card-title">{{ row.name }}</div>
+                  <div class="m-card-meta">{{ row.total_hours }} Jam · {{ formatRp(row.price) }}</div>
+                </div>
+                <div class="m-card-end">
+                  <el-tag :type="row.is_active ? 'success' : 'danger'" size="small">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</el-tag>
+                  <div style="display:flex;gap:4px">
+                    <el-button v-if="can('play_credits.edit')" size="small" circle plain @click="openPackageForm(row)"><el-icon><Edit /></el-icon></el-button>
+                    <el-button v-if="can('play_credits.edit')" size="small" circle plain type="danger" @click="handleDeletePackage(row)"><el-icon><Delete /></el-icon></el-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrap">
             <el-table :data="packageList" v-loading="pkgLoading" size="small" style="width:100%">
 
               <el-table-column label="NAMA PAKET" min-width="220">
@@ -67,7 +88,7 @@
                 </template>
               </el-table-column>
 
-              <el-table-column label="CABANG BERLAKU" min-width="180">
+              <el-table-column label="CABANG BERLAKU" min-width="180" v-if="!isTablet && !isMobile">
                 <template #default="{ row }">
                   <span v-if="row.apply_to_all_stores" style="font-size:12px;color:var(--text-secondary)">Semua Cabang</span>
                   <span v-else style="font-size:12px">
@@ -82,7 +103,7 @@
                 </template>
               </el-table-column>
 
-              <el-table-column label="MASA BERLAKU" width="120">
+              <el-table-column label="MASA BERLAKU" width="120" v-if="!isTablet && !isMobile">
                 <template #default="{ row }">{{ row.validity_days }} Hari</template>
               </el-table-column>
 
@@ -97,10 +118,10 @@
               <el-table-column label="AKSI" width="90" fixed="right">
                 <template #default="{ row }">
                   <div style="display:flex;gap:6px">
-                    <el-button size="small" circle plain @click="openPackageForm(row)">
+                    <el-button v-if="can('play_credits.edit')" size="small" circle plain @click="openPackageForm(row)">
                       <el-icon><Edit /></el-icon>
                     </el-button>
-                    <el-button size="small" circle plain type="danger" @click="handleDeletePackage(row)">
+                    <el-button v-if="can('play_credits.edit')" size="small" circle plain type="danger" @click="handleDeletePackage(row)">
                       <el-icon><Delete /></el-icon>
                     </el-button>
                   </div>
@@ -114,6 +135,7 @@
               </span>
               <el-pagination v-model:current-page="pkgFilter.page" :total="pkgTotal"
                 layout="prev, pager, next" @change="fetchPackages" />
+            </div>
             </div>
           </el-card>
         </div>
@@ -134,7 +156,7 @@
               <h3 style="font-size:16px;font-weight:700;margin-bottom:2px">Member Play Credits (Aktif)</h3>
               <p style="font-size:12px;color:var(--text-secondary)">Daftar paket Play Credits aktif yang dimiliki member.</p>
             </div>
-            <el-button type="primary" @click="openAssignDialog">
+            <el-button v-if="can('play_credits.create')" type="primary" @click="openAssignDialog">
               <el-icon><Plus /></el-icon> Assign Credits
             </el-button>
           </div>
@@ -165,6 +187,23 @@
 
           <!-- Member Credits Table -->
           <el-card shadow="never">
+            <div v-if="isMobile" class="m-card-list" style="margin-bottom:12px">
+              <div class="m-card" v-for="row in memberCreditList" :key="row.id">
+                <div class="m-card-icon" style="background:var(--color-primary);color:#fff;font-weight:700;font-size:14px">
+                  {{ row.customer?.name?.[0]?.toUpperCase() }}
+                </div>
+                <div class="m-card-body">
+                  <div class="m-card-title">{{ row.customer?.name }}</div>
+                  <div class="m-card-meta">{{ row.package?.name }} · {{ row.remaining_hours }} Jam sisa</div>
+                </div>
+                <div class="m-card-end">
+                  <el-tag :type="row.is_expired ? 'danger' : 'success'" size="small">{{ row.is_expired ? 'Kadaluwarsa' : 'Aktif' }}</el-tag>
+                  <el-button v-if="can('play_credits.edit')" size="small" circle plain @click="openEditCredit(row)"><el-icon><Edit /></el-icon></el-button>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-wrap">
             <el-table :data="memberCreditList" v-loading="memberLoading" size="small" style="width:100%">
 
               <!-- Member -->
@@ -276,7 +315,7 @@
               <!-- Aksi -->
               <el-table-column label="AKSI" width="70" fixed="right">
                 <template #default="{ row }">
-                  <el-button size="small" circle plain @click="openEditCredit(row)">
+                  <el-button v-if="can('play_credits.edit')" size="small" circle plain @click="openEditCredit(row)">
                     <el-icon><Edit /></el-icon>
                   </el-button>
                 </template>
@@ -290,6 +329,7 @@
               <el-pagination v-model:current-page="memberFilter.page" :total="memberTotal"
                 layout="prev, pager, next" @change="fetchMemberCredits" />
             </div>
+            </div>
           </el-card>
         </div>
       </el-tab-pane>
@@ -298,13 +338,14 @@
     <!-- ════════════════════════════════════════════════════════
          DIALOG: Create / Edit Package
     ════════════════════════════════════════════════════════ -->
-    <el-dialog
+    <el-drawer
       v-model="packageFormVisible"
       :title="editingPackage ? 'Edit Package' : 'Create New Package'"
-      width="760px"
+      direction="rtl"
+      :size="isMobile ? '100%' : '760px'"
       :destroy-on-close="true"
     >
-      <div style="display:grid;grid-template-columns:1fr 280px;gap:20px">
+      <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 280px', gap:'20px' }">
         <!-- Left: Form -->
         <el-form :model="pkgForm" :rules="pkgRules" ref="pkgFormRef" label-position="top">
           <!-- <el-form-item label="Icon / Photo">
@@ -355,7 +396,7 @@
             </div>
           </el-form-item>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
             <el-form-item label="Harga *" prop="price">
               <el-input-number
                 v-model="pkgForm.price" :min="0" :step="10000" style="width:100%"
@@ -422,12 +463,12 @@
           <el-icon><Check /></el-icon> Konfirmasi {{ editingPackage ? 'Update' : 'Buat' }} Package
         </el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
     <!-- ════════════════════════════════════════════════════════
-         DIALOG: Assign Credits ke Customer
+         DRAWER: Assign Credits ke Customer
     ════════════════════════════════════════════════════════ -->
-    <el-dialog v-model="assignDialogVisible" title="Assign Play Credits ke Customer" width="460px">
+    <el-drawer v-model="assignDialogVisible" title="Assign Play Credits ke Customer" direction="rtl" :size="isMobile ? '100%' : '440px'">
       <el-form :model="assignForm" :rules="assignRules" ref="assignFormRef" label-position="top">
         <el-form-item label="Customer (Member) *" prop="customer_id">
           <el-select
@@ -480,12 +521,12 @@
         <el-button @click="assignDialogVisible = false">Batal</el-button>
         <el-button type="primary" :loading="assignLoading" @click="handleAssign">Assign Credits</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
     <!-- ════════════════════════════════════════════════════════
          DRAWER: Edit Play Credits (slide from right)
     ════════════════════════════════════════════════════════ -->
-    <el-drawer v-model="editCreditVisible" title="Edit Play Credits" direction="rtl" size="380px">
+    <el-drawer v-model="editCreditVisible" title="Edit Play Credits" direction="rtl" :size="isMobile ? '100%' : '380px'">
       <div v-if="editingCredit" style="padding:0 4px">
 
         <!-- Member Info -->
@@ -631,6 +672,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getPackages, getActivePackages, createPackage, updatePackage, deletePackage,
@@ -638,6 +681,9 @@ import {
 } from '@/api/play_credits/playCreditsApi'
 import { getStores } from '@/api/store/storeApi'
 import { getCustomers } from '@/api/customer/customerApi'
+
+const { can } = usePermission()
+const { isMobile, isTablet } = useBreakpoint()
 
 // ── Tab State ─────────────────────────────────────────────────
 const activeTab = ref('packages')
@@ -957,4 +1003,24 @@ onMounted(async () => {
   border-radius:8px; padding:10px 12px; cursor:pointer; transition:border-color 0.2s;
 }
 .adjust-option.active { border-color:var(--color-primary); background:rgba(124,58,237,0.05); }
+
+/* Responsive */
+@media (max-width:639px) { .table-wrap { display:none; } }
+@media (min-width:640px) { .m-card-list { display:none; } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>

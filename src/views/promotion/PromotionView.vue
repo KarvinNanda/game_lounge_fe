@@ -7,7 +7,7 @@
         <h1 class="page-title">Promotion / Voucher</h1>
         <p class="page-desc">Kelola voucher promo dan kirim ke customer (member only)</p>
       </div>
-      <el-button type="primary" @click="openForm(null)">
+      <el-button v-if="can('promotion.create')" type="primary" @click="openForm(null)">
         <el-icon><Plus /></el-icon> Buat Voucher Baru
       </el-button>
     </div>
@@ -77,6 +77,28 @@
 
     <!-- Table -->
     <el-card shadow="never" style="margin-top:14px">
+      <div v-if="isMobile" class="m-card-list">
+        <div class="m-card" v-for="row in voucherList" :key="row.id">
+          <div class="m-card-icon" :style="{ background: getCodeColor(row.type) }">
+            <span style="font-size:9px;font-weight:800;color:var(--text-primary);letter-spacing:-0.5px">{{ row.code?.slice(0,4) }}</span>
+          </div>
+          <div class="m-card-body">
+            <div class="m-card-title">{{ row.name }}</div>
+            <div class="m-card-meta">
+              {{ row.discount_type === 'percentage' ? row.discount_value + '%' : formatRp(row.discount_value) }} diskon · {{ getTypeLabel(row.type) }}
+            </div>
+          </div>
+          <div class="m-card-end">
+            <el-tag :type="getStatusTag(row.status)" size="small">{{ getStatusLabel(row.status) }}</el-tag>
+            <div style="display:flex;gap:4px">
+              <el-button v-if="can('promotion.edit')" size="small" circle plain @click="openForm(row)"><el-icon><Edit /></el-icon></el-button>
+              <el-button v-if="can('promotion.edit')" size="small" circle plain type="danger" @click="handleDelete(row)"><el-icon><Delete /></el-icon></el-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
       <el-table :data="voucherList" v-loading="loading" size="small" style="width:100%">
 
         <!-- Kode -->
@@ -116,7 +138,7 @@
         </el-table-column>
 
         <!-- Berlaku -->
-        <el-table-column label="BERLAKU" width="180">
+        <el-table-column label="BERLAKU" width="180" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <div style="font-size:12px">
               <div>{{ formatDate(row.start_date) }}</div>
@@ -128,7 +150,7 @@
         </el-table-column>
 
         <!-- Penggunaan -->
-        <el-table-column label="PENGGUNAAN" width="140">
+        <el-table-column label="PENGGUNAAN" width="140" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <div style="font-size:12px">
               <span style="font-weight:600;color:var(--color-primary)">{{ row.used_count }}</span>
@@ -138,7 +160,7 @@
         </el-table-column>
 
         <!-- Terkirim -->
-        <el-table-column label="TERKIRIM" width="110">
+        <el-table-column label="TERKIRIM" width="110" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <div style="display:flex;align-items:center;gap:4px;font-size:12px">
               <span style="font-weight:600">{{ row.total_sent || 0 }}</span>
@@ -168,12 +190,12 @@
                   <el-icon><View /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Edit" placement="top">
+              <el-tooltip v-if="can('promotion.edit')" content="Edit" placement="top">
                 <el-button size="small" circle plain @click="openForm(row)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Hapus" placement="top">
+              <el-tooltip v-if="can('promotion.edit')" content="Hapus" placement="top">
                 <el-button size="small" circle plain type="danger" @click="handleDelete(row)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
@@ -198,6 +220,7 @@
           @current-change="fetchVouchers"
         />
       </div>
+      </div>
     </el-card>
 
     <!-- ════════════════════════════════════════════════════════
@@ -207,7 +230,7 @@
       v-model="formVisible"
       :title="editingVoucher ? 'Edit Voucher' : 'Buat Voucher Baru'"
       direction="rtl"
-      size="480px"
+      :size="isMobile ? '100%' : '480px'"
       :destroy-on-close="true"
     >
       <div style="padding:0 4px">
@@ -405,7 +428,7 @@
     <!-- ════════════════════════════════════════════════════════
          DIALOG: Detail Voucher + Usage List
     ════════════════════════════════════════════════════════ -->
-    <el-dialog v-model="detailVisible" title="Detail Voucher" width="580px">
+    <el-drawer v-model="detailVisible" title="Detail Voucher" direction="rtl" :size="isMobile ? '100%' : '540px'">
       <div v-if="selectedVoucher">
 
         <!-- Voucher Header Banner -->
@@ -491,18 +514,23 @@
           Belum ada yang menggunakan voucher ini
         </div>
       </div>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getVouchers, getVoucherById, generateCode,
   createVoucher, updateVoucher, deleteVoucher
 } from '@/api/voucher/voucherApi'
 import { getStores } from '@/api/store/storeApi'
+
+const { can } = usePermission()
+const { isMobile, isTablet } = useBreakpoint()
 
 // ── State ─────────────────────────────────────────────────────
 const loading = ref(false)
@@ -799,4 +827,25 @@ onMounted(async () => {
 .detail-row > strong {
   color:var(--text-primary); font-size:13px; font-weight:600; text-align:right;
 }
+
+/* Responsive */
+@media (max-width:639px) { .table-wrap { display:none; } }
+@media (min-width:640px) { .m-card-list { display:none; } }
+@media (max-width:639px) { .stats-grid { grid-template-columns:1fr 1fr !important; } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>

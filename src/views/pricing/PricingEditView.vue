@@ -12,7 +12,7 @@
         <h1 class="page-title">Edit Pricing – {{ storeName }}</h1>
         <p class="page-desc">Atur harga bermain untuk cabang ini.</p>
       </div>
-      <el-button type="primary" :loading="saving" @click="handleSaveAll">
+      <el-button v-if="can('pricing.edit')" type="primary" :loading="saving" @click="handleSaveAll">
         <el-icon><Check /></el-icon> Simpan & Publish
       </el-button>
     </div>
@@ -116,11 +116,11 @@
               <div v-for="s in happyHourSchedules" :key="s.id" class="schedule-row">
                 <el-icon style="color:var(--color-primary)"><Clock /></el-icon>
                 <span>{{ s.start_time }} – {{ s.end_time }}</span>
-                <el-button size="small" circle plain type="danger" style="margin-left:auto" @click="removeSchedule(s.id)">
+                <el-button v-if="can('pricing.edit')" size="small" circle plain type="danger" style="margin-left:auto" @click="removeSchedule(s.id)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
               </div>
-              <el-button style="width:100%;margin-top:8px" plain size="small" @click="showAddSchedule = true">
+              <el-button v-if="can('pricing.edit')" style="width:100%;margin-top:8px" plain size="small" @click="showAddSchedule = true">
                 <el-icon><Plus /></el-icon> Tambah Rentang
               </el-button>
               <div class="note-box" style="margin-top:10px">
@@ -161,12 +161,12 @@
               <div v-for="s in happyHourSchedules" :key="s.id" class="schedule-row-lg">
                 <el-icon style="color:var(--color-primary)"><Clock /></el-icon>
                 <span style="font-weight:600;font-size:14px">{{ s.start_time }} – {{ s.end_time }}</span>
-                <el-button size="small" type="danger" plain circle @click="removeSchedule(s.id)" style="margin-left:auto">
+                <el-button v-if="can('pricing.edit')" size="small" type="danger" plain circle @click="removeSchedule(s.id)" style="margin-left:auto">
                   <el-icon><Delete /></el-icon>
                 </el-button>
               </div>
 
-              <el-button style="width:100%;margin-top:10px" @click="showAddSchedule = true">
+              <el-button v-if="can('pricing.edit')" style="width:100%;margin-top:10px" @click="showAddSchedule = true">
                 <el-icon><Plus /></el-icon> Tambah Rentang Waktu
               </el-button>
             </el-card>
@@ -271,7 +271,7 @@
               <div class="sh-title">Flash Sale</div>
               <div class="sh-desc">Potongan harga nominal untuk ruangan tertentu pada jam & tanggal tertentu.</div>
             </div>
-            <el-button type="primary" @click="openFlashSaleForm(null)">
+            <el-button v-if="can('pricing.edit')" type="primary" @click="openFlashSaleForm(null)">
               <el-icon><Plus /></el-icon> Tambah Flash Sale
             </el-button>
           </div>
@@ -311,12 +311,12 @@
               <el-table-column label="Aksi" width="100" align="right" fixed="right">
                 <template #default="{ row }">
                   <div style="display:flex;gap:4px;justify-content:flex-end">
-                    <el-tooltip content="Edit" placement="top">
+                    <el-tooltip v-if="can('pricing.edit')" content="Edit" placement="top">
                       <el-button size="small" circle plain @click="openFlashSaleForm(row)">
                         <el-icon><Edit /></el-icon>
                       </el-button>
                     </el-tooltip>
-                    <el-tooltip content="Hapus" placement="top">
+                    <el-tooltip v-if="can('pricing.edit')" content="Hapus" placement="top">
                       <el-button size="small" circle plain type="danger" @click="handleDeleteFS(row.id)">
                         <el-icon><Delete /></el-icon>
                       </el-button>
@@ -349,7 +349,7 @@
                   <el-option v-for="t in roomTemplates" :key="t.id" :label="t.name" :value="t.id" />
                 </el-select>
               </el-form-item>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+              <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
                 <el-form-item label="Jam Mulai">
                   <el-time-picker v-model="calcForm.start_time" format="HH:mm" value-format="HH:mm" style="width:100%" />
                 </el-form-item>
@@ -419,9 +419,9 @@
     </el-tabs>
 
     <!-- ── Dialog: Tambah Jadwal HH ── -->
-    <el-dialog v-model="showAddSchedule" title="Tambah Jadwal Happy Hour" width="380px">
+    <el-drawer v-model="showAddSchedule" title="Tambah Jadwal Happy Hour" direction="rtl" :size="isMobile ? '100%' : '380px'">
       <el-form :model="scheduleForm" label-position="top">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
           <el-form-item label="Jam Mulai">
             <el-time-picker v-model="scheduleForm.start_time" format="HH:mm" value-format="HH:mm" style="width:100%" />
           </el-form-item>
@@ -434,10 +434,10 @@
         <el-button @click="showAddSchedule = false">Batal</el-button>
         <el-button type="primary" :loading="savingSchedule" @click="handleAddSchedule">Tambah</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
-    <!-- ── Dialog: Tambah Durasi Custom ── -->
-    <el-dialog v-model="showAddCustom" title="Tambah Durasi Custom" width="360px">
+    <!-- ── Drawer: Tambah Durasi Custom ── -->
+    <el-drawer v-model="showAddCustom" title="Tambah Durasi Custom" direction="rtl" :size="isMobile ? '100%' : '340px'">
       <el-form label-position="top">
         <el-form-item label="Durasi (jam)">
           <el-input-number v-model="customDuration" :min="1" :max="24" style="width:100%" />
@@ -447,13 +447,14 @@
         <el-button @click="showAddCustom = false">Batal</el-button>
         <el-button type="primary" @click="addCustomDuration">Tambah Durasi</el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
 
-    <!-- ── Dialog: Flash Sale Form ── -->
-    <el-dialog
+    <!-- ── Drawer: Flash Sale Form ── -->
+    <el-drawer
       v-model="showFlashSaleForm"
       :title="editingFS ? 'Edit Flash Sale' : 'Tambah Flash Sale'"
-      width="500px"
+      direction="rtl"
+      :size="isMobile ? '100%' : '480px'"
     >
       <el-form :model="fsForm" label-position="top">
         <el-form-item label="Nama Flash Sale">
@@ -474,7 +475,7 @@
             :parser="v => v.replace(/Rp\s?|\./g, '')"
           />
         </el-form-item>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
           <el-form-item label="Tanggal Mulai">
             <el-date-picker v-model="fsForm.date_from" type="date" value-format="YYYY-MM-DD" style="width:100%" />
           </el-form-item>
@@ -482,7 +483,7 @@
             <el-date-picker v-model="fsForm.date_to" type="date" value-format="YYYY-MM-DD" style="width:100%" />
           </el-form-item>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
           <el-form-item label="Jam Mulai">
             <el-time-picker v-model="fsForm.time_from" format="HH:mm" value-format="HH:mm" style="width:100%" />
           </el-form-item>
@@ -500,12 +501,14 @@
           {{ editingFS ? 'Simpan Perubahan' : 'Tambah Flash Sale' }}
         </el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -517,6 +520,8 @@ import {
 } from '@/api/pricing/pricingApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 
+const { can } = usePermission()
+const { isMobile } = useBreakpoint()
 const route = useRoute()
 const router = useRouter()
 const storeId = route.params.storeId
@@ -869,6 +874,7 @@ onMounted(async () => {
 
 /* Tab layout */
 .tab-grid { display:grid; grid-template-columns:1fr 300px; gap:20px; }
+@media (max-width:639px) { .tab-grid { grid-template-columns:1fr; } }
 
 /* Section header */
 .section-header { display:flex; justify-content:space-between; align-items:flex-start; }

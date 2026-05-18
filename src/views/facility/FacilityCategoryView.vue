@@ -7,7 +7,7 @@
         <h1 class="page-title">Facility Category</h1>
         <p class="page-desc">Kelola kategori untuk pengelompokan fasilitas.</p>
       </div>
-      <el-button type="primary" @click="openDrawer()">
+      <el-button v-if="can('settings.branches')" type="primary" @click="openDrawer()">
         <el-icon><Plus /></el-icon> Tambah Kategori
       </el-button>
     </div>
@@ -25,6 +25,20 @@
         <span class="total-label">{{ filteredList.length }} kategori</span>
       </div>
 
+      <div v-if="isMobile" class="m-card-list">
+        <div class="m-card" v-for="row in filteredList" :key="row.id" style="justify-content:space-between">
+          <div class="m-card-body">
+            <div class="m-card-title">{{ row.name }}</div>
+            <div class="m-card-meta">{{ row.facility_count || 0 }} fasilitas</div>
+          </div>
+          <div class="m-card-end" style="flex-direction:row;gap:6px">
+            <el-button v-if="can('settings.branches')" size="small" plain @click="openDrawer(row)"><el-icon><Edit /></el-icon></el-button>
+            <el-button v-if="can('settings.branches')" size="small" plain type="danger" :disabled="(row.facility_count || 0) > 0" @click="deleteCategory(row)"><el-icon><Delete /></el-icon></el-button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
       <el-table
         :data="filteredList"
         v-loading="loading"
@@ -45,16 +59,17 @@
         <el-table-column label="Aksi" width="130" align="right">
           <template #default="{ row }">
             <div class="row-actions">
-              <el-button size="small" plain @click="openDrawer(row)">
+              <el-button v-if="can('settings.branches')" size="small" plain @click="openDrawer(row)">
                 <el-icon><Edit /></el-icon> Edit
               </el-button>
-              <el-button size="small" plain type="danger" :disabled="(row.facility_count || 0) > 0" @click="deleteCategory(row)">
+              <el-button v-if="can('settings.branches')" size="small" plain type="danger" :disabled="(row.facility_count || 0) > 0" @click="deleteCategory(row)">
                 <el-icon><Delete /></el-icon>
               </el-button>
             </div>
           </template>
         </el-table-column>
       </el-table>
+      </div>
     </el-card>
 
     <!-- Drawer Add/Edit -->
@@ -94,6 +109,8 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getFacilityCategories,
@@ -102,6 +119,8 @@ import {
   deleteFacilityCategory,
 } from '@/api/facility/facilityApi'
 
+const { can } = usePermission()
+const { isMobile } = useBreakpoint()
 const loading = ref(false)
 const saving = ref(false)
 const drawerVisible = ref(false)
@@ -207,4 +226,25 @@ onMounted(fetchCategories)
   gap: 10px;
   padding: 0 4px;
 }
+
+/* Responsive */
+@media (max-width:639px) { .table-wrap { display:none; } }
+@media (min-width:640px) { .m-card-list { display:none; } }
+@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>

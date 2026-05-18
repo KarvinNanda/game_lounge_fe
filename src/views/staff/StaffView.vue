@@ -7,7 +7,7 @@
         <h1 class="page-title">Staff</h1>
         <p class="page-desc">Kelola akun staff yang dapat mengakses sistem.</p>
       </div>
-      <el-button type="primary" @click="openDrawer()">
+      <el-button v-if="can('settings.staff_role')" type="primary" @click="openDrawer()">
         <el-icon><Plus /></el-icon> Tambah Staff
       </el-button>
     </div>
@@ -49,6 +49,26 @@
         </el-button>
       </div>
 
+      <div v-if="isMobile" class="m-card-list">
+        <div class="m-card" v-for="row in staffList" :key="row.id">
+          <div class="m-card-icon" style="background:var(--color-primary);color:#fff;font-weight:700;font-size:14px">
+            {{ row.username?.[0]?.toUpperCase() }}
+          </div>
+          <div class="m-card-body">
+            <div class="m-card-title">{{ row.username }}<el-tag v-if="row.id === authStore.staff?.id" size="small" type="info" style="margin-left:6px;font-size:9px">You</el-tag></div>
+            <div class="m-card-meta">{{ row.email }} · {{ row.role?.name || '—' }}</div>
+          </div>
+          <div class="m-card-end">
+            <el-tag :type="row.deleted_at ? 'danger' : 'success'" size="small">{{ row.deleted_at ? 'Nonaktif' : 'Aktif' }}</el-tag>
+            <div style="display:flex;gap:4px">
+              <el-button v-if="can('settings.staff_role')" size="small" circle plain @click="openDrawer(row)"><el-icon><Edit /></el-icon></el-button>
+              <el-button v-if="can('settings.staff_role')" size="small" circle plain type="danger" :disabled="row.id === authStore.staff?.id" @click="removeStaff(row)"><el-icon><Delete /></el-icon></el-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
       <el-table :data="staffList" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada staff">
         <!-- Staff -->
         <el-table-column label="Staff" min-width="220">
@@ -78,7 +98,7 @@
         </el-table-column>
 
         <!-- Cabang -->
-        <el-table-column label="Cabang" min-width="200">
+        <el-table-column label="Cabang" min-width="200" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <template v-if="row.is_all_stores">
               <el-tag size="small" type="success" plain>Semua Cabang</el-tag>
@@ -98,7 +118,7 @@
         </el-table-column>
 
         <!-- No HP -->
-        <el-table-column label="No. HP" width="140">
+        <el-table-column label="No. HP" width="140" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <span style="font-size:12px;color:var(--text-secondary)">{{ row.phone || '—' }}</span>
           </template>
@@ -117,12 +137,12 @@
         <el-table-column label="Aksi" width="100" align="right" fixed="right">
           <template #default="{ row }">
             <div class="row-actions">
-              <el-tooltip content="Edit" placement="top">
+              <el-tooltip v-if="can('settings.staff_role')" content="Edit" placement="top">
                 <el-button size="small" circle plain @click="openDrawer(row)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Hapus" placement="top">
+              <el-tooltip v-if="can('settings.staff_role')" content="Hapus" placement="top">
                 <el-button
                   size="small" circle plain type="danger"
                   :disabled="row.id === authStore.staff?.id"
@@ -148,6 +168,7 @@
           @current-change="fetchStaffs"
         />
       </div>
+      </div>
     </el-card>
 
     <!-- Drawer Add/Edit Staff -->
@@ -155,7 +176,7 @@
       v-model="drawerVisible"
       :title="form.id ? 'Edit Staff' : 'Tambah Staff'"
       direction="rtl"
-      size="420px"
+      :size="isMobile ? '100%' : '420px'"
       :destroy-on-close="true"
     >
       <div class="drawer-body">
@@ -246,12 +267,16 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/authStore'
 import { getStaffs, createStaff, updateStaff, deleteStaff as apiDelete } from '@/api/staff/staffApi'
 import { getRoles } from '@/api/role/roleApi'
 import { getStores } from '@/api/store/storeApi'
 
+const { can } = usePermission()
+const { isMobile, isTablet } = useBreakpoint()
 const authStore = useAuthStore()
 const loading = ref(false)
 const saving = ref(false)
@@ -474,8 +499,33 @@ onMounted(() => {
 .store-checkboxes {
   display:grid; grid-template-columns:1fr 1fr; gap:6px;
   padding:10px; background:var(--bg-main);
+}
+@media (max-width:639px) {
+  .store-checkboxes { grid-template-columns:1fr; }
   border-radius:8px; border:1px solid var(--border-color);
 }
 
 .drawer-footer { display:flex; gap:10px; padding:0 4px; }
+
+/* Responsive */
+@media (max-width:639px) { .table-wrap { display:none; } }
+@media (min-width:640px) { .m-card-list { display:none; } }
+@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
+@media (max-width:639px) { .stats-row { flex-wrap:wrap; } .stat-item { min-width:calc(50% - 1px); } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>

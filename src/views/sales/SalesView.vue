@@ -38,11 +38,11 @@
         ><el-icon><Calendar /></el-icon> Custom</el-button>
       </div>
 
-      <el-select v-model="filters.store_id" placeholder="Semua Cabang" clearable size="small" style="width:160px" @change="loadAll">
+      <el-select v-model="filters.store_id" placeholder="Semua Cabang" clearable size="small" :style="{ width: isMobile ? '100%' : '160px' }" @change="loadAll">
         <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
       </el-select>
 
-      <el-select v-model="filters.type" size="small" style="width:130px" @change="loadAll">
+      <el-select v-model="filters.type" size="small" :style="{ width: isMobile ? '100%' : '130px' }" @change="loadAll">
         <el-option label="All Type"     value="all" />
         <el-option label="Booking"      value="booking" />
         <el-option label="Play Credits" value="play_credits" />
@@ -99,7 +99,11 @@
             <el-option label="Monthly" value="monthly" />
           </el-select>
         </div>
-        <div ref="trendChartRef" class="trend-chart" />
+        <div v-if="trendData.length === 0 && !loading" class="trend-empty">
+          <el-icon size="32" style="color:var(--color-primary);opacity:.35"><TrendCharts /></el-icon>
+          <div>Belum ada data trend untuk periode ini</div>
+        </div>
+        <div v-else ref="trendChartRef" class="trend-chart" style="width:100%;height:220px" />
       </el-card>
 
       <!-- Revenue by Type -->
@@ -206,7 +210,7 @@
     <!-- ════════════════════════════════════════════════════════
          MODAL: Detail Penjualan
     ════════════════════════════════════════════════════════ -->
-    <el-dialog v-model="showTransactionModal" title="Detail Penjualan" width="860px">
+    <el-drawer v-model="showTransactionModal" title="Detail Penjualan" direction="rtl" :size="isMobile ? '100%' : '860px'">
       <div class="tx-toolbar">
         <el-select v-model="txFilter" size="small" style="width:150px"
           @change="() => { txPage = 1; loadTransactions() }">
@@ -280,7 +284,7 @@
           </template>
         </el-dropdown>
       </template>
-    </el-dialog>
+    </el-drawer>
 
   </div>
 </template>
@@ -288,12 +292,16 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import * as echarts from 'echarts'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { getSalesSummary, getSalesTrend, getTransactions } from '@/api/sales/salesApi'
 import { getStores } from '@/api/store/storeApi'
+
+// ── Breakpoint ────────────────────────────────────────────────
+const { isMobile } = useBreakpoint()
 
 // ── State ─────────────────────────────────────────────────────
 const loading      = ref(false)
@@ -369,6 +377,25 @@ const isLight      = () => document.body.classList.contains('light-mode')
 const ctColor      = () => isLight() ? '#2d4a6e' : '#C9D4E2'
 const gridColor    = () => isLight() ? '#c0d4f0' : '#0e3272'
 
+// ── Helpers: parse trend response (try beberapa kemungkinan struktur) ──
+const parseTrendData = (resData) => {
+  // Kemungkinan struktur yang dikembalikan backend:
+  //   { data: [...] }           → resData.data       (paling umum)
+  //   { data: { items: [...] } }→ resData.data.items
+  //   { data: { trend: [...] } }→ resData.data.trend
+  //   { items: [...] }          → resData.items
+  //   [...]                     → resData sendiri array
+  const d = resData?.data
+  if (Array.isArray(d))               return d
+  if (Array.isArray(d?.items))        return d.items
+  if (Array.isArray(d?.trend))        return d.trend
+  if (Array.isArray(d?.data))         return d.data
+  if (Array.isArray(resData?.items))  return resData.items
+  if (Array.isArray(resData))         return resData
+  console.warn('[SalesTrend] Struktur response tidak dikenali:', resData)
+  return []
+}
+
 // ── Load ──────────────────────────────────────────────────────
 const loadAll = async () => {
   loading.value = true
@@ -378,12 +405,18 @@ const loadAll = async () => {
       getSalesSummary(params),
       getSalesTrend({ ...params, granularity: filters.granularity }),
     ])
-    summary.value   = sRes.data.data
-    trendData.value = tRes.data.data || []
+    summary.value = sRes.data.data
+
+    // Debug: lihat raw response trend di console browser
+    console.log('[SalesTrend] raw response:', tRes.data)
+    trendData.value = parseTrendData(tRes.data)
+    console.log('[SalesTrend] parsed items:', trendData.value)
+
     await nextTick()
     renderTrendChart()
     renderDonutChart()
-  } catch {
+  } catch (err) {
+    console.error('[SalesTrend] loadAll error:', err)
     ElMessage.error('Gagal memuat data sales')
   } finally {
     loading.value = false
@@ -393,7 +426,8 @@ const loadAll = async () => {
 const loadTrend = async () => {
   try {
     const { data } = await getSalesTrend({ ...buildParams(), granularity: filters.granularity })
-    trendData.value = data.data || []
+    console.log('[SalesTrend] loadTrend raw:', data)
+    trendData.value = parseTrendData(data)
     renderTrendChart()
   } catch {}
 }
@@ -420,7 +454,13 @@ const onCustomRangeChange = (val) => {
 // ── Charts ────────────────────────────────────────────────────
 const renderTrendChart = () => {
   if (!trendChartRef.value || !trendData.value?.length) return
-  if (!trendChart) trendChart = echarts.init(trendChartRef.value)
+  try {
+    if (!trendChart) trendChart = echarts.init(trendChartRef.value)
+    trendChart.resize()
+  } catch (e) {
+    console.error('[SalesTrend] ECharts init failed:', e)
+    return
+  }
 
   const tc = ctColor()
   const gc = gridColor()
@@ -481,6 +521,8 @@ const renderTrendChart = () => {
     ],
     grid: { left: 56, right: 16, top: 36, bottom: 28 },
   })
+  // Re-resize after a tick in case the flex container fully settled after render
+  setTimeout(() => trendChart?.resize(), 60)
 }
 
 const renderDonutChart = () => {
@@ -548,6 +590,9 @@ const onResize = () => { trendChart?.resize(); donutChart?.resize() }
 
 watch(showTransactionModal, (val) => { if (val) { txPage.value = 1; loadTransactions() } })
 
+// Re-render trend chart whenever data changes (handles async timing)
+watch(trendData, () => nextTick(renderTrendChart), { deep: false })
+
 onMounted(async () => {
   try {
     const { data } = await getStores({ per_page: 100, status: 'active' })
@@ -555,6 +600,11 @@ onMounted(async () => {
   } catch {}
   await loadAll()
   window.addEventListener('resize', onResize)
+  // Belt-and-suspenders: retry chart render after browser layout settles
+  setTimeout(() => {
+    if (trendData.value?.length) renderTrendChart()
+    donutChart?.resize()
+  }, 300)
 })
 
 onUnmounted(() => {
@@ -570,9 +620,6 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  /* Prevent page from being taller than viewport */
-  height: calc(100vh - 84px);
-  overflow: hidden;
 }
 
 /* ── Header ──────────────────────────────────────────── */
@@ -632,11 +679,9 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: 1fr 340px;
   gap: 10px;
-  flex: 1;
-  min-height: 0;
+  flex-shrink: 0;
 }
-.trend-card { display: flex; flex-direction: column; overflow: hidden; }
-.trend-card :deep(.el-card__body) { padding: 12px; display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.trend-card :deep(.el-card__body) { padding: 12px; }
 .type-card :deep(.el-card__body) { padding: 12px; }
 
 .card-header-row {
@@ -645,7 +690,7 @@ onUnmounted(() => {
 }
 .card-title { font-size: 13px; font-weight: 800; color: var(--text-primary); }
 
-.trend-chart { flex: 1; min-height: 0; width: 100%; }
+.trend-chart { width: 100%; height: 220px; }
 
 /* Donut */
 .donut-wrap { display: flex; align-items: center; gap: 10px; }
@@ -724,6 +769,30 @@ onUnmounted(() => {
   background: rgba(255,255,255,0.28) !important;
 }
 
+/* ── Trend empty state ───────────────────────────────── */
+.trend-empty {
+  height: 220px; width: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px; color: var(--text-muted); font-size: 12px; font-weight: 600;
+}
+
 /* ── Modal toolbar ───────────────────────────────────── */
 .tx-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width:1023px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  .charts-top { grid-template-columns: 1fr; }
+  .charts-bottom { grid-template-columns: 1fr; }
+}
+@media (max-width:639px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid .stat-card:last-child { grid-column: 1 / -1; }
+  .filter-bar { flex-direction: column; align-items: stretch; }
+  .period-buttons { overflow-x: auto; padding-bottom: 2px; white-space: nowrap; }
+  .donut-wrap { flex-direction: column; align-items: center; }
+  .donut-chart { width: 120px; height: 120px; }
+  .donut-legend { width: 100%; }
+  .tx-toolbar { flex-wrap: wrap; }
+}
 </style>

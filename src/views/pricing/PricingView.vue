@@ -93,12 +93,19 @@
         </div>
 
         <el-button
+          v-if="can('pricing.edit')"
           type="primary"
           style="width:100%;border-radius:0 0 10px 10px"
           @click="goToEdit(item)"
         >
           <el-icon><Edit /></el-icon> Edit Pricing →
         </el-button>
+        <div
+          v-else
+          style="width:100%;padding:9px 0;text-align:center;font-size:13px;color:var(--text-muted);border-top:1px solid var(--border-color)"
+        >
+          <el-icon><View /></el-icon> View Only
+        </div>
       </div>
     </div>
 
@@ -130,8 +137,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { usePermission } from '@/composables/usePermission'
 import { getPricings } from '@/api/pricing/pricingApi'
 import { getImageUrl } from '@/utils/imageHelper'
+
+const { can } = usePermission()
 
 const router = useRouter()
 const loading = ref(false)

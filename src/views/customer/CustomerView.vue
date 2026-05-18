@@ -12,7 +12,7 @@
           <p class="page-desc">Kelola data pelanggan dan riwayat transaksi</p>
         </div>
         <div style="display:flex;gap:8px">
-          <el-button @click="openForm(null)">
+          <el-button v-if="can('customers.create')" @click="openForm(null)">
             <el-icon><Plus /></el-icon> Add Customer
           </el-button>
         </div>
@@ -39,8 +39,35 @@
         <el-button plain @click="resetFilters"><el-icon><RefreshRight /></el-icon> Reset</el-button>
       </div>
 
+      <!-- Mobile Card List -->
+      <div v-if="isMobile" class="m-card-list">
+        <div class="m-card" v-for="row in customerList" :key="row.id" @click="selectCustomer(row)" style="cursor:pointer">
+          <div class="m-card-icon" style="background:var(--color-primary);color:#fff;font-weight:700;font-size:16px">
+            {{ row.name?.[0]?.toUpperCase() }}
+          </div>
+          <div class="m-card-body">
+            <div class="m-card-title">{{ row.name }}</div>
+            <div class="m-card-meta">{{ row.whatsapp }} · {{ row.total_visit || 0 }}x visit</div>
+          </div>
+          <div class="m-card-end" style="align-items:center;flex-direction:row;gap:6px">
+            <el-tag :type="row.type === 'member' ? 'warning' : 'info'" size="small">{{ row.type === 'member' ? 'Member' : 'Regular' }}</el-tag>
+            <el-dropdown trigger="click" @command="(cmd) => handleCommand(cmd, row)">
+              <el-button size="small" circle plain @click.stop><el-icon><MoreFilled /></el-icon></el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="view"><el-icon><View /></el-icon> Lihat Detail</el-dropdown-item>
+                  <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
+                  <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Resend Password</el-dropdown-item>
+                  <el-dropdown-item v-if="can('customers.edit')" command="delete" style="color:var(--color-danger)"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </div>
+        </div>
+      </div>
+
       <!-- Table -->
-      <div class="table-wrapper">
+      <div class="table-wrapper table-wrap">
         <el-table
           :data="customerList"
           v-loading="loading"
@@ -127,9 +154,9 @@
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
+                      <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
                       <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Resend Password</el-dropdown-item>
-                      <el-dropdown-item command="delete" style="color:var(--color-danger)"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
+                      <el-dropdown-item v-if="can('customers.edit')" command="delete" style="color:var(--color-danger)"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -200,18 +227,17 @@
 
       <!-- ── Quick Actions ── -->
       <div class="dp-actions">
-        <button class="dp-action-btn dp-action-primary">
-          <el-icon><Plus /></el-icon><span>New Booking</span>
+        <button class="dp-action-btn dp-action-wa dp-action-full" @click="openWhatsApp(selectedCustomer.whatsapp)">
+          <el-icon><ChatDotRound /></el-icon><span>Chat WhatsApp</span>
         </button>
-        <button class="dp-action-btn dp-action-wa" @click="openWhatsApp(selectedCustomer.whatsapp)">
-          <el-icon><ChatDotRound /></el-icon><span>WhatsApp</span>
-        </button>
-        <button class="dp-action-btn dp-action-edit" @click="openForm(selectedCustomer)">
-          <el-icon><Edit /></el-icon><span>Edit</span>
-        </button>
-        <button class="dp-action-btn dp-action-del" @click="handleDelete(selectedCustomer)">
-          <el-icon><Delete /></el-icon><span>Hapus</span>
-        </button>
+        <div v-if="can('customers.edit')" class="dp-action-row">
+          <button class="dp-action-btn dp-action-edit" @click="openForm(selectedCustomer)">
+            <el-icon><Edit /></el-icon><span>Edit</span>
+          </button>
+          <button class="dp-action-btn dp-action-del" @click="handleDelete(selectedCustomer)">
+            <el-icon><Delete /></el-icon><span>Hapus</span>
+          </button>
+        </div>
       </div>
 
       <!-- ── Info Pribadi ── -->
@@ -251,7 +277,7 @@
       <div class="dp-section">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <div class="dp-section-title" style="margin-bottom:0">Catatan</div>
-          <button v-if="!editingNotes" class="dp-link-btn" @click="startEditNotes">
+          <button v-if="!editingNotes && can('customers.edit')" class="dp-link-btn" @click="startEditNotes">
             <el-icon><Edit /></el-icon> Edit
           </button>
         </div>
@@ -299,14 +325,15 @@
     <!-- ══════════════════════════════════════════════════════════
          DIALOG — Add / Edit Customer
     ══════════════════════════════════════════════════════════ -->
-    <el-dialog
+    <el-drawer
       v-model="formVisible"
       :title="editingCustomer ? 'Edit Customer' : 'Add Customer'"
-      width="560px"
+      direction="rtl"
+      :size="isMobile ? '100%' : '520px'"
       :destroy-on-close="true"
     >
       <el-form :model="form" :rules="formRules" ref="formRef" label-position="top">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
           <el-form-item label="Nama Lengkap *" prop="name" style="grid-column:1/-1">
             <el-input v-model="form.name" placeholder="Contoh: Viking Pratama" />
           </el-form-item>
@@ -396,13 +423,83 @@
           {{ editingCustomer ? 'Simpan Perubahan' : 'Tambah Customer' }}
         </el-button>
       </template>
-    </el-dialog>
+    </el-drawer>
+
+    <!-- ── Mobile Detail Drawer ───────────────────────────── -->
+    <el-drawer
+      v-model="detailDrawerVisible"
+      direction="rtl"
+      size="100%"
+      :title="selectedCustomer?.name || 'Detail Customer'"
+      :destroy-on-close="false"
+    >
+      <div v-if="selectedCustomer">
+        <!-- Profile -->
+        <div class="profile-card" style="padding:0 0 14px">
+          <div class="profile-avatar">{{ selectedCustomer.name?.[0]?.toUpperCase() }}</div>
+          <div class="profile-info">
+            <div class="profile-name">{{ selectedCustomer.name }}</div>
+            <div class="profile-tags">
+              <el-tag :type="selectedCustomer.status === 'active' ? 'success' : 'danger'" size="small">{{ selectedCustomer.status === 'active' ? 'Active' : 'Inactive' }}</el-tag>
+              <el-tag :type="selectedCustomer.type === 'member' ? 'warning' : 'info'" size="small">{{ selectedCustomer.type === 'member' ? 'Member' : 'Regular' }}</el-tag>
+            </div>
+            <div class="profile-contacts">
+              <span><el-icon><Phone /></el-icon>{{ selectedCustomer.whatsapp }}</span>
+              <span v-if="selectedCustomer.email"><el-icon><Message /></el-icon>{{ selectedCustomer.email }}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Stats -->
+        <div class="dp-stats">
+          <div class="dp-stat"><div class="dp-stat-val">{{ selectedCustomer.total_visit || 0 }}x</div><div class="dp-stat-lbl">Visit</div></div>
+          <div class="dp-stat-divider" />
+          <div class="dp-stat"><div class="dp-stat-val">{{ selectedCustomer.total_booking || 0 }}</div><div class="dp-stat-lbl">Booking</div></div>
+          <div class="dp-stat-divider" />
+          <div class="dp-stat"><div class="dp-stat-val dp-stat-money">{{ formatRpShort(selectedCustomer.total_spent || 0) }}</div><div class="dp-stat-lbl">Total Spent</div></div>
+        </div>
+        <!-- Actions -->
+        <div class="dp-actions">
+          <button class="dp-action-btn dp-action-wa dp-action-full" @click="openWhatsApp(selectedCustomer.whatsapp)"><el-icon><ChatDotRound /></el-icon><span>Chat WhatsApp</span></button>
+          <div v-if="can('customers.edit')" class="dp-action-row">
+            <button class="dp-action-btn dp-action-edit" @click="openForm(selectedCustomer); detailDrawerVisible = false"><el-icon><Edit /></el-icon><span>Edit</span></button>
+            <button class="dp-action-btn dp-action-del" @click="handleDelete(selectedCustomer)"><el-icon><Delete /></el-icon><span>Hapus</span></button>
+          </div>
+        </div>
+        <!-- Info -->
+        <div class="dp-section">
+          <div class="dp-section-title">Informasi Pribadi</div>
+          <div class="dp-info-list">
+            <div class="dp-info-item"><span class="dp-info-key">Tanggal Lahir</span><span class="dp-info-val">{{ formatDob(selectedCustomer.date_of_birth) }}</span></div>
+            <div class="dp-info-item"><span class="dp-info-key">Gender</span><span class="dp-info-val">{{ selectedCustomer.gender === 'male' ? 'Laki-laki' : selectedCustomer.gender === 'female' ? 'Perempuan' : '-' }}</span></div>
+            <div class="dp-info-item"><span class="dp-info-key">Pekerjaan</span><span class="dp-info-val">{{ selectedCustomer.occupation || '-' }}</span></div>
+            <div class="dp-info-item"><span class="dp-info-key">Bergabung</span><span class="dp-info-val">{{ formatDate(selectedCustomer.created_at) }}</span></div>
+          </div>
+        </div>
+        <!-- Catatan -->
+        <div class="dp-section">
+          <div class="dp-section-title">Catatan</div>
+          <div class="dp-notes-box">{{ selectedCustomer.notes || 'Belum ada catatan.' }}</div>
+        </div>
+        <!-- Booking -->
+        <div class="dp-section" v-if="selectedCustomer.recent_bookings?.length">
+          <div class="dp-section-title">Riwayat Booking</div>
+          <div class="dp-booking-list">
+            <div v-for="(b, i) in selectedCustomer.recent_bookings.slice(0,5)" :key="i" class="dp-booking-item">
+              <div class="dp-booking-left"><div class="dp-booking-room">{{ b.room }}</div><div class="dp-booking-meta">{{ b.date }}</div></div>
+              <div class="dp-booking-right"><div class="dp-booking-total">{{ formatRp(b.total) }}</div><el-tag type="success" size="small">{{ b.status }}</el-tag></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-drawer>
 
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getCustomers, getCustomerById,
@@ -411,12 +508,16 @@ import {
 } from '@/api/customer/customerApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 
+const { can } = usePermission()
+const { isMobile } = useBreakpoint()
+
 // ── State ─────────────────────────────────────────────────────
 
 const loading = ref(false)
 const customerList = ref([])
 const total = ref(0)
 const selectedCustomer = ref(null)
+const detailDrawerVisible = ref(false)
 const roomTemplates = ref([])
 
 const filters = reactive({
@@ -479,6 +580,7 @@ const selectCustomer = async (row) => {
   try {
     const { data } = await getCustomerById(row.id)
     selectedCustomer.value = data.data
+    if (isMobile.value) detailDrawerVisible.value = true
     notesInput.value = data.data.notes || ''
     editingNotes.value = false
   } catch {
@@ -572,6 +674,7 @@ const saveNotes = async () => {
 // ── Commands ──────────────────────────────────────────────────
 
 const handleCommand = async (cmd, row) => {
+  if (cmd === 'view') selectCustomer(row)
   if (cmd === 'edit') openForm(row)
   if (cmd === 'resend') await handleResendPassword(row)
   if (cmd === 'delete') await handleDelete(row)
@@ -748,25 +851,28 @@ onMounted(async () => {
 
 /* Quick Actions */
 .dp-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  padding: 12px 16px;
+  display: flex; flex-direction: column;
+  gap: 7px; padding: 12px 16px;
   border-bottom: 1px solid var(--border-color);
 }
 .dp-action-btn {
   display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 7px 10px; border-radius: 7px; font-size: 12px; font-weight: 500;
-  cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+  padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; border: 1px solid transparent; transition: all 0.15s; white-space: nowrap;
 }
-.dp-action-primary { background: var(--color-primary); color: #fff; border-color: var(--color-primary); }
-.dp-action-primary:hover { opacity: 0.88; }
-.dp-action-wa { background: rgba(37,211,102,0.1); color: #25D366; border-color: rgba(37,211,102,0.3); }
-.dp-action-wa:hover { background: rgba(37,211,102,0.2); }
+.dp-action-full { width: 100%; }
+.dp-action-row { display: flex; gap: 7px; }
+.dp-action-row .dp-action-btn { flex: 1; }
+.dp-action-wa {
+  background: linear-gradient(135deg, rgba(37,211,102,0.12), rgba(37,211,102,0.06));
+  color: #18a34a; border-color: rgba(37,211,102,0.35);
+  font-size: 13px; padding: 9px 12px;
+}
+.dp-action-wa:hover { background: rgba(37,211,102,0.2); box-shadow: 0 2px 8px rgba(37,211,102,0.2); }
 .dp-action-edit { background: var(--bg-main); color: var(--text-primary); border-color: var(--border-color); }
-.dp-action-edit:hover { border-color: var(--color-primary); color: var(--color-primary-light); }
-.dp-action-del { background: rgba(239,68,68,0.07); color: var(--color-danger); border-color: rgba(239,68,68,0.2); }
-.dp-action-del:hover { background: rgba(239,68,68,0.14); }
+.dp-action-edit:hover { border-color: var(--color-primary); color: var(--color-primary-light); background: rgba(2,130,222,0.05); }
+.dp-action-del { background: rgba(239,68,68,0.06); color: var(--color-danger); border-color: rgba(239,68,68,0.2); }
+.dp-action-del:hover { background: rgba(239,68,68,0.12); }
 
 /* Sections */
 .dp-section {
@@ -813,4 +919,31 @@ onMounted(async () => {
 /* Selected row highlight */
 :deep(.selected-row td) { background: rgba(124,58,237,0.07) !important; }
 :deep(.el-table__row) { cursor: pointer; }
+
+/* Responsive */
+@media (max-width:639px) {
+  .customer-layout { grid-template-columns:1fr; height:auto; overflow:visible; }
+  .list-panel { overflow:visible; }
+  .detail-panel { display:none; } /* replaced by drawer on mobile */
+  .table-wrap { display:none; }
+  .filter-bar { flex-direction:column; }
+  .filter-bar .el-input, .filter-bar .el-select { width:100% !important; }
+}
+@media (min-width:640px) { .m-card-list { display:none; } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>

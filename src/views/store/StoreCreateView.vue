@@ -10,12 +10,12 @@
     </div>
 
     <!-- Steps -->
-    <el-card shadow="never" style="margin-bottom:20px">
+    <el-card shadow="never" class="steps-card" style="margin-bottom:20px">
       <el-steps :active="currentStep" finish-status="success" align-center>
-        <el-step title="Informasi Cabang" />
-        <el-step title="Jam Operasional" />
+        <el-step :title="isMobile ? 'Informasi' : 'Informasi Cabang'" />
+        <el-step :title="isMobile ? 'Jam' : 'Jam Operasional'" />
         <el-step title="Room Setup" />
-        <el-step title="Review & Simpan" />
+        <el-step :title="isMobile ? 'Review' : 'Review & Simpan'" />
       </el-steps>
     </el-card>
 
@@ -98,7 +98,7 @@
           <p class="step-desc">Atur jam buka dan tutup cabang Anda.</p>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 280px;gap:20px;margin-top:20px">
+      <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 280px', gap:'20px', marginTop:'20px' }">
         <div style="display:flex;flex-direction:column;gap:12px">
           <div class="hours-card">
             <div class="hours-header">
@@ -184,7 +184,8 @@
         </div>
       </div>
       <div style="margin-top:20px">
-        <el-table :data="roomTemplates" style="width:100%" v-loading="roomsLoading">
+        <!-- Desktop/Tablet table -->
+        <el-table v-if="!isMobile" :data="roomTemplates" style="width:100%" v-loading="roomsLoading">
           <el-table-column width="50">
             <template #default="{ row }"><el-checkbox v-model="row.selected" /></template>
           </el-table-column>
@@ -222,6 +223,29 @@
             </template>
           </el-table-column>
         </el-table>
+
+        <!-- Mobile card list -->
+        <div v-else v-loading="roomsLoading" class="room-card-list">
+          <div v-for="row in roomTemplates" :key="row.id" class="room-card" :class="{ selected: row.selected }" @click="row.selected = !row.selected">
+            <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+              <el-checkbox v-model="row.selected" @click.stop />
+              <div class="room-thumb">
+                <img v-if="row.image_url" :src="getImageUrl(row.image_url)" />
+                <el-icon v-else size="16" style="color:var(--text-muted)"><Picture /></el-icon>
+              </div>
+              <div style="min-width:0">
+                <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.name }}</div>
+                <div style="font-size:11px;color:var(--text-secondary)">{{ row.capacity_min }}–{{ row.capacity_max }} orang</div>
+              </div>
+            </div>
+            <div v-if="row.selected" style="display:flex;align-items:center;gap:6px;flex-shrink:0" @click.stop>
+              <el-button size="small" circle plain @click="row.unit_count = Math.max(1, row.unit_count - 1)"><el-icon><Minus /></el-icon></el-button>
+              <span style="width:28px;text-align:center;font-weight:700;font-size:14px">{{ row.unit_count }}</span>
+              <el-button size="small" circle plain @click="row.unit_count++"><el-icon><Plus /></el-icon></el-button>
+            </div>
+          </div>
+        </div>
+
         <div class="info-box" style="margin-top:12px;flex-direction:row;align-items:center;gap:8px">
           <el-icon style="color:var(--color-info)"><InfoFilled /></el-icon>
           <span>Jumlah unit = banyaknya ruangan dengan tipe yang sama di cabang ini.</span>
@@ -238,7 +262,7 @@
           <p class="step-desc">Periksa kembali sebelum menyimpan.</p>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:20px">
+      <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px', marginTop:'20px' }">
         <div class="review-box">
           <div class="review-title">Informasi Cabang</div>
           <div style="display:flex;gap:12px;margin-top:10px">
@@ -272,20 +296,22 @@
     </el-card>
 
     <!-- Footer Nav -->
-    <div class="step-footer">
-      <el-button v-if="currentStep > 0" @click="currentStep--">
+    <div class="step-footer" :class="{ 'review-footer': currentStep === 3 && isMobile }">
+      <el-button v-if="currentStep > 0" @click="currentStep--" :class="{ 'review-back-btn': currentStep === 3 && isMobile }">
         <el-icon><ArrowLeft /></el-icon> Kembali
       </el-button>
-      <div style="margin-left:auto;display:flex;gap:10px">
-        <el-button v-if="currentStep === 3" plain :loading="saving" @click="saveDraft">
-          <el-icon><DocumentAdd /></el-icon> Simpan sebagai Draft
+      <div :style="currentStep === 3 && isMobile
+        ? { display:'flex', gap:'8px', flex:'1' }
+        : { marginLeft:'auto', display:'flex', gap:'10px' }">
+        <el-button v-if="currentStep === 3" plain :loading="saving" @click="saveDraft" :style="currentStep === 3 && isMobile ? { flex:'1' } : {}">
+          <el-icon><DocumentAdd /></el-icon> {{ isMobile ? 'Draft' : 'Simpan sebagai Draft' }}
         </el-button>
         <el-button v-if="currentStep < 3" plain @click="saveAndExit" :loading="saving">Simpan & Keluar</el-button>
         <el-button v-if="currentStep < 3" type="primary" @click="nextStep">
           Lanjut <el-icon><ArrowRight /></el-icon>
         </el-button>
-        <el-button v-if="currentStep === 3" type="primary" :loading="saving" @click="saveStore">
-          <el-icon><Check /></el-icon> Simpan Store
+        <el-button v-if="currentStep === 3" type="primary" :loading="saving" @click="saveStore" :style="currentStep === 3 && isMobile ? { flex:'1' } : {}">
+          <el-icon><Check /></el-icon> {{ isMobile ? 'Simpan' : 'Simpan Store' }}
         </el-button>
       </div>
     </div>
@@ -295,6 +321,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage } from 'element-plus'
 import { createStore, updateStore, getStoreById } from '@/api/store/storeApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
@@ -302,6 +329,7 @@ import { uploadImage, getImageUrl } from '@/utils/imageHelper'
 
 const router = useRouter()
 const route = useRoute()
+const { isMobile } = useBreakpoint()
 const isEdit = computed(() => !!route.params.id)
 const currentStep = ref(0)
 const saving = ref(false)
@@ -444,6 +472,10 @@ onMounted(async () => {
 
 .two-col { display:grid; grid-template-columns:1fr 320px; gap:24px; }
 .two-col-inner { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+@media (max-width:639px) {
+  .two-col { grid-template-columns:1fr; }
+  .two-col-inner { grid-template-columns:1fr; }
+}
 
 /* Status toggle */
 .status-toggle { display:flex; gap:10px; }
@@ -497,6 +529,15 @@ onMounted(async () => {
 }
 .room-thumb img { width:100%; height:100%; object-fit:cover; }
 
+/* Mobile room card list */
+.room-card-list { display:flex; flex-direction:column; gap:8px; }
+.room-card {
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:10px 12px; border:1px solid var(--border-color); border-radius:10px;
+  background:var(--bg-card); cursor:pointer; transition:border-color 0.2s, background 0.2s;
+}
+.room-card.selected { border-color:var(--color-primary); background:rgba(124,58,237,0.06); }
+
 /* Review */
 .review-box { background:var(--bg-main); border:1px solid var(--border-color); border-radius:10px; padding:14px; }
 .review-title { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:0; }
@@ -509,5 +550,15 @@ onMounted(async () => {
   display:flex; align-items:center;
   margin-top:16px; padding:14px 16px;
   background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px;
+}
+/* Review step footer on mobile — all 3 buttons in one compact row */
+.review-footer { gap:8px; padding:10px 12px; }
+.review-back-btn { flex-shrink:0; }
+
+/* Stepper title font */
+:deep(.el-step__title) { font-size:12px; }
+@media (max-width:639px) {
+  :deep(.el-step__title) { font-size:11px; }
+  :deep(.el-steps) { padding:0 4px; }
 }
 </style>

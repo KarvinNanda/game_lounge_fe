@@ -318,6 +318,7 @@ onMounted(async () => {
 .page-desc { font-size:13px; color:var(--text-secondary); margin-top:4px; }
 
 .form-layout { display:grid; grid-template-columns:1fr 340px; gap:16px; }
+@media (max-width:639px) { .form-layout { grid-template-columns:1fr; } }
 .form-card { border-color:var(--border-color) !important; }
 .right-col { display:flex; flex-direction:column; gap:16px; }
 

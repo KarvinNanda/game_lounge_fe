@@ -7,7 +7,7 @@
         <h1 class="page-title">Facilities</h1>
         <p class="page-desc">Kelola daftar fasilitas yang tersedia di setiap store.</p>
       </div>
-      <el-button type="primary" @click="$router.push('/facility/create')">
+      <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/facility/create')">
         <el-icon><Plus /></el-icon> Tambah Fasilitas
       </el-button>
     </div>
@@ -72,6 +72,27 @@
         </el-button>
       </div>
 
+      <div v-if="isMobile" class="m-card-list">
+        <div class="m-card" v-for="row in facilityList" :key="row.id">
+          <div class="m-card-icon">
+            <img v-if="row.icon_url" :src="getImageUrl(row.icon_url)" :alt="row.name" style="width:28px;height:28px;object-fit:contain" />
+            <el-icon v-else size="18" style="color:var(--text-muted)"><Picture /></el-icon>
+          </div>
+          <div class="m-card-body">
+            <div class="m-card-title">{{ row.name }}</div>
+            <div class="m-card-meta">{{ row.category?.name || '—' }}</div>
+          </div>
+          <div class="m-card-end">
+            <el-tag :type="row.is_active ? 'success' : 'danger'" size="small">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</el-tag>
+            <div style="display:flex;gap:4px">
+              <el-button v-if="can('settings.branches')" size="small" circle plain @click="$router.push(`/facility/${row.id}/edit`)"><el-icon><Edit /></el-icon></el-button>
+              <el-button v-if="can('settings.branches')" size="small" circle plain type="danger" @click="deleteFacility(row)"><el-icon><Delete /></el-icon></el-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
       <el-table :data="facilityList" v-loading="loading" size="small" style="width:100%" empty-text="Tidak ada fasilitas ditemukan">
         <el-table-column label="Fasilitas" min-width="220">
           <template #default="{ row }">
@@ -93,7 +114,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Kategori" min-width="160">
+        <el-table-column label="Kategori" min-width="160" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <el-tag size="small" type="info" plain>{{ row.category?.name || '-' }}</el-tag>
           </template>
@@ -110,7 +131,7 @@
         <el-table-column label="Aksi" min-width="120" align="right" fixed="right">
           <template #default="{ row }">
             <div class="row-actions">
-              <el-tooltip :content="row.is_active ? 'Nonaktifkan' : 'Aktifkan'" placement="top">
+              <el-tooltip v-if="can('settings.branches')" :content="row.is_active ? 'Nonaktifkan' : 'Aktifkan'" placement="top">
                 <el-button
                   size="small"
                   circle
@@ -121,12 +142,12 @@
                   <el-icon><component :is="row.is_active ? 'VideoPause' : 'VideoPlay'" /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Edit" placement="top">
+              <el-tooltip v-if="can('settings.branches')" content="Edit" placement="top">
                 <el-button size="small" circle plain @click="$router.push(`/facility/${row.id}/edit`)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Hapus" placement="top">
+              <el-tooltip v-if="can('settings.branches')" content="Hapus" placement="top">
                 <el-button size="small" circle plain type="danger" @click="deleteFacility(row)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
@@ -148,16 +169,21 @@
           @current-change="fetchFacilities"
         />
       </div>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getFacilities, deleteFacility as apiDelete, updateFacility, getFacilityCategories } from '@/api/facility/facilityApi'
 import { getImageUrl } from '@/utils/imageHelper'
 
+const { can } = usePermission()
+const { isMobile, isTablet } = useBreakpoint()
 const loading = ref(false)
 const facilityList = ref([])
 const categories = ref([])
@@ -296,4 +322,26 @@ onMounted(() => {
   border-top: 1px solid var(--border-color);
 }
 .footer-info { font-size: 13px; color: var(--text-secondary); }
+
+/* Responsive */
+@media (max-width:639px) { .table-wrap { display:none; } }
+@media (min-width:640px) { .m-card-list { display:none; } }
+@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
+@media (max-width:639px) { .stats-row { flex-wrap:wrap; } .stat-item { min-width:calc(50% - 1px); } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>
