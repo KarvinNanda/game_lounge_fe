@@ -7,7 +7,7 @@
         <h1 class="page-title">Rooms</h1>
         <p class="page-desc">Kelola tipe ruangan standar yang digunakan di setiap store.</p>
       </div>
-      <el-button type="primary" @click="$router.push('/room-template/create')">
+      <el-button v-if="can('rooms.create')" type="primary" @click="$router.push('/room-template/create')">
         <el-icon><Plus /></el-icon> Tambah Room
       </el-button>
     </div>
@@ -51,6 +51,27 @@
         </el-button>
       </div>
 
+      <div v-if="isMobile" class="m-card-list">
+        <div class="m-card" v-for="row in templateList" :key="row.id">
+          <div class="m-card-icon">
+            <img v-if="row.image_url" :src="getImageUrl(row.image_url)" :alt="row.name" />
+            <el-icon v-else size="18" style="color:var(--text-muted)"><Picture /></el-icon>
+          </div>
+          <div class="m-card-body">
+            <div class="m-card-title">{{ row.name }}</div>
+            <div class="m-card-meta">{{ row.capacity_min }}–{{ row.capacity_max }} orang</div>
+          </div>
+          <div class="m-card-end">
+            <el-tag :type="row.is_active ? 'success' : 'danger'" size="small">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</el-tag>
+            <div style="display:flex;gap:4px">
+              <el-button v-if="can('rooms.edit')" size="small" circle plain @click="$router.push(`/room-template/${row.id}/edit`)"><el-icon><Edit /></el-icon></el-button>
+              <el-button v-if="can('rooms.delete')" size="small" circle plain type="danger" @click="deleteTemplate(row)"><el-icon><Delete /></el-icon></el-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
       <el-table :data="templateList" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada room template">
         <el-table-column label="Room" min-width="240">
           <template #default="{ row }">
@@ -76,7 +97,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Fasilitas" min-width="160">
+        <el-table-column label="Fasilitas" min-width="160" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <div class="facility-icons" v-if="row.facilities?.length">
               <el-tooltip v-for="f in row.facilities.slice(0,5)" :key="f.id" :content="f.name" placement="top">
@@ -105,7 +126,7 @@
         <el-table-column label="Aksi" width="120" align="right" fixed="right">
           <template #default="{ row }">
             <div class="row-actions">
-              <el-tooltip :content="row.is_active ? 'Nonaktifkan' : 'Aktifkan'" placement="top">
+              <el-tooltip v-if="can('rooms.edit')" :content="row.is_active ? 'Nonaktifkan' : 'Aktifkan'" placement="top">
                 <el-button
                   size="small" circle plain
                   :type="row.is_active ? 'warning' : 'success'"
@@ -114,12 +135,12 @@
                   <el-icon><component :is="row.is_active ? 'VideoPause' : 'VideoPlay'" /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Edit" placement="top">
+              <el-tooltip v-if="can('rooms.edit')" content="Edit" placement="top">
                 <el-button size="small" circle plain @click="$router.push(`/room-template/${row.id}/edit`)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Hapus" placement="top">
+              <el-tooltip v-if="can('rooms.delete')" content="Hapus" placement="top">
                 <el-button size="small" circle plain type="danger" @click="deleteTemplate(row)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
@@ -141,16 +162,21 @@
           @current-change="fetchTemplates"
         />
       </div>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getRoomTemplates, updateRoomTemplate, deleteRoomTemplate as apiDelete } from '@/api/room_template/roomTemplateApi'
 import { getImageUrl } from '@/utils/imageHelper'
 
+const { can } = usePermission()
+const { isMobile, isTablet } = useBreakpoint()
 const loading = ref(false)
 const templateList = ref([])
 const search = ref('')
@@ -254,4 +280,26 @@ onMounted(fetchTemplates)
 
 .table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); }
 .footer-info { font-size:13px; color:var(--text-secondary); }
+
+/* Responsive */
+@media (max-width:639px) { .table-wrap { display:none; } }
+@media (min-width:640px) { .m-card-list { display:none; } }
+@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
+@media (max-width:639px) { .stats-row { flex-wrap:wrap; } .stat-item { min-width:calc(50% - 1px); } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>

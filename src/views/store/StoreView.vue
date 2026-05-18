@@ -7,7 +7,7 @@
         <h1 class="page-title">Stores</h1>
         <p class="page-desc">Kelola semua cabang Quantum Gaming.</p>
       </div>
-      <el-button type="primary" @click="$router.push('/store/create')">
+      <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/store/create')">
         <el-icon><Plus /></el-icon> Buat Store Baru
       </el-button>
     </div>
@@ -58,6 +58,29 @@
         </el-button>
       </div>
 
+      <div v-if="isMobile" class="m-card-list">
+        <div class="m-card" v-for="row in storeList" :key="row.id">
+          <div class="m-card-icon">
+            <img v-if="row.photo_url" :src="getImageUrl(row.photo_url)" :alt="row.name" />
+            <el-icon v-else size="18" style="color:var(--text-muted)"><Shop /></el-icon>
+          </div>
+          <div class="m-card-body">
+            <div class="m-card-title">{{ row.name }}</div>
+            <div class="m-card-meta">{{ row.address || '—' }} · {{ row.room_count || 0 }} ruangan</div>
+          </div>
+          <div class="m-card-end">
+            <el-tag :type="row.status === 'active' ? 'success' : row.status === 'draft' ? 'warning' : 'danger'" size="small">
+              {{ row.status === 'active' ? 'Aktif' : row.status === 'draft' ? 'Draft' : 'Nonaktif' }}
+            </el-tag>
+            <div style="display:flex;gap:4px">
+              <el-button v-if="can('settings.branches')" size="small" circle plain @click="$router.push(`/store/${row.id}/edit`)"><el-icon><Edit /></el-icon></el-button>
+              <el-button v-if="can('settings.branches')" size="small" circle plain type="danger" @click="deleteStore(row)"><el-icon><Delete /></el-icon></el-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
       <el-table :data="storeList" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada store">
         <el-table-column label="Store" min-width="160">
           <template #default="{ row }">
@@ -100,7 +123,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Jam Operasional" min-width="200">
+        <el-table-column label="Jam Operasional" min-width="200" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <div class="hours-cell">
               <template v-if="getHoursInfo(row).sameHours">
@@ -136,7 +159,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Kontak" min-width="140">
+        <el-table-column label="Kontak" min-width="140" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <span style="font-size:12px;color:var(--text-secondary)">{{ row.whatsapp || '—' }}</span>
           </template>
@@ -145,7 +168,7 @@
         <el-table-column label="Aksi" width="120" align="right" fixed="right">
           <template #default="{ row }">
             <div class="row-actions">
-              <el-tooltip :content="row.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'" placement="top">
+              <el-tooltip v-if="can('settings.branches')" :content="row.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'" placement="top">
                 <el-button
                   size="small" circle plain
                   :type="row.status === 'active' ? 'warning' : 'success'"
@@ -154,12 +177,12 @@
                   <el-icon><component :is="row.status === 'active' ? 'VideoPause' : 'VideoPlay'" /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Edit" placement="top">
+              <el-tooltip v-if="can('settings.branches')" content="Edit" placement="top">
                 <el-button size="small" circle plain @click="$router.push(`/store/${row.id}/edit`)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Hapus" placement="top">
+              <el-tooltip v-if="can('settings.branches')" content="Hapus" placement="top">
                 <el-button size="small" circle plain type="danger" @click="deleteStore(row)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
@@ -181,16 +204,21 @@
           @current-change="fetchStores"
         />
       </div>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getStores, deleteStore as apiDelete, updateStore } from '@/api/store/storeApi'
 import { getImageUrl } from '@/utils/imageHelper'
 
+const { can } = usePermission()
+const { isMobile, isTablet } = useBreakpoint()
 const loading = ref(false)
 const storeList = ref([])
 const search = ref('')
@@ -326,4 +354,26 @@ onMounted(fetchStores)
 
 .table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); }
 .footer-info { font-size:13px; color:var(--text-secondary); }
+
+/* Responsive */
+@media (max-width:639px) { .table-wrap { display:none; } }
+@media (min-width:640px) { .m-card-list { display:none; } }
+@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
+@media (max-width:639px) { .stats-row { flex-wrap:wrap; } .stat-item { min-width:calc(50% - 1px); } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>

@@ -381,17 +381,141 @@ strong, b { color: var(--text-primary); font-weight: 700; }
   color: var(--text-secondary) !important;
 }
 
-/* ── Date / Time Picker ──────────────────────────────── */
+/* ── Date / Time Picker — comprehensive ──────────────── */
+/*
+ * EP's picker defaults to LIGHT-mode color tokens (dark text).
+ * We override EP's own CSS variables on the popper so they
+ * cascade into every inner element. Direct !important selectors
+ * are added as fallback for components that don't use the vars.
+ */
 .el-picker__popper {
   background: var(--bg-card) !important;
   border: 1px solid var(--border-color) !important;
   border-radius: 10px !important;
   box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+  /* Override EP's internal color tokens */
+  --el-datepicker-text-color:             var(--text-primary);
+  --el-datepicker-off-text-color:         var(--text-muted);
+  --el-datepicker-header-text-color:      var(--text-primary);
+  --el-datepicker-icon-color:             var(--text-secondary);
+  --el-datepicker-border-color:           var(--border-color);
+  --el-datepicker-inner-border-color:     var(--border-color);
+  --el-datepicker-active-color:           var(--color-primary);
+  --el-datepicker-hover-text-color:       var(--color-primary-light);
+  --el-datepicker-inrange-bg-color:       rgba(2,130,222,0.10);
+  --el-datepicker-inrange-hover-bg-color: rgba(2,130,222,0.16);
+  /* Generic EP text tokens (used by many inner elements) */
+  --el-text-color-primary:    var(--text-primary);
+  --el-text-color-regular:    var(--text-secondary);
+  --el-text-color-secondary:  var(--text-secondary);
+  --el-text-color-placeholder:var(--text-muted);
+  --el-fill-color:            var(--bg-card-hover);
+  --el-fill-color-blank:      var(--bg-card);
+  --el-fill-color-light:      var(--bg-card-hover);
+  --el-border-color:          var(--border-color);
+  --el-border-color-light:    var(--border-color);
+  --el-border-color-lighter:  var(--border-color);
+  --el-color-primary:         var(--color-primary);
 }
-.el-date-table td { color: var(--text-primary) !important; }
-.el-date-table td.disabled .el-date-table-cell__text { color: var(--text-muted) !important; }
-.el-date-picker__header-label { color: var(--text-primary) !important; font-weight: 700 !important; }
-.el-picker-panel__icon-btn { color: var(--text-secondary) !important; }
+
+/* Date cell text */
+.el-date-table-cell__text { color: var(--text-primary) !important; }
+.el-date-table td         { color: var(--text-primary) !important; }
+.el-date-table th { color: var(--text-secondary) !important; font-weight: 700 !important; font-size: 11px !important; }
+
+/* Off-month & disabled */
+.el-date-table td.next-month .el-date-table-cell__text,
+.el-date-table td.prev-month .el-date-table-cell__text { color: var(--text-muted) !important; opacity: 0.55; }
+.el-date-table td.disabled .el-date-table-cell,
+.el-date-table td.disabled .el-date-table-cell__text   { color: var(--text-muted) !important; background: transparent !important; opacity: 0.4; }
+
+/* Today highlight */
+.el-date-table td.today .el-date-table-cell__text { color: var(--color-primary) !important; font-weight: 700 !important; }
+
+/* Selected date */
+.el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+  background: var(--color-primary) !important; color: #fff !important;
+  border-radius: 50%; font-weight: 700 !important;
+}
+
+/* Range in-between */
+.el-date-table td.in-range .el-date-table-cell { background: rgba(2,130,222,0.10) !important; }
+
+/* Range start/end */
+.el-date-table td.start-date .el-date-table-cell,
+.el-date-table td.end-date   .el-date-table-cell   { background: var(--color-primary) !important; }
+.el-date-table td.start-date .el-date-table-cell__text,
+.el-date-table td.end-date   .el-date-table-cell__text { color: #fff !important; font-weight: 700 !important; }
+
+/* Header (month / year navigation) */
+.el-date-picker__header,
+.el-date-range-picker__header            { color: var(--text-primary) !important; background: var(--bg-card) !important; }
+.el-date-picker__header-label,
+.el-date-range-picker__header div        { color: var(--text-primary) !important; font-weight: 700 !important; }
+.el-picker-panel__icon-btn               { color: var(--text-secondary) !important; }
+.el-picker-panel__icon-btn:hover         { color: var(--color-primary-light) !important; }
+
+/* Range picker divider + header */
+.el-date-range-picker__content.is-left  { border-right: 1px solid var(--border-color) !important; }
+.el-date-range-picker__time-header      { border-bottom: 1px solid var(--border-color) !important; background: var(--bg-card) !important; }
+
+/* Footer */
+.el-picker-panel__footer    { background: var(--bg-card) !important; border-top: 1px solid var(--border-color) !important; }
+.el-picker-panel__link-btn  { color: var(--color-primary-light) !important; font-weight: 600 !important; }
+
+/* Year / Month panel */
+.el-year-table td .cell,
+.el-month-table td .cell    { color: var(--text-primary) !important; border-radius: 6px; }
+.el-year-table td:hover .cell,
+.el-month-table td:hover .cell { color: var(--color-primary-light) !important; background: rgba(2,130,222,0.08) !important; }
+.el-year-table td.current .cell,
+.el-month-table td.current .cell { color: var(--color-primary) !important; font-weight: 700 !important; }
+.el-year-table td.disabled .cell,
+.el-month-table td.disabled .cell { color: var(--text-muted) !important; opacity: 0.4; }
+
+/* ── Time Picker Panel ───────────────────────────────── */
+.el-time-panel {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35) !important;
+  --el-text-color-primary:  var(--text-primary);
+  --el-text-color-regular:  var(--text-secondary);
+  --el-border-color:        var(--border-color);
+  --el-fill-color-blank:    var(--bg-card);
+}
+.el-time-panel__content::after,
+.el-time-panel__content::before { border-color: var(--border-color) !important; }
+.el-time-panel__footer          { background: var(--bg-card) !important; border-top: 1px solid var(--border-color) !important; }
+.el-time-panel__btn             { color: var(--text-secondary) !important; font-weight: 600 !important; }
+.el-time-panel__btn.confirm     { color: var(--color-primary-light) !important; font-weight: 700 !important; }
+.el-time-spinner__item          { color: var(--text-secondary) !important; font-weight: 600 !important; }
+.el-time-spinner__item.active:not(.disabled) { color: var(--text-primary) !important; font-weight: 800 !important; }
+.el-time-spinner__item:hover    { color: var(--color-primary-light) !important; background: rgba(2,130,222,0.08) !important; }
+.el-time-spinner__item.disabled { color: var(--text-muted) !important; opacity: 0.35; }
+
+/* ── Select — tags (multi-select) ────────────────────── */
+.el-select__tags .el-tag { background: rgba(2,130,222,0.15) !important; border-color: rgba(2,130,222,0.3) !important; color: var(--color-primary-light) !important; }
+.el-select .el-select__caret { color: var(--text-muted) !important; }
+.el-select .el-icon.el-input__icon { color: var(--text-muted) !important; }
+
+/* ── Loading overlay ─────────────────────────────────── */
+.el-loading-mask { background: rgba(1,2,20,0.72) !important; }
+.el-loading-spinner .circular { stroke: var(--color-primary) !important; }
+.el-loading-spinner .el-loading-text { color: var(--text-secondary) !important; font-size: 12px !important; font-weight: 600 !important; }
+
+/* ── Message (toast) ─────────────────────────────────── */
+.el-message {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4) !important;
+  border-radius: 8px !important;
+}
+.el-message .el-message__content { color: var(--text-primary) !important; font-weight: 600 !important; font-size: 13px !important; }
+.el-message--success { border-color: rgba(16,185,129,0.35) !important; background: rgba(16,185,129,0.08) !important; }
+.el-message--warning { border-color: rgba(245,158,11,0.35) !important; background: rgba(245,158,11,0.08) !important; }
+.el-message--error   { border-color: rgba(239,68,68,0.35)  !important; background: rgba(239,68,68,0.08)  !important; }
+.el-message--info    { border-color: rgba(2,130,222,0.35)  !important; background: rgba(2,130,222,0.08)  !important; }
 
 /* ── Upload ──────────────────────────────────────────── */
 .el-upload-dragger {
@@ -563,3 +687,78 @@ body.light-mode .block-time { color: rgba(255,255,255,0.88) !important; }
 /* Booking grid — light mode slot hover & group header */
 body.light-mode .empty-slot.clickable:hover { background: rgba(2,130,222,0.1) !important; }
 body.light-mode .group-header-row           { background: rgba(2,130,222,0.05) !important; }
+
+/* ══════════════════════════════════════════════════════
+   DATE / TIME PICKER — Light mode overrides
+   In light mode the calendar sits on #ffffff, so text
+   must flip back to dark. We also soften the box shadow.
+══════════════════════════════════════════════════════ */
+body.light-mode .el-picker__popper {
+  box-shadow: 0 8px 24px rgba(2,130,222,0.14) !important;
+  --el-datepicker-text-color:          #0a1a35;
+  --el-datepicker-off-text-color:      #7aaccf;
+  --el-datepicker-header-text-color:   #0a1a35;
+  --el-datepicker-icon-color:          #2d4a6e;
+  --el-text-color-primary:             #0a1a35;
+  --el-text-color-regular:             #2d4a6e;
+  --el-text-color-secondary:           #2d4a6e;
+  --el-fill-color-blank:               #ffffff;
+  --el-fill-color:                     #e4eeff;
+  --el-fill-color-light:               #e4eeff;
+}
+body.light-mode .el-date-table-cell__text            { color: #0a1a35 !important; }
+body.light-mode .el-date-table th                    { color: #2d4a6e !important; }
+body.light-mode .el-date-table td.next-month .el-date-table-cell__text,
+body.light-mode .el-date-table td.prev-month .el-date-table-cell__text { color: #7aaccf !important; opacity: 1; }
+body.light-mode .el-date-table td.today .el-date-table-cell__text      { color: var(--color-primary) !important; }
+body.light-mode .el-date-picker__header-label,
+body.light-mode .el-date-range-picker__header div                       { color: #0a1a35 !important; }
+body.light-mode .el-picker-panel__icon-btn                              { color: #2d4a6e !important; }
+body.light-mode .el-picker-panel__footer,
+body.light-mode .el-date-range-picker__time-header                      { background: #f0f6ff !important; }
+body.light-mode .el-year-table td .cell,
+body.light-mode .el-month-table td .cell                                { color: #0a1a35 !important; }
+
+/* Time picker in light mode */
+body.light-mode .el-time-panel {
+  background: #ffffff !important;
+  box-shadow: 0 8px 24px rgba(2,130,222,0.14) !important;
+}
+body.light-mode .el-time-panel__footer  { background: #f0f6ff !important; }
+body.light-mode .el-time-spinner__item  { color: #2d4a6e !important; }
+body.light-mode .el-time-spinner__item.active:not(.disabled) { color: #0a1a35 !important; }
+
+/* ══════════════════════════════════════════════════════
+   LOADING & MESSAGE — Light mode overrides
+══════════════════════════════════════════════════════ */
+body.light-mode .el-loading-mask        { background: rgba(240,246,255,0.82) !important; }
+body.light-mode .el-loading-spinner .el-loading-text { color: #2d4a6e !important; }
+body.light-mode .el-message {
+  background: #ffffff !important;
+  border-color: #c0d4f0 !important;
+  box-shadow: 0 4px 16px rgba(2,130,222,0.15) !important;
+}
+body.light-mode .el-message .el-message__content { color: #0a1a35 !important; }
+body.light-mode .el-message--success { border-color: rgba(16,185,129,0.35) !important; background: rgba(16,185,129,0.06) !important; }
+body.light-mode .el-message--warning { border-color: rgba(245,158,11,0.35) !important; background: rgba(245,158,11,0.06) !important; }
+body.light-mode .el-message--error   { border-color: rgba(239,68,68,0.35)  !important; background: rgba(239,68,68,0.06)  !important; }
+
+/* ══════════════════════════════════════════════════════
+   INPUT WRAPPER — Light mode: ensure legible background
+══════════════════════════════════════════════════════ */
+body.light-mode .el-input__wrapper {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 0 1px #c0d4f0 !important;
+}
+body.light-mode .el-input__wrapper:hover,
+body.light-mode .el-input__wrapper.is-focus { box-shadow: 0 0 0 1.5px var(--color-primary) !important; }
+body.light-mode .el-select .el-input__wrapper { background-color: #ffffff !important; }
+body.light-mode .el-textarea__inner {
+  background: #ffffff !important;
+  border-color: #c0d4f0 !important;
+}
+body.light-mode .el-select__tags .el-tag {
+  background: rgba(2,130,222,0.10) !important;
+  border-color: rgba(2,130,222,0.25) !important;
+  color: #0262b0 !important;
+}

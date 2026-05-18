@@ -9,7 +9,7 @@
         <p class="page-desc">Kelola jadwal dan booking ruangan</p>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
-        <el-button type="primary" @click="toggleNewBookingMode">
+        <el-button v-if="can('bookings.create')" type="primary" @click="toggleNewBookingMode">
           <el-icon><Plus /></el-icon>
           {{ isNewBookingMode ? 'Batalkan' : 'New Booking' }}
         </el-button>
@@ -228,14 +228,14 @@
           </div>
 
           <!-- Aksi Cepat -->
-          <div v-if="selectedBooking.status !== 'cancelled' && selectedBooking.status !== 'completed'"
+          <div v-if="selectedBooking.status !== 'cancelled' && selectedBooking.status !== 'completed' && (can('bookings.edit') || can('bookings.cancel'))"
                style="margin-top:16px">
             <div class="info-section-title">AKSI CEPAT</div>
-            <el-button style="width:100%;margin-bottom:8px;justify-content:flex-start" plain
+            <el-button v-if="can('bookings.edit')" style="width:100%;margin-bottom:8px;justify-content:flex-start" plain
               @click="openCompleteConfirm">
               <el-icon><CircleCheck /></el-icon> Mark as Completed
             </el-button>
-            <el-button type="danger" plain style="width:100%;justify-content:flex-start"
+            <el-button v-if="can('bookings.cancel')" type="danger" plain style="width:100%;justify-content:flex-start"
               @click="openCancelForm">
               <el-icon><CircleClose /></el-icon> Cancel Booking
             </el-button>
@@ -578,6 +578,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getDashboard, createBooking, cancelBooking, completeBooking,
@@ -586,6 +587,8 @@ import {
 import { getStores } from '@/api/store/storeApi'
 import { getCustomers } from '@/api/customer/customerApi'
 import api from '@/api/index'
+
+const { can } = usePermission()
 
 // ── Constants ─────────────────────────────────────────────────
 const SLOT_WIDTH = 100  // px per jam

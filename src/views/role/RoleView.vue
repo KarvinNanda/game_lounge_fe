@@ -7,7 +7,7 @@
         <h1 class="page-title">Roles</h1>
         <p class="page-desc">Kelola role dan hak akses untuk setiap jabatan staff.</p>
       </div>
-      <el-button type="primary" @click="openDrawer()">
+      <el-button v-if="can('settings.staff_role')" type="primary" @click="openDrawer()">
         <el-icon><Plus /></el-icon> Tambah Role
       </el-button>
     </div>
@@ -35,6 +35,25 @@
         </el-button>
       </div>
 
+      <div v-if="isMobile" class="m-card-list">
+        <div class="m-card" v-for="row in filteredRoles" :key="row.id">
+          <div class="m-card-icon" style="background:rgba(124,58,237,0.15);color:var(--color-primary)">
+            <el-icon size="18"><UserFilled /></el-icon>
+          </div>
+          <div class="m-card-body">
+            <div class="m-card-title">{{ row.name }}</div>
+            <div class="m-card-meta">{{ row.permissions?.length || 0 }} permission · {{ row.staff_count || 0 }} staff</div>
+          </div>
+          <div class="m-card-end">
+            <div style="display:flex;gap:4px">
+              <el-button v-if="can('settings.staff_role')" size="small" circle plain @click="openDrawer(row)"><el-icon><Edit /></el-icon></el-button>
+              <el-button v-if="can('settings.staff_role')" size="small" circle plain type="danger" :disabled="(row.staff_count || 0) > 0" @click="deleteRole(row)"><el-icon><Delete /></el-icon></el-button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
       <el-table :data="filteredRoles" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada role">
         <el-table-column label="Role" min-width="200">
           <template #default="{ row }">
@@ -64,7 +83,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Jumlah Staff" width="120" align="center">
+        <el-table-column label="Jumlah Staff" width="120" align="center" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
             <el-tag size="small" :type="(row.staff_count || 0) > 0 ? 'success' : 'info'" plain>
               {{ row.staff_count || 0 }} staff
@@ -75,12 +94,12 @@
         <el-table-column label="Aksi" width="110" align="right" fixed="right">
           <template #default="{ row }">
             <div class="row-actions">
-              <el-tooltip content="Edit" placement="top">
+              <el-tooltip v-if="can('settings.staff_role')" content="Edit" placement="top">
                 <el-button size="small" circle plain @click="openDrawer(row)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip content="Hapus" placement="top">
+              <el-tooltip v-if="can('settings.staff_role')" content="Hapus" placement="top">
                 <el-button
                   size="small" circle plain type="danger"
                   :disabled="(row.staff_count || 0) > 0"
@@ -93,6 +112,7 @@
           </template>
         </el-table-column>
       </el-table>
+      </div>
     </el-card>
 
     <!-- Drawer Add/Edit Role -->
@@ -100,7 +120,7 @@
       v-model="drawerVisible"
       :title="form.id ? 'Edit Role' : 'Tambah Role'"
       direction="rtl"
-      size="480px"
+      :size="isMobile ? '100%' : '480px'"
       :destroy-on-close="true"
     >
       <div class="drawer-body">
@@ -161,8 +181,13 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { usePermission } from '@/composables/usePermission'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getRoles, createRole, updateRole, deleteRole as apiDelete } from '@/api/role/roleApi'
+
+const { can } = usePermission()
+const { isMobile, isTablet } = useBreakpoint()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -375,7 +400,29 @@ onMounted(fetchRoles)
 .perm-group-label { font-size:13px; font-weight:600; }
 .perm-group-desc { font-size:11px; color:var(--text-secondary); margin:4px 0 8px 22px; }
 .perm-children { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding-left:22px; }
+@media (max-width:639px) { .perm-children { grid-template-columns:1fr; } }
 .perm-item { font-size:12px !important; }
 
 .drawer-footer { display:flex; gap:10px; padding:0 4px; }
+
+/* Responsive */
+@media (max-width:639px) { .table-wrap { display:none; } }
+@media (min-width:640px) { .m-card-list { display:none; } }
+@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
+/* Mobile card list */
+.m-card-list { display:flex; flex-direction:column; gap:8px; }
+.m-card {
+  background:var(--bg-card); border:1px solid var(--border-color);
+  border-radius:10px; padding:12px;
+  display:flex; align-items:center; gap:10px;
+}
+.m-card-icon {
+  width:40px; height:40px; border-radius:8px; background:var(--bg-main);
+  flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.m-card-icon img { width:100%; height:100%; object-fit:cover; }
+.m-card-body { flex:1; min-width:0; }
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 </style>

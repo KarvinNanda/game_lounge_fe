@@ -1,7 +1,12 @@
 <template>
   <div class="admin-layout">
+    <!-- Sidebar backdrop (mobile/tablet overlay) -->
+    <transition name="backdrop">
+      <div v-if="!sidebarCollapsed" class="sidebar-backdrop" @click="sidebarCollapsed = true" />
+    </transition>
+
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" :class="{ collapsed: sidebarCollapsed }">
       <div class="sidebar-logo">
         <div class="logo-icon">⚡</div>
         <div class="logo-text">
@@ -11,84 +16,93 @@
       </div>
 
       <nav class="sidebar-nav">
-        <!-- DASHBOARD — always first -->
-        <router-link to="/sales" class="nav-item" active-class="active">
+        <!-- DASHBOARD — always first, no permission required -->
+        <router-link to="/dashboard" class="nav-item" active-class="active">
           <el-icon><TrendCharts /></el-icon>
           <span>Dashboard</span>
         </router-link>
 
         <!-- STORE -->
-        <div class="nav-label">Store</div>
-        <div class="nav-group">
-          <div class="nav-group-header" @click="storeOpen = !storeOpen">
-            <div style="display:flex;align-items:center;gap:10px">
-              <el-icon><Shop /></el-icon>
-              <span>Store Management</span>
+        <template v-if="showStoreGroup">
+          <div class="nav-label">Store</div>
+          <div class="nav-group">
+            <div class="nav-group-header" @click="storeOpen = !storeOpen">
+              <div style="display:flex;align-items:center;gap:10px">
+                <el-icon><Shop /></el-icon>
+                <span>Store Management</span>
+              </div>
+              <el-icon class="arrow" :class="{ rotated: storeOpen }"><ArrowDown /></el-icon>
             </div>
-            <el-icon class="arrow" :class="{ rotated: storeOpen }"><ArrowDown /></el-icon>
+            <transition name="nav-sub">
+              <div class="nav-sub" v-show="storeOpen">
+                <router-link v-if="can('settings.branches')" to="/facility-category" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Facility Category
+                </router-link>
+                <router-link v-if="can('settings.branches')" to="/facility" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Facilities
+                </router-link>
+                <router-link v-if="can('rooms.view')" to="/room-template" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Rooms
+                </router-link>
+                <router-link v-if="can('settings.branches')" to="/store" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Stores
+                </router-link>
+              </div>
+            </transition>
           </div>
-          <transition name="nav-sub">
-            <div class="nav-sub" v-show="storeOpen">
-              <router-link to="/facility-category" class="nav-subitem" active-class="active">
-                <span class="sub-dot" />Facility Category
-              </router-link>
-              <router-link to="/facility" class="nav-subitem" active-class="active">
-                <span class="sub-dot" />Facilities
-              </router-link>
-              <router-link to="/room-template" class="nav-subitem" active-class="active">
-                <span class="sub-dot" />Rooms
-              </router-link>
-              <router-link to="/store" class="nav-subitem" active-class="active">
-                <span class="sub-dot" />Stores
-              </router-link>
-            </div>
-          </transition>
-        </div>
+        </template>
 
         <!-- BUSINESS -->
-        <div class="nav-label">Business</div>
-        <router-link to="/bookings" class="nav-item" active-class="active">
-          <el-icon><Calendar /></el-icon>
-          <span>Bookings</span>
-        </router-link>
-        <router-link to="/pricing" class="nav-item" active-class="active">
-          <el-icon><Money /></el-icon>
-          <span>Pricing</span>
-        </router-link>
-        <router-link to="/customers" class="nav-item" active-class="active">
-          <el-icon><User /></el-icon>
-          <span>Customers</span>
-        </router-link>
-        <router-link to="/play-credits" class="nav-item" active-class="active">
-          <el-icon><Coin /></el-icon>
-          <span>Play Credits</span>
-        </router-link>
-        <router-link to="/promotion" class="nav-item" active-class="active">
-          <el-icon><Ticket /></el-icon>
-          <span>Promotion</span>
-        </router-link>
+        <template v-if="showBusinessSection">
+          <div class="nav-label">Business</div>
+          <router-link v-if="can('bookings.view')" to="/bookings" class="nav-item" active-class="active">
+            <el-icon><Calendar /></el-icon>
+            <span>Bookings</span>
+          </router-link>
+          <router-link v-if="can('pricing.view')" to="/pricing" class="nav-item" active-class="active">
+            <el-icon><Money /></el-icon>
+            <span>Pricing</span>
+          </router-link>
+          <router-link v-if="can('customers.view')" to="/customers" class="nav-item" active-class="active">
+            <el-icon><User /></el-icon>
+            <span>Customers</span>
+          </router-link>
+          <router-link v-if="can('play_credits.view')" to="/play-credits" class="nav-item" active-class="active">
+            <el-icon><Coin /></el-icon>
+            <span>Play Credits</span>
+          </router-link>
+          <router-link v-if="can('promotion.view')" to="/promotion" class="nav-item" active-class="active">
+            <el-icon><Ticket /></el-icon>
+            <span>Promotion</span>
+          </router-link>
+        </template>
 
         <!-- SYSTEM -->
-        <div class="nav-label">System</div>
-        <div class="nav-group">
-          <div class="nav-group-header" @click="settingsOpen = !settingsOpen">
-            <div style="display:flex;align-items:center;gap:10px">
-              <el-icon><Setting /></el-icon>
-              <span>Settings</span>
+        <template v-if="showSettingsGroup">
+          <div class="nav-label">System</div>
+          <div class="nav-group">
+            <div class="nav-group-header" @click="settingsOpen = !settingsOpen">
+              <div style="display:flex;align-items:center;gap:10px">
+                <el-icon><Setting /></el-icon>
+                <span>Settings</span>
+              </div>
+              <el-icon class="arrow" :class="{ rotated: settingsOpen }"><ArrowDown /></el-icon>
             </div>
-            <el-icon class="arrow" :class="{ rotated: settingsOpen }"><ArrowDown /></el-icon>
+            <transition name="nav-sub">
+              <div class="nav-sub" v-show="settingsOpen">
+                <router-link v-if="can('settings.staff_role')" to="/staff" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Staff
+                </router-link>
+                <router-link v-if="can('settings.staff_role')" to="/role" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Roles
+                </router-link>
+                <router-link v-if="can('settings.staff_role')" to="/settings/notification-templates" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Template Notifikasi
+                </router-link>
+              </div>
+            </transition>
           </div>
-          <transition name="nav-sub">
-            <div class="nav-sub" v-show="settingsOpen">
-              <router-link to="/staff" class="nav-subitem" active-class="active">
-                <span class="sub-dot" />Staff
-              </router-link>
-              <router-link to="/role" class="nav-subitem" active-class="active">
-                <span class="sub-dot" />Roles
-              </router-link>
-            </div>
-          </transition>
-        </div>
+        </template>
       </nav>
     </aside>
 
@@ -96,14 +110,11 @@
     <div class="main-wrapper">
       <!-- Header -->
       <header class="app-header">
-        <div></div>
+        <button class="sidebar-toggle" @click="sidebarCollapsed = !sidebarCollapsed" :title="sidebarCollapsed ? 'Tampilkan sidebar' : 'Sembunyikan sidebar'">
+          <el-icon><component :is="sidebarCollapsed ? 'Expand' : 'Fold'" /></el-icon>
+        </button>
         <!-- <el-input placeholder="Cari sesuatu..." class="header-search" prefix-icon="Search" /> -->
         <div class="header-right">
-          <!-- Theme Toggle -->
-          <div class="theme-toggle" @click="toggleTheme" :title="isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
-            <el-icon size="16"><Sunny v-if="isDark" /><Moon v-else /></el-icon>
-          </div>
-
           <!-- Bell: Sessions Ending Soon -->
           <el-popover placement="bottom-end" :width="310" trigger="click" popper-class="bell-popover">
             <template #reference>
@@ -186,23 +197,52 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { getSessionsEndingSoon } from '@/api/booking/bookingApi'
 
 const router = useRouter()
+const route  = useRoute()
 const authStore = useAuthStore()
-const storeOpen = ref(true)
-const settingsOpen = ref(true)
 
-// ── Theme Toggle ─────────────────────────────────────────
-const isDark = ref(localStorage.getItem('theme') !== 'light')
+// Sidebar visibility — collapsed by default on mobile/tablet
+const sidebarCollapsed = ref(typeof window !== 'undefined' ? window.innerWidth < 1024 : false)
 
-const toggleTheme = () => {
-  isDark.value = !isDark.value
-  localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
-  document.body.classList.toggle('light-mode', !isDark.value)
+// Auto-collapse sidebar on mobile/tablet whenever route changes
+router.afterEach(() => {
+  if (window.innerWidth < 1024) {
+    sidebarCollapsed.value = true
+  }
+})
+
+// Sub-group open state — start collapsed, auto-expand active group on mount
+const storeOpen    = ref(false)
+const settingsOpen = ref(false)
+
+// ── Permission helpers ────────────────────────────────────
+// Access authStore.permissions (string[]) and authStore.isSystem directly
+// so Vue can track reactive dependencies properly.
+const can = (perm) => {
+  if (!perm) return true
+  if (authStore.isSystem) return true
+  return authStore.permissions.includes(perm)
 }
+
+// Permission keys match RoleView.vue permissionGroups values:
+//   settings.branches   → Stores, Facilities, Facility Category
+//   rooms.view          → Room Templates
+//   settings.staff_role → Staff & Roles
+const showStoreGroup = computed(() =>
+  authStore.isSystem || authStore.permissions.includes('settings.branches') || authStore.permissions.includes('rooms.view')
+)
+const showBusinessSection = computed(() =>
+  authStore.isSystem ||
+  ['bookings.view','pricing.view','customers.view','play_credits.view','promotion.view']
+    .some(p => authStore.permissions.includes(p))
+)
+const showSettingsGroup = computed(() =>
+  authStore.isSystem || authStore.permissions.includes('settings.staff_role')
+)
 
 // ── Bell: Sessions Ending Soon ────────────────────────────
 const endingSoonSessions = ref([])
@@ -218,8 +258,8 @@ const pollEndingSoon = async () => {
 }
 
 let endingPollInterval = null
-// ─────────────────────────────────────────────────────────
 
+// ── User ──────────────────────────────────────────────────
 const userInitials = computed(() => {
   const name = authStore.staff?.username || ''
   return name.slice(0, 2).toUpperCase()
@@ -235,7 +275,15 @@ const handleUserCommand = async (cmd) => {
 }
 
 onMounted(() => {
-  if (!isDark.value) document.body.classList.add('light-mode')
+  // Always light mode
+  document.body.classList.add('light-mode')
+
+  // Auto-expand the group that contains the current active route
+  const storeRoutes    = ['/facility-category', '/facility', '/room-template', '/store']
+  const settingsRoutes = ['/staff', '/role', '/settings/']
+  if (storeRoutes.some(r => route.path.startsWith(r)))    storeOpen.value    = true
+  if (settingsRoutes.some(r => route.path.startsWith(r))) settingsOpen.value = true
+
   pollEndingSoon()
   endingPollInterval = setInterval(pollEndingSoon, 60000)
 })
@@ -258,8 +306,49 @@ onUnmounted(() => {
   border-right: 1px solid var(--sidebar-border-color);
   display: flex; flex-direction: column;
   flex-shrink: 0; overflow: hidden; position: relative;
-  transition: background 0.3s ease;
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 0.3s ease,
+              background 0.3s ease;
 }
+.sidebar.collapsed {
+  width: 0;
+  border-right-width: 0;
+}
+
+/* ── Mobile / Tablet: sidebar becomes overlay drawer ── */
+@media (max-width: 1023px) {
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    z-index: 1001;
+    width: var(--sidebar-width) !important; /* always full width */
+    transform: translateX(0);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
+    border-right-width: 1px !important;
+  }
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+    width: var(--sidebar-width) !important;
+    border-right-width: 1px !important;
+  }
+}
+
+/* Backdrop */
+.sidebar-backdrop {
+  display: none;
+}
+@media (max-width: 1023px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+  }
+}
+.backdrop-enter-active, .backdrop-leave-active { transition: opacity 0.25s ease; }
+.backdrop-enter-from, .backdrop-leave-to { opacity: 0; }
 .sidebar::after {
   content: '';
   position: absolute; right: 0; top: 15%; bottom: 15%; width: 1px;
@@ -377,6 +466,21 @@ onUnmounted(() => {
   transition: background 0.3s ease;
 }
 
+/* Sidebar toggle button */
+.sidebar-toggle {
+  width: 34px; height: 34px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-card-hover); border: 1px solid var(--border-color);
+  color: var(--text-secondary); cursor: pointer;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.sidebar-toggle:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-primary-light);
+  border-color: rgba(2,130,222,0.4);
+}
+.sidebar-toggle .el-icon { font-size: 16px; }
+
 /* Header */
 .app-header {
   height: 52px;
@@ -424,22 +528,6 @@ onUnmounted(() => {
   padding: 9px 0; border-bottom: 1px solid var(--border-color); gap: 10px;
 }
 .ending-item:last-child { border-bottom: none; }
-
-/* Theme toggle */
-.theme-toggle {
-  width: 34px; height: 34px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  color: var(--text-secondary); cursor: pointer;
-  border: 1px solid var(--border-color);
-  background: var(--bg-card-hover);
-  transition: all 0.2s; flex-shrink: 0;
-}
-.theme-toggle:hover {
-  background: var(--color-primary-soft);
-  color: var(--color-primary-light);
-  border-color: rgba(2,130,222,0.4);
-  box-shadow: 0 0 12px rgba(2,130,222,0.2);
-}
 
 /* User */
 .header-user {
@@ -494,6 +582,11 @@ onUnmounted(() => {
   flex: 1; overflow-y: auto; padding: 16px 20px;
   background: var(--bg-main);
   transition: background 0.3s ease;
+}
+
+@media (max-width: 639px) {
+  .page-content { padding: 12px; }
+  .app-header { padding: 0 12px; }
 }
 
 /* Page transition */

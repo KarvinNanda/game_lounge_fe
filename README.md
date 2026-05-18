@@ -1,5 +1,7 @@
 # Quantum Gaming — Frontend Admin Dashboard
 
+> This file also serves as guidance for Claude Code (claude.ai/code) when working in this repository.
+
 Admin dashboard untuk manajemen cabang **Quantum Gaming** (PlayStation/Gaming rental).  
 Dibangun dengan **Vue 3 + Vite + Element Plus**.
 
@@ -15,16 +17,26 @@ Dibangun dengan **Vue 3 + Vite + Element Plus**.
 | Pinia | ^3.0 | State management |
 | Element Plus | ^2.13 | UI component library |
 | Axios | ^1.16 | HTTP client |
-| ECharts | ^6.0 | Charting library (Sales Dashboard) |
-| xlsx | ^0.18 | Export data ke file Excel |
-| jsPDF + autotable | ^4.2 | Export data ke file PDF |
+| ECharts | ^6.0 | Charting (Sales & Dashboard) |
+| xlsx | ^0.18 | Export ke Excel |
+| jsPDF + autotable | ^4.2 | Export ke PDF |
 | Node.js | >=20.19 | Runtime requirement |
 
 ---
 
-## Setup Project
+## Commands
 
-### 1. Clone & Install
+```bash
+npm run dev        # Dev server → http://localhost:5173
+npm run build      # Build production ke /dist
+npm run preview    # Preview hasil build
+npm run lint       # oxlint + eslint dengan auto-fix (dijalankan berurutan)
+npm run format     # Prettier format seluruh src/
+```
+
+---
+
+## Setup
 
 ```bash
 git clone <repo-url>
@@ -32,177 +44,226 @@ cd game_lounge_fe
 npm install
 ```
 
-### 2. Konfigurasi Environment
-
-Buat file `.env` di root project:
+Buat file `.env` di root:
 
 ```env
 VITE_API_URL=http://localhost:8080/api/v1
 ```
 
-> Sesuaikan URL dengan alamat backend yang berjalan.
-
-### 3. Jalankan Dev Server
-
-```bash
-npm run dev
-```
-
-Aplikasi akan berjalan di `http://localhost:5173`
-
-### 4. Build Production
-
-```bash
-npm run build
-```
-
-Output ada di folder `dist/`.
-
 ---
 
-## Scripts
+## Arsitektur
 
-| Command | Keterangan |
+### Entry & Bootstrap
+
+`src/main.js` mendaftarkan semua `@element-plus/icons-vue` secara global (sehingga `<el-icon><Calendar /></el-icon>` langsung bisa dipakai tanpa import per-file), memuat `theme.css`, dan menginstall Pinia + Router + ElementPlus.
+
+### Single Layout
+
+Semua halaman authenticated berbagi satu layout: `src/layouts/AdminLayout.vue`. Layout ini memiliki:
+- Sidebar (collapsible; menjadi overlay drawer di mobile/tablet <1024px)
+- Header (bell notifikasi, user dropdown)
+- `<router-view>` untuk konten halaman
+- `router.afterEach()` yang otomatis menutup sidebar di layar <1024px setiap kali navigasi berpindah
+
+### Routing & Permission Guard
+
+`src/router/index.js` memiliki `beforeEach` yang:
+1. Redirect user yang belum login ke `/login`
+2. Skip login jika sudah authenticated
+3. Cek `meta.permission` terhadap `authStore.permissions` — redirect ke `/dashboard` jika tidak punya akses
+
+Permission key mengikuti pola `domain.action` (contoh: `customers.view`, `settings.branches`).
+
+### Auth & Permissions
+
+`src/stores/authStore.js` (Pinia) menyimpan `token` + `staff`.
+
+- `authStore.isSystem` → `true` untuk super-admin (bypass semua permission check)
+- `authStore.permissions` → flat `string[]` yang dinormalisasi dari `staff.role.permissions`
+- `_syncRolePermissions()` melakukan `GET /roles/:id` tambahan jika login/me tidak menyertakan permissions
+
+Gunakan composable `usePermission()` di setiap view:
+
+```js
+import { usePermission } from '@/composables/usePermission'
+const { can } = usePermission()
+// di template: v-if="can('customers.edit')"
+```
+
+`can()` selalu `true` untuk system user.
+
+### API Layer
+
+`src/api/index.js` — Axios instance:
+- `baseURL`: env var `VITE_API_URL`, fallback ke `http://localhost:8080/api/v1`
+- Token JWT diinjeksi dari `localStorage` di setiap request
+- Response `401` → hapus token + redirect ke `/login`
+
+Setiap domain punya file sendiri di `src/api/<domain>/`. Upload file melalui `src/api/uploadApi.js` (`POST /upload`, `multipart/form-data`).
+
+### Responsive Design
+
+`src/composables/useBreakpoint.js` — reactive breakpoints:
+- `isMobile` — `< 640px`
+- `isTablet` — `640–1023px`
+- `isDesktop` — `≥ 1024px`
+
+Pattern yang dipakai secara konsisten di seluruh codebase:
+
+```js
+// Drawer
+:size="isMobile ? '100%' : '480px'"
+
+// Dialog
+:width="isMobile ? '95%' : '560px'"
+
+// Grid kolom
+:style="{ gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }"
+
+// Sembunyikan kolom tabel → pakai v-if (bukan CSS), supaya Element Plus bisa recalculate layout
+v-if="!isMobile && !isTablet"
+```
+
+Mobile card list menggantikan tabel dengan class `.m-card-list`, `.m-card`, `.m-card-body`, `.m-card-end`.
+
+### Styling
+
+`src/assets/theme.css` adalah design system global — **selalu pakai CSS variables**, jangan hardcode warna:
+
+| Variable | Nilai |
 |---|---|
-| `npm run dev` | Jalankan dev server (hot reload) |
-| `npm run build` | Build untuk production |
-| `npm run preview` | Preview hasil build |
-| `npm run lint` | Lint seluruh kode (oxlint + eslint) |
-| `npm run format` | Format kode dengan Prettier |
+| `--color-primary` | `#0282DE` (blue) |
+| `--color-primary-light` | `#19B9EE` (cyan) |
+| `--bg-main` / `--bg-card` | Background utama / card |
+| `--text-primary` / `--text-secondary` / `--text-muted` | Hierarki teks |
+| `--border-color` | Border |
+| `--color-success/warning/danger/info` | Status |
+
+App **selalu dalam light mode** — `AdminLayout.vue` `onMounted` menambahkan `document.body.classList.add('light-mode')`. CSS dark mode di `:root` tidak aktif di production.
+
+Semua style view menggunakan `<style scoped>`. Override global Element Plus ada di `theme.css`.
+
+### Konvensi Form: Drawer, Bukan Dialog
+
+Semua form create/edit dibuka sebagai **right-side drawer** (`el-drawer direction="rtl"`). `RoleView.vue` adalah referensi implementasi. `el-dialog` hanya untuk konfirmasi/delete kecil.
+
+### Pola Struktur View
+
+View di `src/views/` diorganisir per domain. Pola umum list view:
+1. Page header (judul + tombol aksi utama yang dijaga `can(perm)`)
+2. Filter bar / search
+3. `el-table` di desktop/tablet + mobile card list (`v-if="isMobile"`)
+4. `el-drawer` dari kanan untuk form create/edit
+5. `el-dialog` hanya untuk konfirmasi/hapus
+
+Form multi-step (`StoreCreateView.vue`) menggunakan `el-steps` + `v-show="currentStep === N"` per panel step.
+
+`CustomerView.vue` memiliki layout split-pane (list-panel + detail-panel) yang unik — di mobile, detail panel disembunyikan dan digantikan full-screen drawer.
+
+### Image Handling
+
+```js
+import { uploadImage, getImageUrl } from '@/utils/imageHelper'
+
+const path = await uploadImage(file, 'stores')  // upload → dapat path relatif
+const url  = getImageUrl('/assets/img/x.jpg')   // → URL penuh ke backend
+```
+
+`getImageUrl` otomatis menghapus `/api/v1` dari base URL. Blob/data/http URL dikembalikan as-is.
+
+| Fitur | Folder |
+|---|---|
+| Foto store | `stores` |
+| Foto room template | `rooms` |
+| Icon fasilitas | `facilities` |
 
 ---
 
 ## Struktur Folder
 
 ```
-game_lounge_fe/
-├── public/
-├── src/
-│   ├── api/                            # Semua modul pemanggilan API
-│   │   ├── index.js                    # Axios instance + interceptors (auth token, 401 redirect)
-│   │   ├── uploadApi.js                # POST /upload — upload file ke backend
-│   │   ├── auth/
-│   │   │   └── authApi.js              # login, logout, getMe
-│   │   ├── booking/
-│   │   │   └── bookingApi.js           # CRUD booking, dashboard kalender, sessions-ending-soon
-│   │   ├── customer/
-│   │   │   └── customerApi.js          # CRUD customers (member & regular)
-│   │   ├── facility/
-│   │   │   └── facilityApi.js          # CRUD facility categories + facilities
-│   │   ├── play_credits/
-│   │   │   └── playCreditsApi.js       # CRUD paket & penjualan play credits
-│   │   ├── pricing/
-│   │   │   └── pricingApi.js           # Kelola harga per cabang & flash sale
-│   │   ├── promotion/
-│   │   │   └── promotionApi.js         # CRUD voucher & promo
-│   │   ├── role/
-│   │   │   └── roleApi.js              # CRUD roles + permissions
-│   │   ├── room_template/
-│   │   │   └── roomTemplateApi.js      # CRUD room templates
-│   │   ├── sales/
-│   │   │   └── salesApi.js             # Summary, trend, & daftar transaksi penjualan
-│   │   ├── staff/
-│   │   │   └── staffApi.js             # CRUD staff
-│   │   └── store/
-│   │       └── storeApi.js             # CRUD stores
-│   │
-│   ├── assets/
-│   │   ├── logo.png                    # Logo (favicon, sidebar, login page)
-│   │   └── theme.css                   # Design system: CSS vars + Element Plus overrides
-│   │
-│   ├── layouts/
-│   │   └── AdminLayout.vue             # Sidebar nav + header + router-view + bell notification
-│   │
-│   ├── router/
-│   │   └── index.js                    # Definisi routes + navigation guard (auth check)
-│   │
-│   ├── stores/
-│   │   └── authStore.js                # Pinia: token, staff data, login/logout/fetchMe
-│   │
-│   ├── utils/
-│   │   └── imageHelper.js              # getImageUrl() + uploadImage()
-│   │
-│   ├── views/
-│   │   ├── auth/
-│   │   │   └── LoginView.vue
-│   │   ├── booking/
-│   │   │   └── BookingView.vue         # Kalender grid booking + form baru + detail panel
-│   │   ├── customer/
-│   │   │   └── CustomerView.vue        # List customer, tambah/edit, riwayat booking & credits
-│   │   ├── dashboard/
-│   │   │   └── DashboardView.vue       # (placeholder)
-│   │   ├── facility/
-│   │   │   ├── FacilityCategoryView.vue
-│   │   │   ├── FacilityView.vue
-│   │   │   └── FacilityFormView.vue
-│   │   ├── play_credits/
-│   │   │   └── PlayCreditsView.vue     # Kelola paket & penjualan play credits
-│   │   ├── pricing/
-│   │   │   ├── PricingView.vue         # List pricing per cabang
-│   │   │   └── PricingEditView.vue     # Edit slot harga + flash sale
-│   │   ├── profile/
-│   │   │   └── ProfileView.vue
-│   │   ├── promotion/
-│   │   │   └── PromotionView.vue       # CRUD voucher & promo (booking / play credits / keduanya)
-│   │   ├── role/
-│   │   │   └── RoleView.vue
-│   │   ├── room_template/
-│   │   │   ├── RoomTemplateView.vue
-│   │   │   └── RoomTemplateFormView.vue
-│   │   ├── sales/
-│   │   │   └── SalesView.vue           # Sales Dashboard: stats, trend chart, revenue breakdown, export
-│   │   ├── staff/
-│   │   │   └── StaffView.vue
-│   │   └── store/
-│   │       ├── StoreView.vue
-│   │       └── StoreCreateView.vue     # Wizard 4 step: info → jam operasional → room setup → review
-│   │
-│   ├── App.vue
-│   └── main.js
-│
-├── index.html                          # HTML entry + FOUC-prevention script (dark/light bg)
-├── .env                                # VITE_API_URL
-├── package.json
-└── vite.config.js
+src/
+├── api/
+│   ├── index.js                    # Axios instance + interceptors
+│   ├── uploadApi.js                # POST /upload
+│   ├── auth/authApi.js
+│   ├── booking/bookingApi.js
+│   ├── customer/customerApi.js
+│   ├── facility/facilityApi.js
+│   ├── notification_template/notificationTemplateApi.js
+│   ├── play_credits/playCreditsApi.js
+│   ├── pricing/pricingApi.js
+│   ├── promotion/voucherApi.js
+│   ├── role/roleApi.js
+│   ├── room_template/roomTemplateApi.js
+│   ├── sales/salesApi.js
+│   ├── staff/staffApi.js
+│   └── store/storeApi.js
+├── assets/
+│   ├── theme.css                   # Design system: CSS vars + Element Plus overrides
+│   └── logo.png
+├── composables/
+│   ├── useBreakpoint.js            # isMobile / isTablet / isDesktop
+│   └── usePermission.js            # can(perm) helper
+├── layouts/
+│   └── AdminLayout.vue             # Sidebar + header + router-view
+├── router/
+│   └── index.js                    # Routes + navigation guard
+├── stores/
+│   └── authStore.js                # Token, staff, login/logout/fetchMe
+├── utils/
+│   └── imageHelper.js              # getImageUrl() + uploadImage()
+└── views/
+    ├── auth/LoginView.vue
+    ├── booking/BookingView.vue
+    ├── customer/CustomerView.vue
+    ├── dashboard/DashboardView.vue
+    ├── facility/{FacilityCategoryView,FacilityView,FacilityFormView}.vue
+    ├── play_credits/PlayCreditsView.vue
+    ├── pricing/{PricingView,PricingEditView}.vue
+    ├── profile/ProfileView.vue
+    ├── promotion/PromotionView.vue
+    ├── role/RoleView.vue
+    ├── room_template/{RoomTemplateView,RoomTemplateFormView}.vue
+    ├── sales/SalesView.vue
+    ├── settings/NotificationTemplatesView.vue
+    ├── staff/StaffView.vue
+    └── store/{StoreView,StoreCreateView}.vue
 ```
 
 ---
 
 ## Routes
 
-| Path | Komponen | Keterangan |
+| Path | Komponen | Permission |
 |---|---|---|
-| `/login` | `LoginView` | Halaman login (public) |
-| `/sales` | `SalesView` | **Sales Dashboard** — landing page utama |
-| `/dashboard` | `DashboardView` | Dashboard alternatif (placeholder) |
-| `/profile` | `ProfileView` | Profil user yang login |
-| `/bookings` | `BookingView` | Kalender booking ruangan |
-| `/pricing` | `PricingView` | List harga per cabang |
-| `/pricing/:storeId/edit` | `PricingEditView` | Edit slot harga & flash sale |
-| `/customers` | `CustomerView` | Kelola data customer |
-| `/play-credits` | `PlayCreditsView` | Paket & penjualan play credits |
-| `/promotion` | `PromotionView` | Voucher & promo |
-| `/facility-category` | `FacilityCategoryView` | Kategori fasilitas |
-| `/facility` | `FacilityView` | List fasilitas |
-| `/facility/create` | `FacilityFormView` | Tambah fasilitas |
-| `/facility/:id/edit` | `FacilityFormView` | Edit fasilitas |
-| `/room-template` | `RoomTemplateView` | List room templates |
-| `/room-template/create` | `RoomTemplateFormView` | Tambah room template |
-| `/room-template/:id/edit` | `RoomTemplateFormView` | Edit room template |
-| `/store` | `StoreView` | List stores |
-| `/store/create` | `StoreCreateView` | Buat store baru (wizard 4 step) |
-| `/store/:id/edit` | `StoreCreateView` | Edit store |
-| `/staff` | `StaffView` | Kelola staff |
-| `/role` | `RoleView` | Kelola roles & permissions |
-
-> Semua route kecuali `/login` memerlukan autentikasi. Jika tidak ada token → redirect ke `/login`.
+| `/login` | `LoginView` | public |
+| `/dashboard` | `DashboardView` | — |
+| `/sales` | `SalesView` | — |
+| `/bookings` | `BookingView` | `bookings.view` |
+| `/pricing` | `PricingView` | `pricing.view` |
+| `/pricing/:storeId/edit` | `PricingEditView` | `pricing.edit` |
+| `/customers` | `CustomerView` | `customers.view` |
+| `/play-credits` | `PlayCreditsView` | `play_credits.view` |
+| `/promotion` | `PromotionView` | `promotion.view` |
+| `/facility-category` | `FacilityCategoryView` | `settings.branches` |
+| `/facility` | `FacilityView` | `settings.branches` |
+| `/facility/create` · `/facility/:id/edit` | `FacilityFormView` | `settings.branches` |
+| `/room-template` | `RoomTemplateView` | `rooms.view` |
+| `/room-template/create` · `/room-template/:id/edit` | `RoomTemplateFormView` | `rooms.view` |
+| `/store` | `StoreView` | `settings.branches` |
+| `/store/create` · `/store/:id/edit` | `StoreCreateView` | `settings.branches` |
+| `/staff` | `StaffView` | `settings.staff_role` |
+| `/role` | `RoleView` | `settings.staff_role` |
+| `/settings/notification-templates` | `NotificationTemplatesView` | `settings.staff_role` |
 
 ---
 
 ## Sidebar Navigation
 
 ```
-Dashboard              ← /sales (Sales Dashboard, selalu paling atas)
+Dashboard
 
 STORE
   └── Store Management
@@ -221,52 +282,27 @@ BUSINESS
 SYSTEM
   └── Settings
         ├── Staff
-        └── Roles
+        ├── Roles
+        └── Template Notifikasi
 ```
+
+Sidebar group otomatis ter-expand jika route yang aktif termasuk di dalamnya (deteksi di `AdminLayout.vue` `onMounted`).
 
 ---
 
-## Sistem Autentikasi
+## Autentikasi
 
 - Token disimpan di `localStorage` key `token`
-- Setiap request otomatis menambahkan header `Authorization: Bearer <token>` via Axios interceptor
-- Jika response `401`, token dihapus dan user di-redirect ke `/login`
-- Saat app pertama mount, jika token ada tapi data staff kosong (setelah refresh halaman), otomatis memanggil `GET /auth/me`
-
----
-
-## Tema (Dark / Light Mode)
-
-Aplikasi mendukung dua tema yang bisa diswitch dari header (tombol bulan/matahari):
-
-| Mode | Background | Sidebar |
-|---|---|---|
-| Dark (default) | `#010214` navy gelap | Full dark navy |
-| Light | `#f0f6ff` sky blue | Lighter navy (tetap brand) |
-
-**Implementasi:**
-- `body.light-mode` class ditambahkan saat light mode aktif
-- Seluruh warna menggunakan CSS custom properties (`var(--bg-main)`, `var(--text-primary)`, dll.) yang didefinisikan di `src/assets/theme.css`
-- Preferensi disimpan di `localStorage` key `theme`
-- `index.html` mengandung inline script untuk mencegah white flash saat load di dark mode
-
-**Brand palette:**
-```
-Primary:  #0282DE  (blue)
-Light:    #19B9EE  (cyan)
-Dark:     #0262b0  (dark blue)
-Success:  #10B981
-Warning:  #F59E0B
-Danger:   #EF4444
-```
+- Setiap request otomatis menambahkan `Authorization: Bearer <token>` via Axios interceptor
+- Response `401` → token dihapus, redirect ke `/login`
+- Saat refresh halaman, jika token ada tapi data staff kosong, otomatis memanggil `GET /auth/me`
 
 ---
 
 ## Modul Booking
 
-Fitur kalender grid interaktif untuk manajemen jadwal ruangan.
+Kalender grid interaktif untuk manajemen jadwal ruangan.
 
-**Endpoint yang digunakan:**
 | Fungsi | Endpoint |
 |---|---|
 | Kalender dashboard | `GET /bookings/dashboard` |
@@ -279,62 +315,16 @@ Fitur kalender grid interaktif untuk manajemen jadwal ruangan.
 | Hitung harga | `POST /pricing/calculate` |
 | Voucher tersedia | `GET /vouchers/customer-available` |
 
-**Fitur:**
-- Kalender grid horizontal (timeline 10:00–02:00 lintas tengah malam)
-- New Booking Mode: klik slot kosong → form booking muncul di panel kanan
-- Detail panel: lihat info, cancel, complete booking
-- Voucher dropdown dengan preview diskon (kalkulasi client-side)
-- Bell notification: polling setiap 60 detik ke `sessions-ending-soon`
+Fitur utama: kalender grid horizontal (10:00–02:00 lintas tengah malam), new booking mode via klik slot, detail panel kanan, voucher dengan preview diskon, bell notification polling 60 detik.
 
 ---
 
-## Modul Sales Dashboard
+## Modul Sales & Dashboard
 
-Halaman `/sales` adalah landing page utama setelah login.
-
-**Endpoint yang digunakan:**
 | Fungsi | Endpoint |
 |---|---|
 | Stats + revenue breakdown | `GET /sales/summary` |
 | Data trend chart | `GET /sales/trend` |
 | Daftar transaksi | `GET /sales/transactions` |
 
-**Fitur:**
-- Filter period: Today / Yesterday / This Week / This Month / Custom date range
-- 5 stat cards: Total Revenue, Booking Revenue, Credits Revenue, Total Transaksi, Rata-rata
-- Sales Trend: line chart multi-series (ECharts) dengan granularitas daily/weekly/monthly
-- Revenue by Type: donut chart booking vs play credits
-- Revenue by Branch & Revenue by Room Type: tabel dengan mini progress bar
-- Export ke Excel (`.xlsx`) dan PDF (landscape, dengan summary header)
-- Modal detail transaksi dengan pagination & filter
-
----
-
-## Sistem Upload Gambar
-
-Upload dilakukan 2 tahap:
-
-1. **Preview lokal** — `URL.createObjectURL(file)` untuk tampilan instan
-2. **Upload saat submit** — file dikirim ke `POST /upload` sebagai `multipart/form-data`
-
-```js
-import { uploadImage, getImageUrl } from '@/utils/imageHelper'
-
-const path = await uploadImage(file, 'stores')
-const url = getImageUrl('/assets/img/stores/abc123.jpg')
-// → "http://localhost:8080/assets/img/stores/abc123.jpg"
-```
-
-| Fitur | Folder |
-|---|---|
-| Foto store | `stores` |
-| Foto room template | `rooms` |
-| Icon fasilitas | `facilities` |
-
----
-
-## Environment Variables
-
-| Variable | Keterangan |
-|---|---|
-| `VITE_API_URL` | Base URL backend API (contoh: `http://localhost:8080/api/v1`) |
+Filter period: Today / Yesterday / This Week / This Month / Custom range. Export ke `.xlsx` dan PDF landscape. Trend chart multi-series via ECharts.
