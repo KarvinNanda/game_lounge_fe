@@ -61,6 +61,7 @@
           <div class="m-card-end">
             <el-tag :type="row.deleted_at ? 'danger' : 'success'" size="small">{{ row.deleted_at ? 'Nonaktif' : 'Aktif' }}</el-tag>
             <div style="display:flex;gap:4px">
+              <el-button v-if="authStore.isSystem" size="small" circle plain type="warning" @click="handleResetPassword(row)"><el-icon><Key /></el-icon></el-button>
               <el-button v-if="can('settings.staff_role')" size="small" circle plain @click="openDrawer(row)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('settings.staff_role')" size="small" circle plain type="danger" :disabled="row.id === authStore.staff?.id" @click="removeStaff(row)"><el-icon><Delete /></el-icon></el-button>
             </div>
@@ -134,9 +135,14 @@
         </el-table-column>
 
         <!-- Aksi -->
-        <el-table-column label="Aksi" width="100" align="right" fixed="right">
+        <el-table-column label="Aksi" width="130" align="right" fixed="right">
           <template #default="{ row }">
             <div class="row-actions">
+              <el-tooltip v-if="authStore.isSystem" content="Reset Password" placement="top">
+                <el-button size="small" circle plain type="warning" @click="handleResetPassword(row)">
+                  <el-icon><Key /></el-icon>
+                </el-button>
+              </el-tooltip>
               <el-tooltip v-if="can('settings.staff_role')" content="Edit" placement="top">
                 <el-button size="small" circle plain @click="openDrawer(row)">
                   <el-icon><Edit /></el-icon>
@@ -251,6 +257,14 @@
             </div>
           </el-form-item>
         </el-form>
+
+        <AuditTrail
+          v-if="form.id"
+          :created-by="form.created_by"
+          :updated-by="form.updated_by"
+          :created-at="form.created_at"
+          :updated-at="form.updated_at"
+        />
       </div>
 
       <template #footer>
@@ -271,7 +285,8 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/authStore'
-import { getStaffs, createStaff, updateStaff, deleteStaff as apiDelete } from '@/api/staff/staffApi'
+import { getStaffs, createStaff, updateStaff, deleteStaff as apiDelete, resetStaffPassword } from '@/api/staff/staffApi'
+import AuditTrail from '@/components/AuditTrail.vue'
 import { getRoles } from '@/api/role/roleApi'
 import { getStores } from '@/api/store/storeApi'
 
@@ -280,6 +295,7 @@ const { isMobile, isTablet } = useBreakpoint()
 const authStore = useAuthStore()
 const loading = ref(false)
 const saving = ref(false)
+const resettingPassword = ref(false)
 const drawerVisible = ref(false)
 const formRef = ref()
 const staffList = ref([])
@@ -294,6 +310,7 @@ const form = reactive({
   id: null, username: '', email: '', phone: '',
   password: '', password_confirm: '',
   role_id: null, is_all_stores: true, store_ids: [],
+  created_by: null, updated_by: null, created_at: null, updated_at: null,
 })
 
 const formRules = computed(() => ({
@@ -372,12 +389,17 @@ const openDrawer = (row = null) => {
       role_id: row.role_id,
       is_all_stores: row.is_all_stores,
       store_ids: row.staff_stores?.map(ss => ss.store_id) || [],
+      created_by: row.created_by || null,
+      updated_by: row.updated_by || null,
+      created_at: row.created_at || null,
+      updated_at: row.updated_at || null,
     })
   } else {
     Object.assign(form, {
       id: null, username: '', email: '', phone: '',
       password: '', password_confirm: '',
       role_id: null, is_all_stores: true, store_ids: [],
+      created_by: null, updated_by: null, created_at: null, updated_at: null,
     })
   }
   drawerVisible.value = true
@@ -430,6 +452,28 @@ const removeStaff = async (row) => {
 const resetFilters = () => {
   Object.assign(filters, { search: '', role_id: null, store_id: null })
   fetchStaffs()
+}
+
+const handleResetPassword = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `Reset password untuk <b>${row.username}</b>?<br><span style="font-size:12px;color:var(--text-secondary)">Password baru akan dikirimkan ke email staff.</span>`,
+      'Reset Password',
+      {
+        type: 'warning',
+        confirmButtonText: 'Reset Password',
+        cancelButtonText: 'Batal',
+        dangerouslyUseHTMLString: true,
+      }
+    )
+    resettingPassword.value = true
+    await resetStaffPassword(row.id)
+    ElMessage.success('Password berhasil direset. Email konfirmasi dikirim ke staff.')
+  } catch (e) {
+    if (e !== 'cancel') ElMessage.error(e?.response?.data?.message || 'Gagal reset password')
+  } finally {
+    resettingPassword.value = false
+  }
 }
 
 const getRoleTagType = (name) => {

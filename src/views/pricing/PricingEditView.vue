@@ -106,7 +106,7 @@
           <!-- Right Sidebar -->
           <div>
             <!-- HH Schedules -->
-            <el-card shadow="never" style="margin-bottom:14px">
+            <!-- <el-card shadow="never" style="margin-bottom:14px">
               <div class="sh-title" style="margin-bottom:12px">
                 Jadwal Happy Hour <span class="sh-sub">(Weekday Only)</span>
               </div>
@@ -127,7 +127,7 @@
                 <el-icon><WarningFilled /></el-icon>
                 Happy Hour hanya dihitung per jam, tidak berlaku untuk paket 3/5/8/10 jam.
               </div>
-            </el-card>
+            </el-card> -->
 
             <!-- Rules Summary -->
             <el-card shadow="never">
@@ -284,10 +284,10 @@
                   <span style="font-size:12px">{{ row.room_template?.name || '—' }}</span>
                 </template>
               </el-table-column>
-              <el-table-column label="Diskon" width="140">
+              <el-table-column label="Harga / Jam" width="140">
                 <template #default="{ row }">
-                  <span style="color:var(--color-danger);font-weight:600">
-                    – Rp {{ formatPrice(row.discount_amount) }}
+                  <span style="color:var(--color-primary-light);font-weight:600">
+                    Rp {{ formatPrice(row.price_per_hour) }}
                   </span>
                 </template>
               </el-table-column>
@@ -381,7 +381,7 @@
                   </div>
                 </div>
 
-                <div v-if="calcResult.has_flash_sale" class="breakdown-row" style="border-color:var(--color-danger)">
+                <!-- <div v-if="calcResult.has_flash_sale" class="breakdown-row" style="border-color:var(--color-danger)">
                   <div style="display:flex;justify-content:space-between">
                     <span style="font-size:13px;color:var(--color-danger);font-weight:600">
                       Flash Sale: {{ calcResult.flash_sale_name }}
@@ -390,7 +390,7 @@
                       – Rp {{ formatPrice(calcResult.flash_discount) }}
                     </span>
                   </div>
-                </div>
+                </div> -->
 
                 <div class="total-row">
                   <span>TOTAL</span>
@@ -461,13 +461,13 @@
           <el-input v-model="fsForm.name" placeholder="Contoh: Flash Sale Siang VIP Room" />
         </el-form-item>
         <el-form-item label="Tipe Ruangan">
-          <el-select v-model="fsForm.room_template_id" style="width:100%" placeholder="Pilih tipe ruangan">
+          <el-select v-model="fsRoomTemplateId" style="width:100%" placeholder="Pilih tipe ruangan">
             <el-option v-for="t in roomTemplates" :key="t.id" :label="t.name" :value="t.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="Potongan Harga (Rp)">
+        <el-form-item label="Harga per Jam Flash Sale (Rp)">
           <el-input-number
-            v-model="fsForm.discount_amount"
+            v-model="fsForm.price_per_hour"
             :min="0"
             :step="5000"
             style="width:100%"
@@ -495,6 +495,13 @@
           <el-switch v-model="fsForm.is_active" active-text="Aktif" inactive-text="Nonaktif" />
         </el-form-item>
       </el-form>
+      <AuditTrail
+        v-if="editingFS"
+        :created-by="editingFS.created_by"
+        :updated-by="editingFS.updated_by"
+        :created-at="editingFS.created_at"
+        :updated-at="editingFS.updated_at"
+      />
       <template #footer>
         <el-button @click="showFlashSaleForm = false">Batal</el-button>
         <el-button type="primary" :loading="savingFS" @click="handleSaveFS">
@@ -511,6 +518,7 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getPricingByStore, updatePricingConfig,
   addHappyHourSchedule, deleteHappyHourSchedule,
@@ -571,8 +579,11 @@ const showFlashSaleForm = ref(false)
 const editingFS = ref(null)
 const customDuration = ref(2)
 const scheduleForm = reactive({ start_time: '10:00', end_time: '15:00' })
+// fsRoomTemplateId is a standalone ref — el-select v-model on reactive()
+// nested properties can silently fail to propagate; ref() is always reliable.
+const fsRoomTemplateId = ref(null)
 const fsForm = reactive({
-  name: '', room_template_id: null, discount_amount: 0,
+  name: '', price_per_hour: 0,
   date_from: '', date_to: '', time_from: '12:00', time_to: '13:00', is_active: true,
 })
 
@@ -770,10 +781,10 @@ const addCustomDuration = () => {
 const openFlashSaleForm = (sale) => {
   editingFS.value = sale
   if (sale) {
+    fsRoomTemplateId.value = sale.room_template_id ?? null
     Object.assign(fsForm, {
       name: sale.name,
-      room_template_id: sale.room_template_id,
-      discount_amount: sale.discount_amount,
+      price_per_hour: sale.price_per_hour,
       date_from: sale.date_from?.split('T')[0] || '',
       date_to: sale.date_to?.split('T')[0] || '',
       time_from: sale.time_from,
@@ -781,8 +792,9 @@ const openFlashSaleForm = (sale) => {
       is_active: sale.is_active,
     })
   } else {
+    fsRoomTemplateId.value = null
     Object.assign(fsForm, {
-      name: '', room_template_id: null, discount_amount: 0,
+      name: '', price_per_hour: 0,
       date_from: '', date_to: '', time_from: '12:00', time_to: '13:00', is_active: true,
     })
   }
@@ -791,11 +803,13 @@ const openFlashSaleForm = (sale) => {
 
 const handleSaveFS = async () => {
   savingFS.value = true
+  // Build payload: fsForm (reactive) + fsRoomTemplateId (standalone ref, always correct)
+  const payload = { ...fsForm, room_template_id: fsRoomTemplateId.value }
   try {
     if (editingFS.value) {
-      await updateFlashSale(editingFS.value.id, fsForm)
+      await updateFlashSale(editingFS.value.id, payload)
     } else {
-      await createFlashSale(storeId, fsForm)
+      await createFlashSale(storeId, payload)
     }
     ElMessage.success('Flash sale berhasil disimpan')
     showFlashSaleForm.value = false
