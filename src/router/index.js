@@ -42,6 +42,7 @@ const routes = [
       { path: 'staff', name: 'Staff', meta: { permission: 'settings.staff_role' }, component: () => import('@/views/staff/StaffView.vue') },
       { path: 'role',  name: 'Role',  meta: { permission: 'settings.staff_role' }, component: () => import('@/views/role/RoleView.vue') },
       { path: 'settings/notification-templates', name: 'NotificationTemplates', meta: { permission: 'settings.staff_role' }, component: () => import('@/views/settings/NotificationTemplatesView.vue') },
+      { path: 'settings/global-holidays', name: 'GlobalHolidays', meta: { permission: 'settings.branches' }, component: () => import('@/views/settings/GlobalHolidayView.vue') },
     ]
   }
 ]
@@ -51,8 +52,16 @@ const router = createRouter({ history: createWebHistory(), routes })
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
+  // ── On page refresh: token exists but staff not loaded yet.
+  //    Fetch user data BEFORE permission checks so permissions
+  //    are available and the user lands on the correct page.
+  if (authStore.isLoggedIn && !authStore.staff) {
+    await authStore.fetchMe()
+    // fetchMe clears token on 401, so re-check login status below
+  }
+
   // Not logged in → go to login
-  if (to.meta.requiresAuth && !authStore.isLoggedIn) return next('/login')
+  if (to.meta.requiresAuth !== false && !authStore.isLoggedIn) return next('/login')
 
   // Already logged in → skip login page
   if (to.path === '/login' && authStore.isLoggedIn) return next('/dashboard')

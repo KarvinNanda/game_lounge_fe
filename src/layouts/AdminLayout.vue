@@ -99,6 +99,9 @@
                 <router-link v-if="can('settings.staff_role')" to="/settings/notification-templates" class="nav-subitem" active-class="active">
                   <span class="sub-dot" />Template Notifikasi
                 </router-link>
+                <router-link v-if="can('settings.branches')" to="/settings/global-holidays" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Tanggal Merah Global
+                </router-link>
               </div>
             </transition>
           </div>
@@ -130,6 +133,7 @@
                 <span>⚠️ Sesi Hampir Selesai</span>
                 <el-tag v-if="endingSoonCount > 0" type="warning" size="small">{{ endingSoonCount }}</el-tag>
               </div>
+              <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px">Berakhir dalam &lt; 5 menit</div>
               <div v-if="endingSoonSessions.length === 0"
                    style="font-size:12px;color:var(--text-secondary);text-align:center;padding:20px 0">
                 Semua sesi berjalan normal 👍
@@ -281,6 +285,7 @@ onMounted(() => {
   // Auto-expand the group that contains the current active route
   const storeRoutes    = ['/facility-category', '/facility', '/room-template', '/store']
   const settingsRoutes = ['/staff', '/role', '/settings/']
+  // Note: /settings/ prefix covers notification-templates and global-holidays
   if (storeRoutes.some(r => route.path.startsWith(r)))    storeOpen.value    = true
   if (settingsRoutes.some(r => route.path.startsWith(r))) settingsOpen.value = true
 

@@ -117,6 +117,28 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="Status Ruangan" min-width="160" v-if="!isMobile">
+          <template #default="{ row }">
+            <div class="rooms-toggle-list">
+              <div
+                v-for="room in (row.rooms || [])"
+                :key="room.id"
+                class="room-toggle-item"
+              >
+                <span class="room-toggle-name">{{ room.name }}</span>
+                <el-switch
+                  :model-value="room.is_active"
+                  :loading="togglingRoom === room.id"
+                  size="small"
+                  :disabled="!can('settings.branches')"
+                  @change="handleToggleRoom(room)"
+                />
+              </div>
+              <span v-if="!row.rooms?.length" style="font-size:12px;color:var(--text-muted)">—</span>
+            </div>
+          </template>
+        </el-table-column>
+
         <el-table-column label="Alamat" min-width="130">
           <template #default="{ row }">
             <span style="font-size:13px;color:var(--text-secondary)">{{ row.address }}</span>
@@ -145,14 +167,16 @@
               <div v-if="!getHoursInfo(row).weekday && !getHoursInfo(row).weekend" class="hours-empty">—</div>
               <template v-if="getHoursInfo(row).holidays.length > 0">
                 <div class="holiday-divider" />
-                <div
-                  v-for="h in getHoursInfo(row).holidays"
-                  :key="h.date"
-                  class="holiday-row"
-                >
-                  <el-icon style="font-size:9px;color:var(--color-danger);flex-shrink:0"><Calendar /></el-icon>
-                  <span class="holiday-date">{{ formatHolidayDate(h.date) }}</span>
-                  <span class="holiday-time">{{ h.open_time }} – {{ h.close_time }}</span>
+                <div class="holiday-scroll">
+                  <div
+                    v-for="h in getHoursInfo(row).holidays"
+                    :key="h.date"
+                    class="holiday-row"
+                  >
+                    <el-icon style="font-size:9px;color:var(--color-danger);flex-shrink:0"><Calendar /></el-icon>
+                    <span class="holiday-date">{{ formatHolidayDate(h.date) }}</span>
+                    <span class="holiday-time">{{ h.open_time }} – {{ h.close_time }}</span>
+                  </div>
                 </div>
               </template>
             </div>
@@ -206,6 +230,36 @@
       </div>
       </div>
     </el-card>
+
+    <!-- Global Holidays Reference Card -->
+    <el-card shadow="never" class="global-holiday-card" style="margin-top:12px">
+      <div class="gh-header">
+        <div>
+          <div class="gh-title">
+            <el-icon style="color:var(--color-danger)"><Calendar /></el-icon>
+            Tanggal Merah Global
+          </div>
+          <div class="gh-desc">Berlaku untuk semua cabang. Kelola di <router-link to="/settings/global-holidays" class="gh-link">Settings → Tanggal Merah Global</router-link>.</div>
+        </div>
+        <el-tag size="small" type="danger" plain>{{ globalHolidays.length }} hari libur</el-tag>
+      </div>
+
+      <div v-if="globalHolidays.length === 0" style="text-align:center;padding:20px;font-size:12px;color:var(--text-muted)">
+        Belum ada tanggal merah global yang dikonfigurasi.
+      </div>
+      <div v-else class="gh-scroll">
+        <div class="gh-list">
+          <div v-for="h in globalHolidays" :key="h.id" class="gh-item">
+            <div class="gh-dot"><el-icon style="color:var(--color-danger);font-size:10px"><Calendar /></el-icon></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</div>
+              <div style="font-size:11px;color:var(--text-secondary)">{{ formatDate(h.date) }}</div>
+            </div>
+            <div v-if="h.description" style="font-size:11px;color:var(--text-muted);max-width:160px;text-align:right;flex-shrink:0">{{ h.description }}</div>
+          </div>
+        </div>
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -214,7 +268,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getStores, deleteStore as apiDelete, updateStore } from '@/api/store/storeApi'
+import { getStores, deleteStore as apiDelete, updateStore, updateStoreRoom, getGlobalHolidays } from '@/api/store/storeApi'
 import { getImageUrl } from '@/utils/imageHelper'
 
 const { can } = usePermission()
@@ -227,6 +281,8 @@ const page = ref(1)
 const perPage = ref(10)
 const total = ref(0)
 const stats = reactive({ total: 0, active: 0, inactive: 0, total_rooms: 0 })
+const togglingRoom = ref(null)
+const globalHolidays = ref([])
 let debounceTimer = null
 
 const debouncedFetch = () => {
@@ -306,7 +362,39 @@ const resetFilters = () => {
   fetchStores()
 }
 
-onMounted(fetchStores)
+const handleToggleRoom = async (room) => {
+  if (togglingRoom.value === room.id) return
+  const next = room.is_active ? false : true
+  try {
+    togglingRoom.value = room.id
+    await updateStoreRoom(room.id, { is_active: next })
+    room.is_active = next
+    ElMessage.success(`Ruangan ${next ? 'diaktifkan' : 'dinonaktifkan'}`)
+  } catch {
+    ElMessage.error('Gagal mengubah status ruangan')
+  } finally {
+    togglingRoom.value = null
+  }
+}
+
+const fetchGlobalHolidays = async () => {
+  try {
+    const { data } = await getGlobalHolidays()
+    globalHolidays.value = data.data || []
+  } catch {}
+}
+
+const formatDate = (val) => {
+  if (!val) return '—'
+  try {
+    return new Date(val).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+  } catch { return val }
+}
+
+onMounted(() => {
+  fetchStores()
+  fetchGlobalHolidays()
+})
 </script>
 
 <style scoped>
@@ -348,9 +436,26 @@ onMounted(fetchStores)
 .hours-time { font-size:12px; color:var(--text-secondary); font-variant-numeric:tabular-nums; }
 .hours-empty { font-size:12px; color:var(--text-muted); }
 .holiday-divider { height:1px; background:var(--border-color); margin:3px 0; }
+.holiday-scroll { max-height:140px; overflow-y:auto; display:flex; flex-direction:column; gap:2px; }
 .holiday-row { display:flex; align-items:center; gap:4px; }
 .holiday-date { font-size:10px; font-weight:600; color:var(--color-danger); width:50px; flex-shrink:0; }
 .holiday-time { font-size:10px; color:var(--text-muted); font-variant-numeric:tabular-nums; }
+
+.rooms-toggle-list { display:flex; flex-direction:column; gap:4px; max-height:120px; overflow-y:auto; }
+.room-toggle-item { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.room-toggle-name { font-size:12px; color:var(--text-secondary); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Global Holiday Card */
+.global-holiday-card { border-color:var(--border-color) !important; }
+.gh-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:8px; }
+.gh-title  { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:3px; }
+.gh-desc   { font-size:11px; color:var(--text-secondary); }
+.gh-link   { color:var(--color-primary-light); text-decoration:none; }
+.gh-link:hover { text-decoration:underline; }
+.gh-scroll { max-height:160px; overflow-y:auto; }
+.gh-list   { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:6px; }
+.gh-item   { display:flex; align-items:flex-start; gap:8px; padding:8px 10px; background:var(--bg-main); border-radius:6px; border:1px solid var(--border-color); }
+.gh-dot    { width:22px; height:22px; border-radius:6px; background:rgba(239,68,68,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
 
 .table-footer { display:flex; justify-content:space-between; align-items:center; margin-top:10px; padding-top:8px; border-top:1px solid var(--border-color); }
 .footer-info { font-size:13px; color:var(--text-secondary); }

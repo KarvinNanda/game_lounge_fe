@@ -123,6 +123,16 @@
           </template>
         </el-table-column>
 
+        <!-- Target Ruangan -->
+        <el-table-column label="RUANGAN" width="130" v-if="!isTablet && !isMobile">
+          <template #default="{ row }">
+            <span v-if="row.is_all_room_types" style="font-size:12px;color:var(--color-primary-light)">Semua</span>
+            <span v-else style="font-size:12px;color:var(--text-secondary)">
+              {{ row.room_templates?.map(rt => rt.name).join(', ') || '-' }}
+            </span>
+          </template>
+        </el-table-column>
+
         <!-- Diskon -->
         <el-table-column label="DISKON" width="150">
           <template #default="{ row }">
@@ -373,6 +383,38 @@
             </el-select>
           </el-form-item>
 
+          <!-- Target Ruangan -->
+          <el-form-item label="Target Ruangan">
+            <el-radio-group v-model="form.is_all_room_types" style="display:flex;gap:16px;margin-bottom:8px"
+              @change="() => { if (form.is_all_room_types) voucherRoomTemplateIds.value = [] }">
+              <el-radio :label="true">Semua Ruangan</el-radio>
+              <el-radio :label="false">Ruangan Tertentu</el-radio>
+            </el-radio-group>
+            <div v-if="!form.is_all_room_types" class="room-type-grid">
+              <el-checkbox-group v-model="voucherRoomTemplateIds">
+                <el-checkbox
+                  v-for="rt in roomTemplates"
+                  :key="rt.id"
+                  :label="rt.id"
+                  class="room-type-checkbox"
+                >{{ rt.name }}</el-checkbox>
+              </el-checkbox-group>
+              <div v-if="!roomTemplates.length" style="font-size:12px;color:var(--text-muted);padding:6px 0">
+                Tidak ada tipe ruangan tersedia
+              </div>
+            </div>
+            <div class="recipient-preview" v-if="loadingRecipient">
+              <el-icon size="12"><Loading /></el-icon>
+              <span>Menghitung member yang memenuhi syarat...</span>
+            </div>
+            <div class="recipient-preview" v-else-if="recipientCount !== null">
+              <el-icon size="12"><UserFilled /></el-icon>
+              <span>
+                <strong>{{ recipientCount }}</strong> member yang memenuhi syarat
+              </span>
+            </div>
+          </el-form-item>
+
           <!-- Channel Pengiriman (hanya saat create) -->
           <el-form-item v-if="!editingVoucher" label="Kirim Notifikasi ke Member">
             <div class="channel-grid">
@@ -413,6 +455,14 @@
             <el-switch v-model="form.is_active" active-text="Aktif" inactive-text="Nonaktif" />
           </el-form-item>
         </el-form>
+
+        <AuditTrail
+          v-if="editingVoucher"
+          :created-by="editingVoucher.created_by"
+          :updated-by="editingVoucher.updated_by"
+          :created-at="editingVoucher.created_at"
+          :updated-at="editingVoucher.updated_at"
+        />
 
         <!-- Footer -->
         <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-color)">
@@ -482,6 +532,11 @@
             <span v-else>{{ selectedVoucher.stores?.map(s => s.store?.name).join(', ') || '-' }}</span>
           </div>
           <div class="detail-row">
+            <span>Target Ruangan</span>
+            <span v-if="selectedVoucher.is_all_room_types" style="color:var(--color-primary-light)">Semua Ruangan</span>
+            <span v-else>{{ selectedVoucher.room_templates?.map(rt => rt.name).join(', ') || '-' }}</span>
+          </div>
+          <div class="detail-row">
             <span>Penggunaan</span>
             <span>
               <strong style="color:var(--color-primary)">{{ selectedVoucher.used_count }}</strong>
@@ -519,15 +574,18 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getVouchers, getVoucherById, generateCode,
-  createVoucher, updateVoucher, deleteVoucher
+  createVoucher, updateVoucher, deleteVoucher,
+  getVoucherRecipientCount
 } from '@/api/voucher/voucherApi'
 import { getStores } from '@/api/store/storeApi'
+import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 
 const { can } = usePermission()
 const { isMobile, isTablet } = useBreakpoint()
@@ -538,6 +596,9 @@ const voucherList = ref([])
 const total = ref(0)
 const stats = reactive({ total_voucher: 0, total_sent: 0, total_used: 0, total_discount: 0 })
 const allStores = ref([])
+const roomTemplates = ref([])
+const recipientCount = ref(null)
+const loadingRecipient = ref(false)
 
 const filters = reactive({ search: '', status: null, type: null, page: 1, per_page: 10 })
 
@@ -550,12 +611,16 @@ const editingVoucher = ref(null)
 const detailVisible = ref(false)
 const selectedVoucher = ref(null)
 
+// Standalone ref for room_template_ids — el-checkbox-group v-model is more reliable with ref()
+const voucherRoomTemplateIds = ref([])
+
 const form = reactive({
   name: '', code: '', description: '', type: 'booking',
   discount_type: 'percentage', discount_value: 10,
   max_discount: 0, min_purchase: 0,
   start_date: '', end_date: '', no_end_date: false,
   send_channel: '', is_all_stores: true, store_ids: [],
+  is_all_room_types: true,
   is_active: true,
 })
 
@@ -567,6 +632,34 @@ const formRules = {
   discount_value: [{ required: true, type: 'number', min: 0, message: 'Nilai diskon wajib diisi', trigger: 'blur' }],
   start_date: [{ required: true, message: 'Tanggal mulai wajib diisi', trigger: 'change' }],
 }
+
+// ── Room Templates ────────────────────────────────────────────
+const fetchRoomTemplates = async () => {
+  try {
+    const { data } = await getRoomTemplates({ per_page: 100 })
+    roomTemplates.value = data.data || []
+  } catch {}
+}
+
+// ── Recipient Count Preview ────────────────────────────────────
+const fetchRecipientCount = async () => {
+  if (!formVisible.value) return
+  loadingRecipient.value = true
+  recipientCount.value = null
+  try {
+    const params = {
+      is_all_room_types: form.is_all_room_types,
+      room_template_ids: form.is_all_room_types ? [] : voucherRoomTemplateIds.value,
+    }
+    const { data } = await getVoucherRecipientCount(params)
+    recipientCount.value = data.data?.count ?? data.count ?? null
+  } catch { recipientCount.value = null }
+  finally { loadingRecipient.value = false }
+}
+
+watch([() => form.is_all_room_types, voucherRoomTemplateIds], () => {
+  if (formVisible.value) fetchRecipientCount()
+}, { deep: true })
 
 // ── Debounce ──────────────────────────────────────────────────
 let debounceTimer = null
@@ -610,8 +703,11 @@ const openForm = (voucher) => {
     send_channel: '',
     is_all_stores: voucher?.is_all_stores ?? true,
     store_ids: voucher?.stores?.map(s => s.store_id) || [],
+    is_all_room_types: voucher?.is_all_room_types ?? true,
     is_active: voucher?.is_active ?? true,
   })
+  voucherRoomTemplateIds.value = voucher?.room_templates?.map(rt => rt.id) || []
+  recipientCount.value = null
   formVisible.value = true
 }
 
@@ -638,6 +734,7 @@ const handleSubmit = async () => {
       const payload = {
         ...form,
         end_date: form.no_end_date ? null : form.end_date,
+        room_template_ids: form.is_all_room_types ? [] : voucherRoomTemplateIds.value,
       }
       if (editingVoucher.value) {
         await updateVoucher(editingVoucher.value.id, payload)
@@ -726,6 +823,7 @@ const getStatusTag = (s) => ({
 
 onMounted(async () => {
   fetchVouchers()
+  fetchRoomTemplates()
   try {
     const { data } = await getStores({ per_page: 100, status: 'active' })
     allStores.value = data.data || []
@@ -827,6 +925,40 @@ onMounted(async () => {
 .detail-row > strong {
   color:var(--text-primary); font-size:13px; font-weight:600; text-align:right;
 }
+
+/* ── Room type targeting ─────────────────────────────────── */
+.room-type-grid {
+  width:100%; margin-bottom:6px;
+}
+.room-type-grid :deep(.el-checkbox-group) {
+  display:flex; flex-wrap:wrap; gap:6px;
+}
+.room-type-checkbox :deep(.el-checkbox__label) {
+  font-size:12.5px; font-weight:600;
+}
+.room-type-checkbox {
+  border:1.5px solid var(--border-color); border-radius:8px;
+  padding:7px 12px; margin:0 !important;
+  transition:all 0.18s;
+}
+.room-type-checkbox:hover {
+  border-color:var(--color-primary);
+  background:rgba(124,58,237,0.06);
+}
+.room-type-checkbox.is-checked {
+  border-color:var(--color-primary);
+  background:rgba(124,58,237,0.12);
+}
+.recipient-preview {
+  display:flex; align-items:center; gap:6px;
+  margin-top:8px; padding:8px 12px;
+  background:rgba(124,58,237,0.08);
+  border:1px solid rgba(124,58,237,0.2);
+  border-radius:8px;
+  font-size:12px; font-weight:600;
+  color:var(--color-primary-light);
+}
+.recipient-preview strong { font-size:13px; color:var(--color-primary); }
 
 /* Responsive */
 @media (max-width:639px) { .table-wrap { display:none; } }
