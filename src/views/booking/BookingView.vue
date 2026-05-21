@@ -59,6 +59,21 @@
       <div class="legend-item"><div class="dot" style="background:#F59E0B;box-shadow:0 0 0 2px rgba(245,158,11,0.3)"></div>Ending Soon</div>
     </div>
 
+    <!-- ── Holiday Warning Banner ────────────────────────────── -->
+    <div v-if="effectiveHours?.is_holiday" class="holiday-banner">
+      <el-icon size="16"><WarningFilled /></el-icon>
+      <div>
+        <span style="font-weight:700">
+          {{ effectiveHours.holiday_type === 'global' ? '🗓️ Hari Libur Nasional' : '📅 Tanggal Merah Cabang' }}
+          — {{ effectiveHours.holiday_name }}
+        </span>
+        <span style="margin-left:8px;opacity:0.85">
+          Jam operasional: {{ effectiveHours.open_time?.slice(0,5) }} – {{ effectiveHours.close_time?.slice(0,5) }}
+          · Happy Hour tidak berlaku
+        </span>
+      </div>
+    </div>
+
     <div class="main-area">
       <!-- ── Calendar Grid ──────────────────────────────────── -->
       <div class="grid-area" :class="{ 'with-panel': !!selectedBooking || isNewBookingForm }">
@@ -71,6 +86,20 @@
             {{ formatDateDisplay(selectedDate) }}
           </span>
           <el-button circle plain @click="changeDate(1)"><el-icon><ArrowRight /></el-icon></el-button>
+        </div>
+
+        <!-- Room Type Tabs -->
+        <div class="room-type-tabs" v-if="roomGroups.length > 0">
+          <button
+            v-for="group in roomGroups"
+            :key="group.templateName"
+            class="room-type-tab"
+            :class="{ active: (activeRoomTab || roomGroups[0]?.templateName) === group.templateName }"
+            @click="activeRoomTab = group.templateName"
+          >
+            {{ group.templateName }}
+            <span class="tab-count">{{ group.rooms.length }}</span>
+          </button>
         </div>
 
         <!-- Grid Container -->
@@ -93,16 +122,10 @@
               <p>Belum ada data ruangan. Pilih cabang terlebih dahulu.</p>
             </div>
 
-            <!-- Rooms grouped by template -->
-            <template v-for="group in roomGroups" :key="group.templateName">
-              <!-- Group header -->
-              <div class="group-header-row">
-                <div class="group-header-cell">{{ group.templateName }}</div>
-              </div>
-
-              <!-- Room rows -->
+            <!-- Room rows — only active tab's group -->
+            <template v-if="activeRoomGroup">
               <div
-                v-for="room in group.rooms" :key="room.id"
+                v-for="room in activeRoomGroup.rooms" :key="room.id"
                 class="grid-row room-row"
               >
                 <!-- Room label -->
@@ -248,6 +271,13 @@
               {{ selectedBooking.notes }}
             </p>
           </div>
+
+          <AuditTrail
+            :created-by="selectedBooking.created_by"
+            :updated-by="selectedBooking.updated_by"
+            :created-at="selectedBooking.created_at"
+            :updated-at="selectedBooking.updated_at"
+          />
         </div>
 
         <!-- New Booking Form Panel -->
@@ -279,13 +309,16 @@
               >
                 <el-option v-for="c in customerOptions" :key="c.id"
                   :label="c.name" :value="c.id">
-                  <div style="display:flex;justify-content:space-between;align-items:center">
-                    <span>{{ c.name }}</span>
-                    <el-tag :type="c.type === 'member' ? 'warning' : 'info'" size="small" style="margin-left:8px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+                    <span style="font-weight:600;font-size:13px">{{ c.name }} - {{ c.whatsapp }}</span>
+                    <el-tag :type="c.type === 'member' ? 'warning' : 'info'" size="small">
                       {{ c.type === 'member' ? 'Member' : 'Regular' }}
                     </el-tag>
                   </div>
-                  <div style="font-size:10px;color:var(--text-muted)">{{ c.whatsapp }}</div>
+                  <div v-if="c.whatsapp || c.phone" style="display:flex;align-items:center;gap:4px;margin-top:2px">
+                    <span style="font-size:10px;font-weight:600;color:#25D366;">WA</span>
+                    <span style="font-size:10px;color:var(--text-secondary);font-variant-numeric:tabular-nums">{{ c.whatsapp || c.phone }}</span>
+                  </div>
                 </el-option>
               </el-select>
               <div style="font-size:10px;color:var(--text-muted);margin-top:2px">
@@ -330,9 +363,9 @@
 
             <!-- Durasi Quick Select -->
             <el-form-item label="Tambah Durasi">
-              <div style="display:flex;gap:5px;flex-wrap:wrap">
+              <div style="display:flex;gap:2px;flex-wrap:wrap">
                 <el-button
-                  v-for="d in [1, 2, 3, 4, 5, 6, 8]" :key="d" size="small"
+                  v-for="d in [1, 2, 3, 4, 5, 6, 8,10]" :key="d" size="small"
                   :type="newBookingForm.duration_hours === d ? 'primary' : 'default'"
                   @click="setDuration(d)"
                 >{{ d }}j</el-button>
@@ -348,10 +381,10 @@
                 <span style="font-size:11px;color:var(--text-secondary)">{{ item.description }}</span>
                 <span style="font-size:12px;font-weight:600">{{ formatRp(item.amount) }}</span>
               </div>
-              <div v-if="priceCalc.has_flash_sale" class="breakdown-row" style="color:var(--color-danger)">
+              <!-- <div v-if="priceCalc.has_flash_sale" class="breakdown-row" style="color:var(--color-danger)">
                 <span style="font-size:11px">⚡ Flash Sale: {{ priceCalc.flash_sale_name }}</span>
                 <span style="font-size:12px">- {{ formatRp(priceCalc.flash_discount) }}</span>
-              </div>
+              </div> -->
 
               <!-- Voucher discount preview -->
               <template v-if="voucherDiscount">
@@ -577,14 +610,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getDashboard, createBooking, cancelBooking, completeBooking,
   getAvailableCredits, calculatePrice
 } from '@/api/booking/bookingApi'
-import { getStores } from '@/api/store/storeApi'
+import { getStores, getEffectiveOperatingHours } from '@/api/store/storeApi'
 import { getCustomers } from '@/api/customer/customerApi'
 import api from '@/api/index'
 
@@ -592,10 +626,14 @@ const { can } = usePermission()
 
 // ── Constants ─────────────────────────────────────────────────
 const SLOT_WIDTH = 100  // px per jam
-const OPEN_HOUR = 10    // Store opens at 10:00
-const CLOSE_HOUR = 26   // 02:00 next day = hour 26
 
 // ── State ─────────────────────────────────────────────────────
+// Dynamic open/close hour — updated by generateTimeSlots based on effective operating hours
+const OPEN_HOUR_REF  = ref(10)
+const CLOSE_HOUR_REF = ref(26)  // 26 = 02:00 next day
+
+const effectiveHours = ref(null) // { open_time, close_time, is_holiday, holiday_name, holiday_type }
+
 const loading = ref(false)
 const stores = ref([])
 const selectedStore = ref('')
@@ -654,6 +692,19 @@ const roomGroups = computed(() => {
   return Object.values(groups)
 })
 
+// ── Room Type Tab (booking grid) ──────────────────────────────
+const activeRoomTab = ref(null)
+
+const activeRoomGroup = computed(() => {
+  if (!roomGroups.value.length) return null
+  if (!activeRoomTab.value) return roomGroups.value[0]
+  return roomGroups.value.find(g => g.templateName === activeRoomTab.value) || roomGroups.value[0]
+})
+
+watch([selectedStore, selectedDate], () => {
+  activeRoomTab.value = null
+})
+
 const selectedCustomerIsMember = computed(() => {
   const c = customerOptions.value.find(c => c.id === newBookingForm.customer_id)
   return c?.type === 'member'
@@ -688,11 +739,18 @@ const voucherDiscount = computed(() => {
 })
 
 // ── Generate Time Slots ───────────────────────────────────────
-const generateTimeSlots = () => {
+const generateTimeSlots = (openTime = '10:00:00', closeTime = '02:00:00') => {
+  let startHour = parseInt(openTime.split(':')[0])
+  let endHour   = parseInt(closeTime.split(':')[0])
+  // Handle past midnight: if close <= open treat as next day
+  if (endHour <= startHour) endHour += 24
+
+  OPEN_HOUR_REF.value  = startHour
+  CLOSE_HOUR_REF.value = endHour
+
   const slots = []
-  for (let h = OPEN_HOUR; h < CLOSE_HOUR; h++) {
+  for (let h = startHour; h < endHour; h++) {
     const hour = h % 24
-    const nextHour = (h + 1) % 24
     slots.push(`${String(hour).padStart(2,'0')}:00`)
   }
   timeSlots.value = slots
@@ -705,15 +763,39 @@ const loadDashboard = async () => {
   try {
     const params = { store_id: selectedStore.value, date: selectedDate.value }
     if (selectedRoom.value) params.room_id = selectedRoom.value
-    const { data } = await getDashboard(params)
-    dashboardData.value = data.data
-    allRooms.value = data.data?.rooms || []
-    if (data.data?.operating_hours) operatingHours.value = data.data.operating_hours
-    generateTimeSlots()
+
+    // Fetch dashboard data + effective operating hours in parallel
+    const [dashRes, hoursRes] = await Promise.allSettled([
+      getDashboard(params),
+      getEffectiveOperatingHours(selectedStore.value, selectedDate.value),
+    ])
+
+    if (dashRes.status === 'fulfilled') {
+      dashboardData.value = dashRes.value.data.data
+      allRooms.value = dashRes.value.data.data?.rooms || []
+    } else {
+      dashboardData.value = null
+      allRooms.value = []
+    }
+
+    if (hoursRes.status === 'fulfilled') {
+      const eff = hoursRes.value.data.data
+      effectiveHours.value = eff
+      const openT  = eff?.open_time  || '10:00:00'
+      const closeT = eff?.close_time || '02:00:00'
+      operatingHours.value = `${openT.slice(0,5)} – ${closeT.slice(0,5)}`
+      generateTimeSlots(openT, closeT)
+    } else {
+      // Fallback: use dashboard operating_hours or default
+      effectiveHours.value = null
+      if (dashboardData.value?.operating_hours) operatingHours.value = dashboardData.value.operating_hours
+      generateTimeSlots()
+    }
   } catch {
     ElMessage.error('Gagal memuat jadwal')
     dashboardData.value = null
     allRooms.value = []
+    effectiveHours.value = null
     generateTimeSlots()
   } finally { loading.value = false }
 }
@@ -735,9 +817,9 @@ const timeToOffset = (timeStr) => {
   const parts = timeStr.split(':')
   let h = parseInt(parts[0])
   const m = parseInt(parts[1] || 0)
-  // Handle past midnight: hours < OPEN_HOUR belong to next day
-  if (h < OPEN_HOUR) h += 24
-  return ((h - OPEN_HOUR) + m / 60) * SLOT_WIDTH
+  // Handle past midnight: hours before open belong to next day
+  if (h < OPEN_HOUR_REF.value) h += 24
+  return ((h - OPEN_HOUR_REF.value) + m / 60) * SLOT_WIDTH
 }
 
 const getBookingsForRoom = (roomId) => {
@@ -771,7 +853,7 @@ const toggleNewBookingMode = () => {
 
 const handleSlotClick = (room, slot, idx) => {
   if (!isNewBookingMode.value) return
-  const startH = OPEN_HOUR + idx
+  const startH = OPEN_HOUR_REF.value + idx
   const startTime = `${String(startH % 24).padStart(2,'0')}:00`
   const endTime = `${String((startH + 1) % 24).padStart(2,'0')}:00`
 
@@ -1054,9 +1136,25 @@ onUnmounted(() => {
 
 /* ── Filter ──────────────────────────────────────────── */
 .filter-bar  { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
-.legend-bar  { display:flex; gap:16px; align-items:center; font-size:11.5px; color:var(--text-secondary); font-weight:600; margin-bottom:10px; }
+.legend-bar  { display:flex; gap:16px; align-items:center; font-size:11.5px; color:var(--text-secondary); font-weight:600; margin-bottom:10px; flex-wrap:wrap; }
 .legend-item { display:flex; align-items:center; gap:5px; }
 .dot         { width:10px; height:10px; border-radius:3px; }
+
+/* ── Holiday Warning Banner ───────────────────────── */
+.holiday-banner {
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 8px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12.5px;
+  color: #D97706;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.08); }
 
 /* ── Main layout ─────────────────────────────────────── */
 .main-area {
@@ -1168,6 +1266,36 @@ onUnmounted(() => {
   font-weight: 500; gap: 10px;
 }
 
+/* ── Room Type Tabs ──────────────────────────────────────── */
+.room-type-tabs {
+  display:flex; gap:6px; flex-wrap:wrap;
+  margin-bottom:10px; padding-bottom:10px;
+  border-bottom:1px solid var(--border-color);
+}
+.room-type-tab {
+  display:flex; align-items:center; gap:6px;
+  padding:6px 14px; border-radius:8px;
+  border:1px solid var(--border-color);
+  background:var(--bg-card); color:var(--text-secondary);
+  font-size:12px; font-weight:600; cursor:pointer;
+  transition:all 0.15s; white-space:nowrap;
+}
+.room-type-tab:hover {
+  border-color:var(--color-primary); color:var(--color-primary);
+}
+.room-type-tab.active {
+  background:var(--color-primary);
+  border-color:var(--color-primary); color:#fff;
+}
+.tab-count {
+  background:rgba(255,255,255,0.25);
+  border-radius:10px; padding:1px 6px;
+  font-size:10px; font-weight:700;
+}
+.room-type-tab:not(.active) .tab-count {
+  background:var(--bg-main); color:var(--text-secondary);
+}
+
 /* Grid footer */
 .grid-footer {
   font-size: 11.5px; color: var(--text-secondary); font-weight: 600;
@@ -1177,7 +1305,7 @@ onUnmounted(() => {
 
 /* ── Right Panel ─────────────────────────────────────── */
 .right-panel {
-  width: 326px; min-width: 326px;
+  width: 426px; min-width: 426px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px; padding: 16px;

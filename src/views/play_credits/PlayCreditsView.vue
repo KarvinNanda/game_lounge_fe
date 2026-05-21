@@ -455,6 +455,14 @@
             </div>
           </div>
         </div>
+
+        <AuditTrail
+          v-if="editingPackage"
+          :created-by="editingPackage.created_by"
+          :updated-by="editingPackage.updated_by"
+          :created-at="editingPackage.created_at"
+          :updated-at="editingPackage.updated_at"
+        />
       </div>
 
       <template #footer>
@@ -675,6 +683,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getPackages, getActivePackages, createPackage, updatePackage, deletePackage,
   getMemberCredits, assignCredit, adjustCredit

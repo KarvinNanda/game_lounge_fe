@@ -162,13 +162,17 @@ strong, b { color: var(--text-primary); font-weight: 700; }
 .el-input__wrapper.is-focus { box-shadow: 0 0 0 1.5px var(--color-primary) !important; }
 .el-textarea__inner {
   background: var(--bg-card-hover) !important;
-  border-color: var(--border-color) !important;
+  border: 1px solid var(--border-color) !important;
   color: var(--text-primary) !important;
   font-size: 13px !important;
   box-shadow: none !important;
   border-radius: 6px !important;
+  transition: border-color 0.2s !important;
+  resize: vertical;
 }
-.el-textarea__inner:focus { border-color: var(--color-primary) !important; }
+.el-textarea__inner:hover { border-color: var(--color-primary) !important; }
+.el-textarea__inner:focus { border-color: var(--color-primary) !important; outline: none !important; }
+.el-textarea.is-disabled .el-textarea__inner { background: var(--bg-main) !important; opacity: 0.8; cursor: not-allowed; }
 .el-input__prefix-inner { color: var(--text-muted) !important; }
 .el-input-group__prepend {
   background: var(--bg-card) !important;
@@ -755,8 +759,10 @@ body.light-mode .el-input__wrapper.is-focus { box-shadow: 0 0 0 1.5px var(--colo
 body.light-mode .el-select .el-input__wrapper { background-color: #ffffff !important; }
 body.light-mode .el-textarea__inner {
   background: #ffffff !important;
-  border-color: #c0d4f0 !important;
+  border: 1px solid #c0d4f0 !important;
 }
+body.light-mode .el-textarea__inner:hover,
+body.light-mode .el-textarea__inner:focus { border-color: var(--color-primary) !important; }
 body.light-mode .el-select__tags .el-tag {
   background: rgba(2,130,222,0.10) !important;
   border-color: rgba(2,130,222,0.25) !important;

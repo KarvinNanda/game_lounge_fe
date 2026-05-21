@@ -165,6 +165,14 @@
             </div>
           </div>
         </el-form>
+
+        <AuditTrail
+          v-if="form.id"
+          :created-by="form.created_by"
+          :updated-by="form.updated_by"
+          :created-at="form.created_at"
+          :updated-at="form.updated_at"
+        />
       </div>
 
       <template #footer>
@@ -185,6 +193,7 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getRoles, createRole, updateRole, deleteRole as apiDelete } from '@/api/role/roleApi'
+import AuditTrail from '@/components/AuditTrail.vue'
 
 const { can } = usePermission()
 const { isMobile, isTablet } = useBreakpoint()
@@ -196,7 +205,7 @@ const formRef = ref()
 const roleList = ref([])
 const search = ref('')
 
-const form = reactive({ id: null, name: '', description: '' })
+const form = reactive({ id: null, name: '', description: '', created_by: null, updated_by: null, created_at: null, updated_at: null })
 const rules = {
   name: [{ required: true, message: 'Nama role wajib diisi', trigger: 'blur' }],
 }
@@ -303,7 +312,7 @@ const fetchRoles = async () => {
 
 const openDrawer = (row = null) => {
   if (row) {
-    Object.assign(form, { id: row.id, name: row.name, description: row.description || '' })
+    Object.assign(form, { id: row.id, name: row.name, description: row.description || '', created_by: row.created_by || null, updated_by: row.updated_by || null, created_at: row.created_at || null, updated_at: row.updated_at || null })
     loadPermissions(row.permissions || [])
   } else {
     Object.assign(form, { id: null, name: '', description: '' })

@@ -415,6 +415,14 @@
           <el-icon style="flex-shrink:0;margin-top:1px"><InfoFilled /></el-icon>
           Password akan di-generate otomatis dari nama customer dan dikirim ke email (jika diisi).
         </div>
+
+        <AuditTrail
+          v-if="editingCustomer"
+          :created-by="editingCustomer.created_by"
+          :updated-by="editingCustomer.updated_by"
+          :created-at="editingCustomer.created_at"
+          :updated-at="editingCustomer.updated_at"
+        />
       </el-form>
 
       <template #footer>
@@ -501,6 +509,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getCustomers, getCustomerById,
   createCustomer, updateCustomer,

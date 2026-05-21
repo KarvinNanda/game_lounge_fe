@@ -179,11 +179,60 @@
       <div class="step-header">
         <el-icon size="26" style="color:var(--color-primary)"><Grid /></el-icon>
         <div>
-          <h3 class="step-title">Room Setup</h3>
-          <p class="step-desc">Pilih tipe ruangan yang tersedia di cabang ini dan tentukan jumlah unitnya.</p>
+          <h3 class="step-title">{{ isEdit ? 'Manajemen Ruangan' : 'Room Setup' }}</h3>
+          <p class="step-desc">{{ isEdit ? 'Aktifkan / nonaktifkan ruangan per tipe. Ruangan nonaktif tidak bisa dibooking.' : 'Pilih tipe ruangan yang tersedia di cabang ini dan tentukan jumlah unitnya.' }}</p>
         </div>
       </div>
-      <div style="margin-top:20px">
+
+      <!-- ── EDIT MODE: Manajemen Ruangan with tabs ── -->
+      <div v-if="isEdit" style="margin-top:20px">
+        <!-- Summary bar -->
+        <div class="room-summary-bar">
+          <span>Total: <strong>{{ storeRooms.length }}</strong> ruangan</span>
+          <span style="color:var(--color-success)">Aktif: <strong>{{ storeRooms.filter(r => r.is_active).length }}</strong></span>
+          <span style="color:var(--text-secondary)">Nonaktif: <strong>{{ storeRooms.filter(r => !r.is_active).length }}</strong></span>
+        </div>
+
+        <div v-if="roomGroupsByTemplate.length === 0" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
+          Tidak ada ruangan di cabang ini.
+        </div>
+
+        <!-- Tabs per template -->
+        <el-tabs v-else v-model="activeRoomTemplateTab" type="border-card" class="room-mgmt-tabs">
+          <el-tab-pane
+            v-for="group in roomGroupsByTemplate"
+            :key="group.templateId"
+            :label="`${group.templateName} (${group.rooms.length})`"
+            :name="String(group.templateId)"
+          >
+            <div class="room-mgmt-list">
+              <div
+                v-for="room in group.rooms"
+                :key="room.id"
+                class="room-mgmt-row"
+                :class="{ 'room-mgmt-inactive': !room.is_active }"
+              >
+                <div class="room-mgmt-info">
+                  <span class="room-mgmt-name">{{ room.name }}</span>
+                  <el-tag :type="room.is_active ? 'success' : 'danger'" size="small">
+                    {{ room.is_active ? 'Aktif' : 'Nonaktif' }}
+                  </el-tag>
+                </div>
+                <el-switch
+                  v-model="room.is_active"
+                  :loading="togglingRoomId === room.id"
+                  active-text="Aktif"
+                  inactive-text="Nonaktif"
+                  @change="(val) => handleToggleRoom(room, val)"
+                />
+              </div>
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+
+      <!-- ── CREATE MODE: Room template selection ── -->
+      <div v-else style="margin-top:20px">
         <!-- Desktop/Tablet table -->
         <el-table v-if="!isMobile" :data="roomTemplates" style="width:100%" v-loading="roomsLoading">
           <el-table-column width="50">
@@ -250,7 +299,8 @@
           <el-icon style="color:var(--color-info)"><InfoFilled /></el-icon>
           <span>Jumlah unit = banyaknya ruangan dengan tipe yang sama di cabang ini.</span>
         </div>
-      </div>
+      </div><!-- end v-else create mode -->
+
     </el-card>
 
     <!-- ── Step 3: Review ── -->
@@ -323,7 +373,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage } from 'element-plus'
-import { createStore, updateStore, getStoreById } from '@/api/store/storeApi'
+import { createStore, updateStore, getStoreById, toggleStoreRoom } from '@/api/store/storeApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
 
@@ -361,6 +411,36 @@ const infoRules = {
 }
 
 const selectedRooms = computed(() => roomTemplates.value.filter(r => r.selected))
+
+// ── Manajemen Ruangan (edit mode) ─────────────────────────────
+const storeRooms        = ref([])
+const togglingRoomId    = ref(null)
+const activeRoomTemplateTab = ref(null)
+
+const roomGroupsByTemplate = computed(() => {
+  if (!storeRooms.value.length) return []
+  const groups = {}
+  for (const room of storeRooms.value) {
+    const tid   = room.room_template?.id || 0
+    const tname = room.room_template?.name || 'Lainnya'
+    if (!groups[tid]) groups[tid] = { templateId: tid, templateName: tname, rooms: [] }
+    groups[tid].rooms.push(room)
+  }
+  return Object.values(groups).sort((a, b) => a.templateName.localeCompare(b.templateName))
+})
+
+const handleToggleRoom = async (room, isActive) => {
+  togglingRoomId.value = room.id
+  try {
+    await toggleStoreRoom(room.id, isActive)
+    ElMessage.success(`${room.name} berhasil ${isActive ? 'diaktifkan' : 'dinonaktifkan'}`)
+  } catch {
+    room.is_active = !isActive
+    ElMessage.error('Gagal mengubah status ruangan')
+  } finally {
+    togglingRoomId.value = null
+  }
+}
 
 const triggerPhotoInput = () => photoInput.value?.click()
 
@@ -455,6 +535,9 @@ onMounted(async () => {
       const we = d.operating_hours?.find(o => o.day_type === 'weekend')
       if (wh) { form.weekday_active = wh.is_active; form.weekday_open = wh.open_time; form.weekday_close = wh.close_time }
       if (we) { form.weekend_active = we.is_active; form.weekend_open = we.open_time; form.weekend_close = we.close_time }
+
+      // Load actual rooms for management section
+      storeRooms.value = d.rooms || []
     } catch {}
   }
 })
@@ -554,6 +637,25 @@ onMounted(async () => {
 /* Review step footer on mobile — all 3 buttons in one compact row */
 .review-footer { gap:8px; padding:10px 12px; }
 .review-back-btn { flex-shrink:0; }
+
+/* ── Manajemen Ruangan (edit mode) ──────────────────────── */
+.room-summary-bar {
+  display:flex; gap:16px; font-size:12px;
+  background:var(--bg-main); border:1px solid var(--border-color);
+  border-radius:8px; padding:8px 14px; margin-bottom:12px;
+}
+.room-mgmt-tabs :deep(.el-tabs__content) { padding:0; }
+.room-mgmt-list { display:flex; flex-direction:column; }
+.room-mgmt-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 14px; border-bottom:1px solid var(--border-color);
+  transition:background 0.15s;
+}
+.room-mgmt-row:last-child { border-bottom:none; }
+.room-mgmt-row:hover { background:var(--bg-main); }
+.room-mgmt-inactive { opacity:0.6; }
+.room-mgmt-info { display:flex; align-items:center; gap:10px; }
+.room-mgmt-name { font-size:13px; font-weight:600; min-width:100px; }
 
 /* Stepper title font */
 :deep(.el-step__title) { font-size:12px; }
