@@ -34,9 +34,24 @@
         style="width:200px"
         @change="loadDashboard"
       />
-      <!-- Cabang -->
-      <el-select v-model="selectedStore" placeholder="Pilih Cabang" style="width:200px" @change="loadDashboard">
-        <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
+      <!-- Cabang — badge jika terkunci ke 1 store, dropdown jika bisa pilih -->
+      <div v-if="isStoreLocked" class="store-locked-badge">
+        <el-icon><Location /></el-icon>
+        <span>{{ lockedStoreName }}</span>
+      </div>
+      <el-select
+        v-else
+        v-model="selectedStore"
+        placeholder="Pilih Cabang"
+        style="width:220px"
+        @change="loadDashboard"
+      >
+        <el-option
+          v-for="s in accessibleStores"
+          :key="s.id"
+          :label="s.name"
+          :value="s.id"
+        />
       </el-select>
       <!-- Ruangan -->
       <el-select v-model="selectedRoom" placeholder="Semua Ruangan" clearable style="width:170px" @change="loadDashboard">
@@ -612,6 +627,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePermission } from '@/composables/usePermission'
+import { useAuthStore } from '@/stores/authStore'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AuditTrail from '@/components/AuditTrail.vue'
 import {
@@ -623,6 +639,7 @@ import { getCustomers } from '@/api/customer/customerApi'
 import api from '@/api/index'
 
 const { can } = usePermission()
+const authStore = useAuthStore()
 
 // ── Constants ─────────────────────────────────────────────────
 const SLOT_WIDTH = 100  // px per jam
@@ -711,6 +728,29 @@ const selectedCustomerIsMember = computed(() => {
 })
 
 const gridTotalWidth = computed(() => 140 + timeSlots.value.length * SLOT_WIDTH)
+
+// ── Store Access Filter ───────────────────────────────────────
+// Daftar store yang boleh diakses staff ini
+const accessibleStores = computed(() => {
+  const staff = authStore.staff
+  // Super admin atau is_all_stores = true → gunakan semua store dari API
+  if (!staff || staff.is_all_stores) return stores.value
+  // Staff biasa → hanya store yang di-assign
+  return (staff.staff_stores || []).map(ss => ss.store).filter(Boolean)
+})
+
+// Dropdown tidak bisa diubah jika staff hanya punya tepat 1 store
+const isStoreLocked = computed(() => {
+  const staff = authStore.staff
+  if (!staff || staff.is_all_stores) return false
+  return (staff.staff_stores || []).length === 1
+})
+
+// Label badge untuk store terkunci
+const lockedStoreName = computed(() => {
+  if (!isStoreLocked.value) return ''
+  return authStore.staff?.staff_stores?.[0]?.store?.name || ''
+})
 
 // ── Voucher Discount Preview ──────────────────────────────────
 const selectedVoucherData = computed(() =>
@@ -1102,13 +1142,24 @@ const getStatusTagType = (s) => ({
 onMounted(async () => {
   generateTimeSlots()
   try {
-    const { data } = await getStores({ per_page: 100, status: 'active' })
-    stores.value = data.data || []
+    const staff = authStore.staff
+
+    if (!staff || staff.is_all_stores) {
+      // Super admin / all stores → fetch semua store dari API
+      const { data } = await getStores({ per_page: 100, status: 'active' })
+      stores.value = data.data || []
+    } else {
+      // Staff biasa → ambil langsung dari data staff, tidak perlu API call
+      stores.value = (staff.staff_stores || []).map(ss => ss.store).filter(Boolean)
+    }
+
     if (stores.value.length > 0) {
       selectedStore.value = stores.value[0].id
       await loadDashboard()
     }
-  } catch {}
+  } catch {
+    ElMessage.error('Gagal memuat data cabang')
+  }
 })
 
 onUnmounted(() => {
@@ -1425,4 +1476,21 @@ body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.
 .confirm-row > strong { color: var(--text-primary); font-weight: 700; font-size: 13px; text-align: right; }
 
 /* Light mode overrides are in theme.css (global) to avoid :global() compound-selector issues */
+
+/* ── Store Locked Badge ──────────────────────────────────── */
+.store-locked-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  height: 32px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: default;
+  white-space: nowrap;
+}
 </style>
