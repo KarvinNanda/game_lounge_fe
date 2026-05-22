@@ -9,10 +9,35 @@
         <p class="page-desc">Kelola jadwal dan booking ruangan</p>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
-        <el-button v-if="can('bookings.create')" type="primary" @click="toggleNewBookingMode">
-          <el-icon><Plus /></el-icon>
-          {{ isNewBookingMode ? 'Batalkan' : 'New Booking' }}
-        </el-button>
+        <el-dropdown v-if="can('bookings.create')" @command="handleNewBookingCommand" trigger="click">
+          <el-button type="primary">
+            <el-icon><Plus /></el-icon>
+            New Booking
+            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="regular" style="padding:10px 16px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <el-icon size="18" style="color:var(--color-primary)"><CalendarIcon /></el-icon>
+                  <div>
+                    <div style="font-weight:600;font-size:13px">Regular Booking</div>
+                    <div style="font-size:11px;color:var(--text-secondary)">Booking per ruangan</div>
+                  </div>
+                </div>
+              </el-dropdown-item>
+              <el-dropdown-item command="event" style="padding:10px 16px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <el-icon size="18" style="color:#D97706"><Star /></el-icon>
+                  <div>
+                    <div style="font-weight:600;font-size:13px">Event Booking</div>
+                    <div style="font-size:11px;color:var(--text-secondary)">Booking 1 gedung penuh</div>
+                  </div>
+                </div>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
     </div>
 
@@ -129,6 +154,22 @@
                 class="time-header-cell"
                 :style="{ width: SLOT_WIDTH + 'px' }"
               >{{ slot }}</div>
+            </div>
+
+            <!-- Event Booking Merged Blocks — absolute overlay atas semua room rows -->
+            <div class="event-overlay-container" v-if="eventBookings.length > 0">
+              <div
+                v-for="event in eventBookings"
+                :key="event.id"
+                class="event-merged-block"
+                :style="getEventBlockStyle(event)"
+                @click="handleEventClick(event)"
+              >
+                <el-icon size="18" style="color:#EEEDFE;margin-bottom:4px"><Star /></el-icon>
+                <div class="event-block-title">EVENT</div>
+                <div class="event-block-name">{{ event.event_name }}</div>
+                <div class="event-block-time">{{ event.start_time?.slice(0,5) }} – {{ event.end_time?.slice(0,5) }}</div>
+              </div>
             </div>
 
             <!-- Empty state -->
@@ -293,6 +334,145 @@
             :created-at="selectedBooking.created_at"
             :updated-at="selectedBooking.updated_at"
           />
+        </div>
+
+        <!-- Event Booking Form Panel -->
+        <div v-else-if="isEventBookingForm" class="right-panel">
+          <div class="panel-header">
+            <span style="font-size:14px;font-weight:700">EVENT BOOKING BARU</span>
+            <el-button circle text @click="isEventBookingForm = false"><el-icon><Close /></el-icon></el-button>
+          </div>
+
+          <div class="event-form-badge">
+            <el-icon><Star /></el-icon> Booking seluruh gedung — semua ruangan terblokir
+          </div>
+
+          <el-form :model="eventForm" label-position="top">
+            <el-form-item label="Nama Event *">
+              <el-input v-model="eventForm.event_name" placeholder="Contoh: Grand Tournament PS5" />
+            </el-form-item>
+
+            <!-- Customer Search — sama dengan regular booking -->
+            <el-form-item label="Customer (Opsional)">
+              <el-select
+                v-model="eventForm.customer_id"
+                filterable remote
+                :remote-method="searchCustomers"
+                :loading="customerSearchLoading"
+                placeholder="Cari nama / WhatsApp customer..."
+                style="width:100%"
+                clearable
+                @change="onEventCustomerChange"
+              >
+                <el-option
+                  v-for="c in customerOptions"
+                  :key="c.id"
+                  :label="c.name"
+                  :value="c.id"
+                >
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
+                    <span style="font-weight:600;font-size:13px">{{ c.name }} - {{ c.whatsapp }}</span>
+                    <el-tag :type="c.type === 'member' ? 'warning' : 'info'" size="small">
+                      {{ c.type === 'member' ? 'Member' : 'Regular' }}
+                    </el-tag>
+                  </div>
+                  <div v-if="c.whatsapp || c.phone" style="display:flex;align-items:center;gap:4px;margin-top:2px">
+                    <span style="font-size:10px;font-weight:600;color:#25D366;">WA</span>
+                    <span style="font-size:10px;color:var(--text-secondary)">{{ c.whatsapp || c.phone }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+              <div style="font-size:10px;color:var(--text-muted);margin-top:2px">
+                Kosongkan untuk penyelenggara baru — isi manual di bawah
+              </div>
+            </el-form-item>
+
+            <!-- Nama Customer — auto-fill jika dipilih dari search, bisa diedit manual -->
+            <el-form-item label="Nama Penyelenggara *">
+              <el-input v-model="eventForm.customer_name" placeholder="Nama penyelenggara" />
+            </el-form-item>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <el-form-item label="WhatsApp">
+                <el-input v-model="eventForm.customer_whatsapp" placeholder="08xx-xxxx" />
+              </el-form-item>
+              <el-form-item label="Email">
+                <el-input v-model="eventForm.customer_email" placeholder="email@..." />
+              </el-form-item>
+            </div>
+            <el-form-item label="Tanggal *">
+              <el-date-picker v-model="eventForm.booking_date" type="date"
+                value-format="YYYY-MM-DD" format="dddd, DD MMM YYYY" style="width:100%" />
+            </el-form-item>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <el-form-item label="Jam Mulai *">
+                <el-time-picker v-model="eventForm.start_time" format="HH:mm"
+                  value-format="HH:mm" style="width:100%" @change="previewEventPriceCalc" />
+              </el-form-item>
+              <el-form-item label="Jam Selesai *">
+                <el-time-picker v-model="eventForm.end_time" format="HH:mm"
+                  value-format="HH:mm" style="width:100%" @change="previewEventPriceCalc" />
+              </el-form-item>
+            </div>
+
+            <!-- Preview harga -->
+            <div v-if="eventPricePreview" class="price-preview-box">
+              <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">KALKULASI HARGA</div>
+              <div style="font-size:11px;color:var(--text-secondary)">{{ eventPricePreview.formula }}</div>
+              <div style="font-size:18px;font-weight:700;color:var(--color-primary);margin-top:4px">
+                {{ formatRp(eventPricePreview.total_price) }}
+              </div>
+            </div>
+
+            <el-form-item label="Catatan">
+              <el-input v-model="eventForm.notes" type="textarea" :rows="2" />
+            </el-form-item>
+          </el-form>
+
+          <el-button type="primary" style="width:100%;margin-top:8px"
+            :loading="creatingEvent" :disabled="!eventPricePreview"
+            @click="handleCreateEventBooking">
+            Konfirmasi Event Booking
+          </el-button>
+        </div>
+
+        <!-- Event Detail Panel -->
+        <div v-else-if="selectedEvent" class="right-panel">
+          <div class="panel-header">
+            <span style="font-size:14px;font-weight:700">DETAIL EVENT</span>
+            <el-button circle text @click="selectedEvent = null"><el-icon><Close /></el-icon></el-button>
+          </div>
+
+          <el-tag type="warning" style="margin-bottom:12px">
+            <el-icon><Star /></el-icon> {{ selectedEvent.status?.toUpperCase() }}
+          </el-tag>
+
+          <div class="info-section-title">INFORMASI EVENT</div>
+          <div class="info-grid">
+            <div class="info-row"><span>Nama Event</span><strong>{{ selectedEvent.event_name }}</strong></div>
+            <div class="info-row"><span>Customer</span><span>{{ selectedEvent.customer_name }}</span></div>
+            <div class="info-row"><span>Tanggal</span><span>{{ formatDateDisplay(selectedEvent.booking_date) }}</span></div>
+            <div class="info-row">
+              <span>Waktu</span>
+              <span>{{ selectedEvent.start_time?.slice(0,5) }} – {{ selectedEvent.end_time?.slice(0,5) }} ({{ selectedEvent.duration_hours }} Jam)</span>
+            </div>
+            <div class="info-row">
+              <span>Total Harga</span>
+              <strong style="color:var(--color-primary)">{{ formatRp(selectedEvent.total_price) }}</strong>
+            </div>
+          </div>
+
+          <div v-if="selectedEvent.status !== 'cancelled' && selectedEvent.status !== 'completed'"
+               style="margin-top:16px">
+            <div class="info-section-title">AKSI</div>
+            <el-button type="danger" plain style="width:100%" @click="openCancelEventForm">
+              <el-icon><CircleClose /></el-icon> Batalkan Event
+            </el-button>
+          </div>
+
+          <div v-if="selectedEvent.cancel_reason" class="cancel-info">
+            <div style="font-weight:600;margin-bottom:4px">Alasan Pembatalan</div>
+            {{ selectedEvent.cancel_reason }}
+          </div>
         </div>
 
         <!-- New Booking Form Panel -->
@@ -600,6 +780,29 @@
     </el-dialog>
 
     <!-- ════════════════════════════════════════════════════════
+         DIALOG: Cancel Event Booking
+    ════════════════════════════════════════════════════════ -->
+    <el-dialog v-model="showCancelEventDialog" title="Batalkan Event Booking" width="400px" align-center>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">
+        Masukkan alasan pembatalan event
+        <strong style="color:var(--text-primary)">{{ selectedEvent?.event_name }}</strong>.
+      </p>
+      <el-form :model="cancelEventForm" ref="cancelEventFormRef">
+        <el-form-item prop="reason"
+          :rules="[{ required: true, min: 5, message: 'Alasan minimal 5 karakter', trigger: 'blur' }]">
+          <el-input v-model="cancelEventForm.reason" type="textarea" :rows="3"
+            placeholder="Alasan pembatalan..." />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showCancelEventDialog = false">Kembali</el-button>
+        <el-button type="danger" :loading="cancellingEvent" @click="handleCancelEvent">
+          Konfirmasi Batalkan
+        </el-button>
+      </template>
+    </el-dialog>
+
+    <!-- ════════════════════════════════════════════════════════
          DIALOG: Cancel Booking
     ════════════════════════════════════════════════════════ -->
     <el-dialog v-model="showCancelDialog" title="Batalkan Booking" width="400px" align-center>
@@ -634,6 +837,9 @@ import {
   getDashboard, createBooking, cancelBooking, completeBooking,
   getAvailableCredits, calculatePrice
 } from '@/api/booking/bookingApi'
+import {
+  getEventDashboard, createEventBooking, cancelEventBooking, previewEventPrice
+} from '@/api/booking/eventBookingApi'
 import { getStores, getEffectiveOperatingHours } from '@/api/store/storeApi'
 import { getCustomers } from '@/api/customer/customerApi'
 import api from '@/api/index'
@@ -696,6 +902,32 @@ const newBookingForm = reactive({
 })
 
 const cancelForm = reactive({ reason: '' })
+
+// ── Event Booking State ───────────────────────────────────────
+const eventBookings         = ref([])
+const isEventBookingForm    = ref(false)
+const creatingEvent         = ref(false)
+const showEventSuccess      = ref(false)
+const showCancelEventDialog = ref(false)
+const cancellingEvent       = ref(false)
+const selectedEvent         = ref(null)
+const eventPricePreview     = ref(null)
+
+const eventForm = reactive({
+  store_id:          '',
+  event_name:        '',
+  customer_id:       '',
+  customer_name:     '',
+  customer_whatsapp: '',
+  customer_email:    '',
+  booking_date:      '',
+  start_time:        '',
+  end_time:          '',
+  notes:             '',
+})
+
+const cancelEventForm    = reactive({ reason: '' })
+const cancelEventFormRef = ref()
 
 // ── Computed ──────────────────────────────────────────────────
 const roomGroups = computed(() => {
@@ -804,10 +1036,11 @@ const loadDashboard = async () => {
     const params = { store_id: selectedStore.value, date: selectedDate.value }
     if (selectedRoom.value) params.room_id = selectedRoom.value
 
-    // Fetch dashboard data + effective operating hours in parallel
-    const [dashRes, hoursRes] = await Promise.allSettled([
+    // Fetch regular booking + event booking + operating hours paralel
+    const [dashRes, hoursRes, eventRes] = await Promise.allSettled([
       getDashboard(params),
       getEffectiveOperatingHours(selectedStore.value, selectedDate.value),
+      getEventDashboard({ store_id: selectedStore.value, date: selectedDate.value }),
     ])
 
     if (dashRes.status === 'fulfilled') {
@@ -826,16 +1059,20 @@ const loadDashboard = async () => {
       operatingHours.value = `${openT.slice(0,5)} – ${closeT.slice(0,5)}`
       generateTimeSlots(openT, closeT)
     } else {
-      // Fallback: use dashboard operating_hours or default
       effectiveHours.value = null
       if (dashboardData.value?.operating_hours) operatingHours.value = dashboardData.value.operating_hours
       generateTimeSlots()
     }
+
+    eventBookings.value = eventRes.status === 'fulfilled'
+      ? (eventRes.value.data.data || [])
+      : []
   } catch {
     ElMessage.error('Gagal memuat jadwal')
     dashboardData.value = null
     allRooms.value = []
     effectiveHours.value = null
+    eventBookings.value = []
     generateTimeSlots()
   } finally { loading.value = false }
 }
@@ -881,6 +1118,120 @@ const getBlockClass = (bk) => ({
   completed: 'block-completed',
   cancelled: 'block-cancelled',
 }[bk.status] || 'block-upcoming')
+
+// ── Event Booking Helpers ─────────────────────────────────────
+// Style (posisi & ukuran) untuk merged event block di grid
+const getEventBlockStyle = (event) => {
+  const startPx    = timeToOffset(event.start_time)
+  const endPx      = timeToOffset(event.end_time)
+  const width      = Math.max(endPx - startPx - 4, 20)
+  const totalRooms = allRooms.value.length || 1
+  const rowHeight  = 56 // matches .room-row { height: 56px }
+  return {
+    left:   startPx + 'px',
+    width:  width + 'px',
+    height: (totalRooms * rowHeight - 8) + 'px',
+    top:    '4px',
+  }
+}
+
+const handleNewBookingCommand = (command) => {
+  if (command === 'regular') {
+    toggleNewBookingMode()
+  } else if (command === 'event') {
+    openEventBookingForm()
+  }
+}
+
+const openEventBookingForm = () => {
+  Object.assign(eventForm, {
+    store_id:          selectedStore.value,
+    event_name:        '',
+    customer_id:       '',
+    customer_name:     '',
+    customer_whatsapp: '',
+    customer_email:    '',
+    booking_date:      selectedDate.value,
+    start_time:        '',
+    end_time:          '',
+    notes:             '',
+  })
+  eventPricePreview.value  = null
+  customerOptions.value    = []   // reset search dropdown
+  isEventBookingForm.value = true
+  isNewBookingMode.value   = false
+  selectedBooking.value    = null
+  selectedEvent.value      = null
+}
+
+// Auto-fill customer data saat dipilih dari dropdown search
+const onEventCustomerChange = (customerId) => {
+  if (!customerId) {
+    // User clear pilihan → reset ke manual entry
+    eventForm.customer_name     = ''
+    eventForm.customer_whatsapp = ''
+    eventForm.customer_email    = ''
+    return
+  }
+  const customer = customerOptions.value.find(c => c.id === customerId)
+  if (customer) {
+    eventForm.customer_name     = customer.name
+    eventForm.customer_whatsapp = customer.whatsapp || ''
+    eventForm.customer_email    = customer.email    || ''
+  }
+}
+
+const previewEventPriceCalc = async () => {
+  if (!eventForm.store_id || !eventForm.start_time || !eventForm.end_time) return
+  try {
+    const { data } = await previewEventPrice({
+      store_id:   eventForm.store_id,
+      start_time: eventForm.start_time,
+      end_time:   eventForm.end_time,
+    })
+    eventPricePreview.value = data.data
+  } catch { eventPricePreview.value = null }
+}
+
+const handleCreateEventBooking = async () => {
+  creatingEvent.value = true
+  try {
+    await createEventBooking({ ...eventForm })
+    ElMessage.success('Event booking berhasil dibuat!')
+    isEventBookingForm.value = false
+    loadDashboard()
+  } catch (e) {
+    ElMessage.error(e?.response?.data?.message || 'Gagal membuat event booking')
+  } finally { creatingEvent.value = false }
+}
+
+const handleEventClick = (event) => {
+  selectedEvent.value      = event
+  isNewBookingForm.value   = false
+  isEventBookingForm.value = false
+  selectedBooking.value    = null
+}
+
+const openCancelEventForm = () => {
+  cancelEventForm.reason = ''
+  showCancelEventDialog.value = true
+}
+
+const handleCancelEvent = async () => {
+  await cancelEventFormRef.value.validate(async (valid) => {
+    if (!valid) return
+    cancellingEvent.value = true
+    try {
+      await cancelEventBooking(selectedEvent.value.id, { reason: cancelEventForm.reason })
+      ElMessage.success('Event booking berhasil dibatalkan')
+      showCancelEventDialog.value = false
+      selectedEvent.value = null
+      loadDashboard()
+    } catch (e) {
+      ElMessage.error(e?.response?.data?.message || 'Gagal membatalkan')
+    } finally { cancellingEvent.value = false }
+  })
+}
 
 // ── New Booking Flow ──────────────────────────────────────────
 const toggleNewBookingMode = () => {
@@ -1476,6 +1827,73 @@ body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.
 .confirm-row > strong { color: var(--text-primary); font-weight: 700; font-size: 13px; text-align: right; }
 
 /* Light mode overrides are in theme.css (global) to avoid :global() compound-selector issues */
+
+/* ── Event Booking ───────────────────────────────────────── */
+
+/* Overlay container — absolute di atas semua room rows */
+.event-overlay-container {
+  position: absolute;
+  top: 36px; /* offset header row height */
+  left: 145px; /* offset room label cell width */
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+/* Merged event block */
+.event-merged-block {
+  position: absolute;
+  background: #534AB7;
+  border: 2px solid #3C3489;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 8;
+  transition: opacity 0.15s;
+}
+.event-merged-block:hover { opacity: 0.85; }
+
+.event-block-title { font-size: 11px; font-weight: 700; color: #EEEDFE; letter-spacing: 1px; }
+.event-block-name  { font-size: 13px; font-weight: 500; color: #EEEDFE; text-align: center; padding: 0 8px; }
+.event-block-time  { font-size: 11px; color: #AFA9EC; }
+
+/* Event form badge */
+.event-form-badge {
+  background: rgba(83,74,183,0.1);
+  border: 1px solid rgba(83,74,183,0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+/* Price preview box (event) */
+.price-preview-box {
+  background: var(--bg-main);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  margin: 8px 0 14px;
+}
+
+/* Cancel info (event detail) */
+.cancel-info {
+  margin-top: 12px;
+  background: rgba(239,68,68,0.08);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--color-danger);
+}
 
 /* ── Store Locked Badge ──────────────────────────────────── */
 .store-locked-badge {

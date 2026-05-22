@@ -416,6 +416,45 @@
         </div>
       </el-tab-pane>
 
+      <!-- ───────────────── Tab: Harga Event ───────────────── -->
+      <el-tab-pane label="Harga Event" name="event_price">
+        <div style="margin-top:16px;max-width:700px">
+          <el-card shadow="never">
+            <template #header>
+              <div style="display:flex;align-items:center;gap:8px">
+                <el-icon style="color:#D97706"><Star /></el-icon>
+                <span style="font-weight:700">Harga Event Booking</span>
+              </div>
+            </template>
+
+            <div class="note-box" style="margin-bottom:16px">
+              <el-icon><InfoFilled /></el-icon>
+              <span style="font-size:12px">
+                Harga untuk booking 1 gedung penuh (event). Kalkulasi proporsional:
+                <strong>(Harga per hari ÷ 24) × durasi jam = total harga event</strong>.
+                Contoh: Rp 1.000.000/hari, event 6 jam = Rp 250.000.
+              </span>
+            </div>
+
+            <div style="display:flex;align-items:flex-end;gap:12px;max-width:400px">
+              <el-form-item label="Harga per Hari (Rp)" style="flex:1;margin:0">
+                <el-input-number
+                  v-model="eventPrice"
+                  :min="0"
+                  :step="100000"
+                  style="width:100%"
+                  :formatter="v => `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
+                  :parser="v => Number(v.replace(/[^0-9]/g, ''))"
+                />
+              </el-form-item>
+              <el-button type="primary" :loading="savingEvent" @click="saveEventPrice">
+                Simpan
+              </el-button>
+            </div>
+          </el-card>
+        </div>
+      </el-tab-pane>
+
     </el-tabs>
 
     <!-- ── Dialog: Tambah Jadwal HH ── -->
@@ -527,6 +566,7 @@ import {
   calculatePrice,
 } from '@/api/pricing/pricingApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
+import { getEventPrice, upsertEventPrice } from '@/api/booking/eventBookingApi'
 
 const { can } = usePermission()
 const { isMobile } = useBreakpoint()
@@ -545,6 +585,8 @@ const savingSchedule = ref(false)
 const savingFS = ref(false)
 const loadingFS = ref(false)
 const calculating = ref(false)
+const savingEvent = ref(false)
+const eventPrice  = ref(0)
 
 const storeName = ref('')
 const lastUpdated = ref('—')
@@ -861,6 +903,15 @@ const getPackagePrice = (templateId, dur) => {
   return price > 0 ? `Rp ${formatPrice(price)}` : '—'
 }
 
+const saveEventPrice = async () => {
+  savingEvent.value = true
+  try {
+    await upsertEventPrice(storeId, { price_per_day: eventPrice.value })
+    ElMessage.success('Harga event berhasil disimpan')
+  } catch { ElMessage.error('Gagal menyimpan harga event') }
+  finally { savingEvent.value = false }
+}
+
 onMounted(async () => {
   const { data } = await getRoomTemplates({ per_page: 100 })
   roomTemplates.value = data.data || []
@@ -869,6 +920,11 @@ onMounted(async () => {
   }
   await loadPricing()
   await loadFlashSales()
+  // Load event price (graceful — tidak crash jika BE belum ada)
+  try {
+    const { data: epData } = await getEventPrice(storeId)
+    eventPrice.value = epData.data?.price_per_day || 0
+  } catch { eventPrice.value = 0 }
 })
 </script>
 
