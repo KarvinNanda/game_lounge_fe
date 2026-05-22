@@ -10,6 +10,18 @@ const routes = [
     meta: { requiresAuth: false }
   },
   {
+    path: '/admin-recovery',
+    name: 'AdminRecoveryRequest',
+    component: () => import('@/views/auth/AdminRecoveryRequestView.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/admin-recovery/:token',
+    name: 'AdminRecoveryReset',
+    component: () => import('@/views/auth/AdminRecoveryResetView.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
     path: '/',
     component: AdminLayout,
     meta: { requiresAuth: true },
