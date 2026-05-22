@@ -102,6 +102,8 @@ const { can } = usePermission()
 
 Setiap domain punya file sendiri di `src/api/<domain>/`. Upload file melalui `src/api/uploadApi.js` (`POST /upload`, `multipart/form-data`).
 
+`src/api/auth/authApi.js` juga meng-ekspos 3 fungsi admin recovery: `requestPasswordReset`, `validateResetToken`, `resetPassword` — dipakai oleh halaman forgot-password di luar AdminLayout.
+
 ### Responsive Design
 
 `src/composables/useBreakpoint.js` — reactive breakpoints:
@@ -187,8 +189,10 @@ src/
 ├── api/
 │   ├── index.js                    # Axios instance + interceptors
 │   ├── uploadApi.js                # POST /upload
-│   ├── auth/authApi.js
-│   ├── booking/bookingApi.js
+│   ├── auth/authApi.js             # login, getMe, logout + admin recovery (3 fungsi)
+│   ├── booking/
+│   │   ├── bookingApi.js           # Regular booking CRUD
+│   │   └── eventBookingApi.js      # Event booking CRUD + preview price + event price
 │   ├── customer/customerApi.js
 │   ├── facility/facilityApi.js
 │   ├── notification_template/notificationTemplateApi.js
@@ -215,7 +219,10 @@ src/
 ├── utils/
 │   └── imageHelper.js              # getImageUrl() + uploadImage()
 └── views/
-    ├── auth/LoginView.vue
+    ├── auth/
+    │   ├── LoginView.vue
+    │   ├── AdminRecoveryRequestView.vue   # Halaman minta link reset (public)
+    │   └── AdminRecoveryResetView.vue     # Halaman ganti password via token (public)
     ├── booking/BookingView.vue
     ├── customer/CustomerView.vue
     ├── dashboard/DashboardView.vue
@@ -239,6 +246,8 @@ src/
 | Path | Komponen | Permission |
 |---|---|---|
 | `/login` | `LoginView` | public |
+| `/admin-recovery` | `AdminRecoveryRequestView` | public |
+| `/admin-recovery/:token` | `AdminRecoveryResetView` | public |
 | `/dashboard` | `DashboardView` | — |
 | `/sales` | `SalesView` | — |
 | `/bookings` | `BookingView` | `bookings.view` |
@@ -292,7 +301,9 @@ Sidebar group otomatis ter-expand jika route yang aktif termasuk di dalamnya (de
 
 ## Modul Booking
 
-Kalender grid interaktif untuk manajemen jadwal ruangan.
+Kalender grid interaktif untuk manajemen jadwal ruangan. Mendukung dua tipe booking: **reguler** (per slot per ruangan) dan **event** (satu hari penuh, seluruh ruangan).
+
+### Regular Booking
 
 | Fungsi | Endpoint |
 |---|---|
@@ -306,7 +317,29 @@ Kalender grid interaktif untuk manajemen jadwal ruangan.
 | Hitung harga | `POST /pricing/calculate` |
 | Voucher tersedia | `GET /vouchers/customer-available` |
 
-Fitur utama: kalender grid horizontal (10:00–02:00 lintas tengah malam), new booking mode via klik slot, detail panel kanan, voucher dengan preview diskon, bell notification polling 60 detik.
+### Event Booking
+
+| Fungsi | Endpoint |
+|---|---|
+| Daftar event booking | `GET /event-bookings` |
+| Detail event booking | `GET /event-bookings/:id` |
+| Buat event booking | `POST /event-bookings` |
+| Batalkan event booking | `PATCH /event-bookings/:id/cancel` |
+| Dashboard event | `GET /event-bookings/dashboard` |
+| Preview harga event | `GET /event-bookings/preview-price` |
+| Ambil harga event per store | `GET /stores/:storeId/event-price` |
+| Set harga event per store | `PUT /stores/:storeId/event-price` |
+
+Event booking ditampilkan sebagai **overlay block** di atas kalender grid — satu blok horizontal yang menutupi seluruh baris ruangan secara vertikal, dengan posisi `absolute` dihitung dari `timeToOffset()`.
+
+Fitur utama: kalender grid horizontal (10:00–02:00 lintas tengah malam), new booking mode via klik slot, detail panel kanan, voucher dengan preview diskon, bell notification polling 60 detik. Dropdown "New Booking" memiliki opsi Regular dan Event. Customer search di event booking identik dengan regular booking — auto-fill nama/WA/email jika customer ditemukan di database.
+
+### Filter Store per Staff
+
+Dropdown store di BookingView disesuaikan dengan `staff.staff_stores`:
+- **Super admin / is_all_stores**: semua store tersedia
+- **Staff multi-store**: hanya store yang di-assign
+- **Staff single-store**: store dikunci (ditampilkan sebagai badge, tanpa dropdown)
 
 ---
 
@@ -319,3 +352,60 @@ Fitur utama: kalender grid horizontal (10:00–02:00 lintas tengah malam), new b
 | Daftar transaksi | `GET /sales/transactions` |
 
 Filter period: Today / Yesterday / This Week / This Month / Custom range. Export ke `.xlsx` dan PDF landscape. Trend chart multi-series via ECharts.
+
+---
+
+## Autentikasi Lanjutan — Admin Recovery
+
+Dua halaman **di luar AdminLayout** (tidak perlu login) untuk reset password super admin:
+
+| Route | Komponen | Fungsi |
+|---|---|---|
+| `/admin-recovery` | `AdminRecoveryRequestView` | Input email → kirim link reset |
+| `/admin-recovery/:token` | `AdminRecoveryResetView` | Validasi token → form ganti password |
+
+Pola keamanan: halaman request **selalu tampilkan state sukses** tanpa memedulikan response backend — tidak pernah membocorkan apakah email terdaftar atau tidak. Token divalidasi via `GET /admin-recovery/:token/validate` sebelum menampilkan form.
+
+```
+authApi.js
+  requestPasswordReset(email)          → POST /admin-recovery/request
+  validateResetToken(token)            → GET  /admin-recovery/:token/validate
+  resetPassword(token, { new_password, confirm_password })
+                                       → POST /admin-recovery/:token/reset
+```
+
+---
+
+## Unit Tests
+
+```bash
+npm run test          # jalankan semua test
+npm run test:watch    # watch mode
+npm run test:coverage # coverage report
+```
+
+**255 tests · 19 file · 100% pass**
+
+| File | Deskripsi |
+|---|---|
+| `tests/api/authApi.spec.js` | login, getMe, logout + 3 fungsi admin recovery |
+| `tests/api/bookingApi.spec.js` | Semua endpoint regular booking |
+| `tests/api/eventBookingApi.spec.js` | 8 fungsi event booking (CRUD, dashboard, preview, event price) |
+| `tests/api/customerApi.spec.js` | CRUD customer + search |
+| `tests/api/staffApi.spec.js` | CRUD staff + reset password |
+| `tests/api/pricingApi.spec.js` | Config, happy hour, package prices, flash sale |
+| `tests/api/playCreditsApi.spec.js` | CRUD play credits + topup |
+| `tests/api/voucherApi.spec.js` | CRUD voucher + generate code + recipient count |
+| `tests/api/miscApi.spec.js` | Endpoint-endpoint kecil (facilities, roles, dll) |
+| `tests/api/storeApi.spec.js` | CRUD store + rooms |
+| `tests/stores/authStore.spec.js` | isLoggedIn, isSystem, permissions normalizer, fetchMe, doLogout |
+| `tests/composables/usePermission.spec.js` | can(): wildcard, isSystem bypass, in-list, case-sensitive |
+| `tests/composables/useBreakpoint.spec.js` | Threshold boundaries, mutually exclusive, reaktivitas |
+| `tests/booking/bookingCalc.spec.js` | Kalkulasi harga, duration, voucher discount |
+| `tests/booking/timeSlots.spec.js` | Time slot generation, cross-midnight logic |
+| `tests/booking/storeFilter.spec.js` | accessibleStores, isStoreLocked, lockedStoreName + reaktivitas |
+| `tests/pricing/flashSale.spec.js` | Flash sale payload builder, formatPrice |
+| `tests/promotion/roomTargeting.spec.js` | Room targeting logic untuk voucher/promo |
+| `tests/components/AuditTrail.spec.js` | Render kondisi createdBy/updatedBy/date |
+
+Stack: **Vitest v2** + **jsdom** + `vi.mock('@/api/index')` pattern. Pinia stores ditest dengan `setActivePinia(createPinia())` di `beforeEach`.
