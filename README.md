@@ -1,7 +1,5 @@
 # Gaming Lounge — Frontend Admin Dashboard
 
-> This file also serves as guidance for Claude Code (claude.ai/code) when working in this repository.
-
 Admin dashboard untuk manajemen cabang **Quantum Gaming** (PlayStation/Gaming rental).  
 Dibangun dengan **Vue 3 + Vite + Element Plus**.
 
