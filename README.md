@@ -1,6 +1,6 @@
 # Gaming Lounge — Frontend Admin Dashboard
 
-Admin dashboard untuk manajemen cabang **Quantum Gaming** (PlayStation/Gaming rental).  
+Admin dashboard untuk manajemen cabang **Quantum Gaming* Center* (PlayStation/Gaming rental).  
 Dibangun dengan **Vue 3 + Vite + Element Plus**.
 
 ---
