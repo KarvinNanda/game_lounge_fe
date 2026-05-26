@@ -55,6 +55,7 @@ const routes = [
       { path: 'role',  name: 'Role',  meta: { permission: 'settings.staff_role' }, component: () => import('@/views/role/RoleView.vue') },
       { path: 'settings/notification-templates', name: 'NotificationTemplates', meta: { permission: 'settings.staff_role' }, component: () => import('@/views/settings/NotificationTemplatesView.vue') },
       { path: 'settings/global-holidays', name: 'GlobalHolidays', meta: { permission: 'settings.branches' }, component: () => import('@/views/settings/GlobalHolidayView.vue') },
+      { path: 'settings/banners', name: 'BannerManagement', meta: { permission: 'settings.branches' }, component: () => import('@/views/settings/BannerManagementView.vue') },
     ]
   }
 ]
