@@ -47,7 +47,7 @@ npm install
 Buat file `.env` di root:
 
 ```env
-VITE_API_URL=http://localhost:8080/api/v1
+VITE_API_URL=http://localhost:8080/api
 ```
 
 ---
