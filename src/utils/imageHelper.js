@@ -1,7 +1,7 @@
 import { uploadFile } from '@/api/uploadApi'
 
 const getBaseUrl = () =>
-  (import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1').replace(/\/api\/v1.*$/, '')
+  (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api.*$/, '')
 
 /**
  * Convert a relative path ("/assets/img/x.jpg") to the full backend URL.

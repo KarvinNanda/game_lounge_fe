@@ -102,6 +102,9 @@
                 <router-link v-if="can('settings.branches')" to="/settings/global-holidays" class="nav-subitem" active-class="active">
                   <span class="sub-dot" />Tanggal Merah Global
                 </router-link>
+                <router-link v-if="can('settings.branches')" to="/settings/banners" class="nav-subitem" active-class="active">
+                  <span class="sub-dot" />Kelola Banner
+                </router-link>
               </div>
             </transition>
           </div>
