@@ -547,7 +547,8 @@ const handleExport = async (format) => {
   try {
     const { data } = await getTransactions({ ...buildParams(), type: txFilter.value, page: 1, per_page: 9999 })
     const rows = data.data || []
-    format === 'excel' ? exportToExcel(rows) : exportToPDF(rows)
+    if (format === 'excel') exportToExcel(rows)
+    else exportToPDF(rows)
   } catch { ElMessage.error('Gagal export') }
 }
 
