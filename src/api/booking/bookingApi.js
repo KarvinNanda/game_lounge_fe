@@ -16,7 +16,7 @@ export const getDashboard = (params) => api.get('/bookings/dashboard', { params 
 export const getSessionsEndingSoon = (storeId) =>
   api.get('/bookings/sessions-ending-soon', { params: { store_id: storeId } })
 // Play credits tersedia untuk customer di store tertentu
-export const getAvailableCredits = (customerId, storeId) =>
-  api.get('/bookings/available-credits', { params: { customer_id: customerId, store_id: storeId } })
+export const getAvailableCredits = (customerId, storeId, bookingDate) =>
+  api.get('/bookings/available-credits', { params: { customer_id: customerId, store_id: storeId, booking_date: bookingDate } })
 // Hitung harga booking (dari pricing engine)
 export const calculatePrice = (payload) => api.post('/pricing/calculate', payload)

@@ -27,4 +27,12 @@ export default defineConfig([
   ...pluginOxlint.buildFromOxlintConfigFile('.oxlintrc.json'),
 
   skipFormatting,
+
+  // ── Project-wide rule overrides ──────────────────────────────────────────
+  {
+    rules: {
+      // Empty catch blocks are intentional throughout this codebase (silent error handling).
+      'no-empty': ['error', { allowEmptyCatch: true }],
+    },
+  },
 ])

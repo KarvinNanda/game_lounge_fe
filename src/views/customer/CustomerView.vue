@@ -296,22 +296,21 @@
       <!-- ── Riwayat Booking ── -->
       <div class="dp-section">
         <div class="dp-section-title">Riwayat Booking</div>
-        <div v-if="!selectedCustomer.recent_bookings?.length" class="dp-empty-center">
+        <div v-if="!selectedCustomer.booking_history?.length" class="dp-empty-center">
           Belum ada riwayat booking
         </div>
         <div v-else class="dp-booking-list">
-          <div v-for="(b, i) in selectedCustomer.recent_bookings" :key="i" class="dp-booking-item">
+          <div v-for="(b, i) in selectedCustomer.booking_history" :key="i" class="dp-booking-item">
             <div class="dp-booking-left">
-              <div class="dp-booking-room">{{ b.room }}</div>
-              <div class="dp-booking-meta">{{ b.date }} &middot; {{ b.duration }}</div>
+              <div class="dp-booking-room">{{ b.room.name }}</div>
+              <div class="dp-booking-meta">{{ formatDate(b.booking_date) }} &middot; {{ b.duration_hours }} jam</div>
             </div>
             <div class="dp-booking-right">
-              <div class="dp-booking-total">{{ formatRp(b.total) }}</div>
+              <div class="dp-booking-total">{{ formatRp(b.total_price) }}</div>
               <el-tag type="success" size="small">{{ b.status }}</el-tag>
             </div>
           </div>
         </div>
-        <button class="dp-link-btn dp-see-all">Lihat Semua Riwayat &rarr;</button>
       </div>
 
     </div>
@@ -489,12 +488,12 @@
           <div class="dp-notes-box">{{ selectedCustomer.notes || 'Belum ada catatan.' }}</div>
         </div>
         <!-- Booking -->
-        <div class="dp-section" v-if="selectedCustomer.recent_bookings?.length">
+        <div class="dp-section" v-if="selectedCustomer.booking_history?.length">
           <div class="dp-section-title">Riwayat Booking</div>
           <div class="dp-booking-list">
-            <div v-for="(b, i) in selectedCustomer.recent_bookings.slice(0,5)" :key="i" class="dp-booking-item">
-              <div class="dp-booking-left"><div class="dp-booking-room">{{ b.room }}</div><div class="dp-booking-meta">{{ b.date }}</div></div>
-              <div class="dp-booking-right"><div class="dp-booking-total">{{ formatRp(b.total) }}</div><el-tag type="success" size="small">{{ b.status }}</el-tag></div>
+            <div v-for="(b, i) in selectedCustomer.booking_history" :key="i" class="dp-booking-item">
+              <div class="dp-booking-left"><div class="dp-booking-room">{{ b.room.name }}</div><div class="dp-booking-meta">{{ formatDate(b.booking_date) }} &middot; {{ b.duration_hours }} jam</div></div>
+              <div class="dp-booking-right"><div class="dp-booking-total">{{ formatRp(b.total_price) }}</div><el-tag type="success" size="small">{{ b.status }}</el-tag></div>
             </div>
           </div>
         </div>
@@ -904,8 +903,18 @@ onMounted(async () => {
   min-height: 36px;
 }
 
-/* Booking list */
-.dp-booking-list { display: flex; flex-direction: column; gap: 6px; }
+/* Booking list — max 3 items visible, scroll untuk sisanya */
+.dp-booking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 168px;   /* ~3 item @ ±50px each + gap */
+  overflow-y: auto;
+  padding-right: 2px;  /* ruang scrollbar tipis */
+}
+.dp-booking-list::-webkit-scrollbar { width: 4px; }
+.dp-booking-list::-webkit-scrollbar-track { background: transparent; }
+.dp-booking-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
 .dp-booking-item {
   display: flex; justify-content: space-between; align-items: center;
   background: var(--bg-main); border-radius: 7px; padding: 8px 10px;
