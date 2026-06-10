@@ -301,7 +301,7 @@ import { getSalesSummary, getSalesTrend, getTransactions } from '@/api/sales/sal
 import { getStores } from '@/api/store/storeApi'
 
 // ── Breakpoint ────────────────────────────────────────────────
-const { isMobile, isTablet } = useBreakpoint()
+const { isMobile } = useBreakpoint()
 
 // ── State ─────────────────────────────────────────────────────
 const loading      = ref(false)

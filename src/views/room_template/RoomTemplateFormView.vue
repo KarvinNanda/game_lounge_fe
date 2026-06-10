@@ -155,15 +155,15 @@
                 {{ form.capacity_min }}–{{ form.capacity_max }} orang
               </div>
               <div class="preview-facilities" v-if="selectedFacilityIds.length">
-                <img
-                  v-for="fid in selectedFacilityIds.slice(0, 6)"
-                  :key="fid"
-                  :src="getImageUrl(getFacility(fid)?.icon_url)"
-                  :alt="getFacility(fid)?.name"
-                  :title="getFacility(fid)?.name"
-                  class="preview-fac-icon"
-                  v-if="getFacility(fid)?.icon_url"
-                />
+                <template v-for="fid in selectedFacilityIds.slice(0, 6)" :key="fid">
+                  <img
+                    v-if="getFacility(fid)?.icon_url"
+                    :src="getImageUrl(getFacility(fid)?.icon_url)"
+                    :alt="getFacility(fid)?.name"
+                    :title="getFacility(fid)?.name"
+                    class="preview-fac-icon"
+                  />
+                </template>
               </div>
               <div class="preview-desc" v-if="form.description">{{ form.description }}</div>
             </div>
