@@ -545,8 +545,7 @@ onMounted(() => {
   padding:10px; background:var(--bg-main);
 }
 @media (max-width:639px) {
-  .store-checkboxes { grid-template-columns:1fr; }
-  border-radius:8px; border:1px solid var(--border-color);
+  .store-checkboxes { grid-template-columns:1fr; border-radius:8px; border:1px solid var(--border-color); }
 }
 
 .drawer-footer { display:flex; gap:10px; padding:0 4px; }

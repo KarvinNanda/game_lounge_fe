@@ -629,15 +629,6 @@ const fsForm = reactive({
   date_from: '', date_to: '', time_from: '12:00', time_to: '13:00', is_active: true,
 })
 
-// Static content
-const priorityRules = [
-  'Klasifikasi Hari (Weekday / Weekend / Tanggal Merah)',
-  'Pengecekan Happy Hour (jika Weekday)',
-  'Perhitungan Happy Hour (per jam)',
-  'Perhitungan Normal Hour (paket termurah)',
-  'Penerapan Flash Sale (jika ada)',
-]
-
 const rulesSummary = [
   { title: 'Happy Hour', desc: 'Berlaku Weekday (Senin–Kamis) pada jam yang ditentukan, dihitung per jam.' },
   { title: 'Normal Hour (Weekday)', desc: 'Di luar jam Happy Hour, menggunakan harga paket termurah.' },
@@ -678,7 +669,7 @@ const loadPricing = async () => {
 
     // FIX Bug 3: build package rows dengan type casting yang benar
     buildPackageRows(p.package_prices || [])
-  } catch (e) {
+  } catch {
     ElMessage.error('Gagal memuat data pricing')
   } finally {
     loading.value = false

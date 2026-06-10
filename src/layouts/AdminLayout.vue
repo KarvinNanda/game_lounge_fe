@@ -75,6 +75,10 @@
             <el-icon><Ticket /></el-icon>
             <span>Promotion</span>
           </router-link>
+          <router-link v-if="can('fnb.view')" to="/fnb" class="nav-item" active-class="active">
+            <el-icon><Food /></el-icon>
+            <span>FnB</span>
+          </router-link>
         </template>
 
         <!-- SYSTEM -->
@@ -244,7 +248,7 @@ const showStoreGroup = computed(() =>
 )
 const showBusinessSection = computed(() =>
   authStore.isSystem ||
-  ['bookings.view','pricing.view','customers.view','play_credits.view','promotion.view']
+  ['bookings.view','pricing.view','customers.view','play_credits.view','promotion.view','fnb.view']
     .some(p => authStore.permissions.includes(p))
 )
 const showSettingsGroup = computed(() =>
