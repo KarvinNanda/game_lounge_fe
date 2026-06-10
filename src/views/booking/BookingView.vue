@@ -156,20 +156,23 @@
               >{{ slot }}</div>
             </div>
 
-            <!-- Event Booking Merged Blocks — absolute overlay atas semua room rows -->
+            <!-- Event Booking Merged Blocks — absolute overlay per tab room type -->
             <div class="event-overlay-container" v-if="eventBookings.length > 0">
-              <div
-                v-for="event in eventBookings"
-                :key="event.id"
-                class="event-merged-block"
-                :style="getEventBlockStyle(event)"
-                @click="handleEventClick(event)"
-              >
-                <el-icon size="18" style="color:#EEEDFE;margin-bottom:4px"><Star /></el-icon>
-                <div class="event-block-title">EVENT</div>
-                <div class="event-block-name">{{ event.event_name }}</div>
-                <div class="event-block-time">{{ event.start_time?.slice(0,5) }} – {{ event.end_time?.slice(0,5) }}</div>
-              </div>
+              <template v-for="event in eventBookings" :key="event.id">
+                <div
+                  v-if="isRoomTabInEvent(event)"
+                  class="event-merged-block"
+                  :style="getEventBlockStyle(event)"
+                  @click="handleEventClick(event)"
+                >
+                  <el-icon size="18" style="color:#EEEDFE;margin-bottom:4px"><Star /></el-icon>
+                  <div class="event-block-title">EVENT</div>
+                  <div class="event-block-name">{{ event.event_name }}</div>
+                  <div class="event-block-time">{{ event.start_time?.slice(0,5) }} – {{ event.end_time?.slice(0,5) }}</div>
+                  <div v-if="event.booking_scope === 'per_room_type'"
+                       style="font-size:9px;opacity:0.75;margin-top:2px">Per Tipe Ruangan</div>
+                </div>
+              </template>
             </div>
 
             <!-- Empty state -->
@@ -344,12 +347,31 @@
           </div>
 
           <div class="event-form-badge">
-            <el-icon><Star /></el-icon> Booking seluruh gedung — semua ruangan terblokir
+            <el-icon><Star /></el-icon>
+            <span v-if="eventForm.booking_scope === 'full_venue'">Booking seluruh gedung — semua ruangan terblokir</span>
+            <span v-else>Booking per tipe ruangan — pilih tipe yang diblokir</span>
           </div>
 
           <el-form :model="eventForm" label-position="top">
             <el-form-item label="Nama Event *">
-              <el-input v-model="eventForm.event_name" placeholder="Contoh: Grand Tournament PS5" />
+              <el-input v-model="eventForm.event_name"
+                placeholder="Contoh: Birthday Party, Tournament PS5"
+                maxlength="150" show-word-limit />
+            </el-form-item>
+
+            <!-- BARU: Description -->
+            <el-form-item label="Deskripsi (Opsional)">
+              <el-input
+                v-model="eventForm.description"
+                type="textarea"
+                :rows="3"
+                placeholder="Contoh: Paket ini sudah termasuk FnB 1 paket per orang, dekorasi, dan akses semua ruangan lantai 4."
+                maxlength="500"
+                show-word-limit
+              />
+              <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
+                💡 Deskripsi ini akan ditampilkan kepada customer di halaman konfirmasi booking.
+              </div>
             </el-form-item>
 
             <!-- Customer Search — sama dengan regular booking -->
@@ -399,11 +421,33 @@
                 <el-input v-model="eventForm.customer_email" placeholder="email@..." />
               </el-form-item>
             </div>
+
+            <!-- Tanggal -->
             <el-form-item label="Tanggal *">
               <el-date-picker v-model="eventForm.booking_date" type="date"
-                value-format="YYYY-MM-DD" format="dddd, DD MMM YYYY" style="width:100%" />
+                value-format="YYYY-MM-DD" format="dddd, DD MMM YYYY" style="width:100%"
+                @change="previewEventPriceCalc" />
             </el-form-item>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+            <!-- Tipe Durasi -->
+            <el-form-item label="Tipe Durasi *">
+              <el-radio-group v-model="eventForm.duration_type" @change="previewEventPriceCalc">
+                <el-radio-button value="hourly">🕐 Per Jam</el-radio-button>
+                <el-radio-button value="full_day">📅 Full 1 Hari</el-radio-button>
+              </el-radio-group>
+              <div style="font-size:11px;color:var(--text-secondary);margin-top:5px">
+                <template v-if="eventForm.duration_type === 'full_day'">
+                  Seluruh jam operasional akan diblokir. Harga = harga event per hari.
+                </template>
+                <template v-else>
+                  Tentukan jam mulai dan selesai booking.
+                </template>
+              </div>
+            </el-form-item>
+
+            <!-- Jam (hanya jika hourly) -->
+            <div v-if="eventForm.duration_type === 'hourly'"
+                 style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
               <el-form-item label="Jam Mulai *">
                 <el-time-picker v-model="eventForm.start_time" format="HH:mm"
                   value-format="HH:mm" style="width:100%" @change="previewEventPriceCalc" />
@@ -414,11 +458,62 @@
               </el-form-item>
             </div>
 
+            <!-- Info full_day -->
+            <div v-else class="info-box" style="margin-bottom:12px">
+              <el-icon><InfoFilled /></el-icon>
+              <span>Jam akan otomatis disesuaikan dengan jam operasional store pada tanggal tersebut.</span>
+            </div>
+
+            <!-- Scope Ruangan -->
+            <el-form-item label="Scope Ruangan *">
+              <el-radio-group v-model="eventForm.booking_scope">
+                <el-radio-button value="full_venue">🏠 Full 1 Gedung</el-radio-button>
+                <el-radio-button value="per_room_type">📋 Per Tipe Ruangan</el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+
+            <!-- Pilih tipe ruangan (per_room_type) -->
+            <el-form-item v-if="eventForm.booking_scope === 'per_room_type'"
+              label="Tipe Ruangan yang Diblokir *">
+              <div v-if="loadingRoomTemplates" style="color:var(--text-muted);font-size:12px">
+                <el-icon class="is-loading"><Loading /></el-icon> Memuat tipe ruangan...
+              </div>
+              <div v-else-if="!storeRoomTemplates.length" style="color:var(--text-muted);font-size:12px">
+                Pilih cabang terlebih dahulu
+              </div>
+              <el-checkbox-group v-else v-model="eventSelectedRoomTemplateIds"
+                style="display:flex;flex-wrap:wrap;gap:6px">
+                <el-checkbox v-for="rt in storeRoomTemplates" :key="rt.id" :value="rt.id"
+                  style="margin:0">
+                  {{ rt.name }}
+                </el-checkbox>
+              </el-checkbox-group>
+              <!-- <div style="font-size:11px;color:var(--text-muted);margin-top:5px">
+                Semua unit dari tipe yang dipilih akan diblokir.
+              </div> -->
+            </el-form-item>
+
             <!-- Preview harga -->
             <div v-if="eventPricePreview" class="price-preview-box">
-              <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">KALKULASI HARGA</div>
-              <div style="font-size:11px;color:var(--text-secondary)">{{ eventPricePreview.formula }}</div>
-              <div style="font-size:18px;font-weight:700;color:var(--color-primary);margin-top:4px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                <div style="font-size:11px;color:var(--text-secondary)">KALKULASI HARGA</div>
+                <span
+                  v-if="eventPricePreview.day_type"
+                  :class="['day-type-badge', eventPricePreview.day_type === 'weekday' ? 'weekday' : 'weekend']"
+                >
+                  {{ eventPricePreview.day_type === 'weekday' ? 'Weekday' : 'Weekend / Hari Libur' }}
+                </span>
+              </div>
+              <div v-if="eventPricePreview.active_price" style="font-size:11px;color:var(--text-secondary)">
+                Harga aktif: <strong>{{ formatRp(eventPricePreview.active_price) }}</strong>/hari
+              </div>
+              <div v-if="eventPricePreview.duration_hours" style="font-size:11px;color:var(--text-secondary)">
+                Durasi: <strong>{{ eventPricePreview.duration_hours }} jam</strong>
+                <template v-if="eventPricePreview.formula">
+                  &nbsp;·&nbsp; {{ eventPricePreview.formula }}
+                </template>
+              </div>
+              <div style="font-size:18px;font-weight:700;color:var(--color-primary);margin-top:6px">
                 {{ formatRp(eventPricePreview.total_price) }}
               </div>
             </div>
@@ -429,7 +524,10 @@
           </el-form>
 
           <el-button type="primary" style="width:100%;margin-top:8px"
-            :loading="creatingEvent" :disabled="!eventPricePreview"
+            :loading="creatingEvent"
+            :disabled="!eventForm.event_name || !eventForm.customer_name || !eventForm.booking_date ||
+              (eventForm.duration_type === 'hourly' && (!eventForm.start_time || !eventForm.end_time)) ||
+              (eventForm.booking_scope === 'per_room_type' && !eventSelectedRoomTemplateIds.length)"
             @click="handleCreateEventBooking">
             Konfirmasi Event Booking
           </el-button>
@@ -449,6 +547,14 @@
           <div class="info-section-title">INFORMASI EVENT</div>
           <div class="info-grid">
             <div class="info-row"><span>Nama Event</span><strong>{{ selectedEvent.event_name }}</strong></div>
+            <div v-if="selectedEvent?.description" class="detail-row">
+              <span class="detail-label" style="color:var(--text-secondary);font-size:12px">
+                Deskripsi
+              </span>
+              <p style="margin:0;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word">
+                {{ selectedEvent.description }}
+              </p>
+            </div>
             <div class="info-row"><span>Customer</span><span>{{ selectedEvent.customer_name }}</span></div>
             <div class="info-row"><span>Tanggal</span><span>{{ formatDateDisplay(selectedEvent.booking_date) }}</span></div>
             <div class="info-row">
@@ -613,19 +719,39 @@
               <div style="font-size:11px;font-weight:700;margin-bottom:8px;color:var(--color-success)">
                 🎮 Pakai Play Credits?
               </div>
-              <el-radio-group v-model="newBookingForm.payment_method" style="display:flex;flex-direction:column;gap:6px">
-                <el-radio label="cash">
-                  <span style="font-size:12px">💵 Cash — Bayar langsung</span>
-                </el-radio>
-                <el-radio v-for="cr in availableCredits" :key="cr.id" :label="`play_credits_${cr.id}`"
-                  @change="newBookingForm.play_credit_id = cr.id; newBookingForm.payment_method = 'play_credits'">
-                  <span style="font-size:12px">
-                    <strong>{{ cr.package?.name }}</strong>
-                    — {{ cr.remaining_hours }} Jam tersisa
-                    <span style="font-size:10px;color:var(--text-muted)">(exp. {{ formatDate(cr.expires_at) }})</span>
-                  </span>
-                </el-radio>
-              </el-radio-group>
+              <div style="display:flex;flex-direction:column;gap:6px">
+
+                <!-- Opsi: Cash -->
+                <div
+                  :class="['payment-option', newBookingForm.payment_method === 'cash' ? 'payment-option--selected' : '']"
+                  @click="newBookingForm.payment_method = 'cash'; newBookingForm.play_credit_id = null"
+                >
+                  <div class="payment-option__check">
+                    <el-icon v-if="newBookingForm.payment_method === 'cash'"><Check /></el-icon>
+                  </div>
+                  <span style="font-size:12px;font-weight:600">💵 Cash</span>
+                  <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">— Bayar langsung</span>
+                </div>
+
+                <!-- Opsi: Play Credits -->
+                <div
+                  v-for="cr in availableCredits" :key="cr.id"
+                  :class="['payment-option', newBookingForm.play_credit_id === cr.id && newBookingForm.payment_method !== 'cash' ? 'payment-option--selected' : '']"
+                  @click="newBookingForm.play_credit_id = cr.id; newBookingForm.payment_method = 'play_credits'"
+                >
+                  <div class="payment-option__check">
+                    <el-icon v-if="newBookingForm.play_credit_id === cr.id && newBookingForm.payment_method !== 'cash'"><Check /></el-icon>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:1px">
+                    <span style="font-size:12px;font-weight:700">🎮 {{ cr.package?.name }}</span>
+                    <span style="font-size:11px;color:var(--text-secondary)">
+                      {{ cr.remaining_hours }} Jam tersisa
+                      <span style="color:var(--text-muted)">&nbsp;·&nbsp; exp. {{ formatDate(cr.expires_at) }}</span>
+                    </span>
+                  </div>
+                </div>
+
+              </div>
             </div>
 
             <!-- Voucher -->
@@ -916,6 +1042,7 @@ const eventPricePreview     = ref(null)
 const eventForm = reactive({
   store_id:          '',
   event_name:        '',
+  description:       '',
   customer_id:       '',
   customer_name:     '',
   customer_whatsapp: '',
@@ -924,7 +1051,14 @@ const eventForm = reactive({
   start_time:        '',
   end_time:          '',
   notes:             '',
+  duration_type:     'hourly',     // 'hourly' | 'full_day'
+  booking_scope:     'full_venue', // 'full_venue' | 'per_room_type'
 })
+
+// Room template pilihan untuk per_room_type — ref terpisah agar el-checkbox-group reaktif
+const eventSelectedRoomTemplateIds = ref([])
+const storeRoomTemplates           = ref([])
+const loadingRoomTemplates         = ref(false)
 
 const cancelEventForm    = reactive({ reason: '' })
 const cancelEventFormRef = ref()
@@ -1120,17 +1254,34 @@ const getBlockClass = (bk) => ({
 }[bk.status] || 'block-upcoming')
 
 // ── Event Booking Helpers ─────────────────────────────────────
+
+// Apakah tab room type yang sedang aktif termasuk dalam event ini?
+const isRoomTabInEvent = (event) => {
+  // full_venue → tampil di semua tab
+  if (!event.booking_scope || event.booking_scope === 'full_venue') return true
+  // per_room_type → cek apakah ada room di tab aktif yang template-nya ada di selected list
+  let ids = event.selected_room_template_ids
+  if (!ids) return false
+  if (typeof ids === 'string') {
+    try { ids = JSON.parse(ids) } catch { return false }
+  }
+  if (!Array.isArray(ids) || ids.length === 0) return false
+  const tabRooms = activeRoomGroup.value?.rooms || []
+  return tabRooms.some(r => ids.includes(r.room_template?.id))
+}
+
 // Style (posisi & ukuran) untuk merged event block di grid
+// Untuk per_room_type, tinggi disesuaikan dengan jumlah room di tab aktif
 const getEventBlockStyle = (event) => {
-  const startPx    = timeToOffset(event.start_time)
-  const endPx      = timeToOffset(event.end_time)
-  const width      = Math.max(endPx - startPx - 4, 20)
-  const totalRooms = allRooms.value.length || 1
-  const rowHeight  = 56 // matches .room-row { height: 56px }
+  const startPx   = timeToOffset(event.start_time)
+  const endPx     = timeToOffset(event.end_time)
+  const width     = Math.max(endPx - startPx - 4, 20)
+  const roomCount = activeRoomGroup.value?.rooms?.length || 1
+  const rowHeight = 56
   return {
     left:   startPx + 'px',
     width:  width + 'px',
-    height: (totalRooms * rowHeight - 8) + 'px',
+    height: (roomCount * rowHeight - 8) + 'px',
     top:    '4px',
   }
 }
@@ -1143,10 +1294,23 @@ const handleNewBookingCommand = (command) => {
   }
 }
 
+// Fetch room templates milik store ini untuk pilihan per_room_type
+const onEventStoreChange = async (storeId) => {
+  storeRoomTemplates.value = []
+  if (!storeId) return
+  loadingRoomTemplates.value = true
+  try {
+    const { data } = await api.get(`/public/room-templates?store_id=${storeId}`)
+    storeRoomTemplates.value = data.data || []
+  } catch { /* biarkan kosong */ } finally { loadingRoomTemplates.value = false }
+}
+watch(() => eventForm.store_id, onEventStoreChange)
+
 const openEventBookingForm = () => {
   Object.assign(eventForm, {
     store_id:          selectedStore.value,
     event_name:        '',
+    description:       '',
     customer_id:       '',
     customer_name:     '',
     customer_whatsapp: '',
@@ -1155,9 +1319,12 @@ const openEventBookingForm = () => {
     start_time:        '',
     end_time:          '',
     notes:             '',
+    duration_type:     'hourly',
+    booking_scope:     'full_venue',
   })
+  eventSelectedRoomTemplateIds.value = []
   eventPricePreview.value  = null
-  customerOptions.value    = []   // reset search dropdown
+  customerOptions.value    = []
   isEventBookingForm.value = true
   isNewBookingMode.value   = false
   selectedBooking.value    = null
@@ -1182,13 +1349,23 @@ const onEventCustomerChange = (customerId) => {
 }
 
 const previewEventPriceCalc = async () => {
-  if (!eventForm.store_id || !eventForm.start_time || !eventForm.end_time) return
+  if (!eventForm.store_id) return
+  if (eventForm.duration_type === 'hourly' && (!eventForm.start_time || !eventForm.end_time)) return
   try {
-    const { data } = await previewEventPrice({
-      store_id:   eventForm.store_id,
-      start_time: eventForm.start_time,
-      end_time:   eventForm.end_time,
-    })
+    const params = {
+      store_id:      eventForm.store_id,
+      duration_type: eventForm.duration_type,
+    }
+    if (eventForm.booking_date) params.booking_date = eventForm.booking_date
+    if (eventForm.duration_type === 'hourly') {
+      params.start_time = eventForm.start_time
+      params.end_time   = eventForm.end_time
+    }
+    if (eventForm.duration_type === 'full_day') {
+      params.start_time = dashboardData.value.open_time
+      params.end_time   = dashboardData.value.close_time
+    }
+    const { data } = await previewEventPrice(params)
     eventPricePreview.value = data.data
   } catch { eventPricePreview.value = null }
 }
@@ -1196,7 +1373,25 @@ const previewEventPriceCalc = async () => {
 const handleCreateEventBooking = async () => {
   creatingEvent.value = true
   try {
-    await createEventBooking({ ...eventForm })
+    const payload = {
+      store_id:          eventForm.store_id,
+      event_name:        eventForm.event_name,
+      description:       eventForm.description,
+      customer_id:       eventForm.customer_id || null,
+      customer_name:     eventForm.customer_name,
+      customer_whatsapp: eventForm.customer_whatsapp,
+      customer_email:    eventForm.customer_email,
+      booking_date:      eventForm.booking_date,
+      start_time:        eventForm.duration_type === 'hourly' ? eventForm.start_time : '',
+      end_time:          eventForm.duration_type === 'hourly' ? eventForm.end_time   : '',
+      notes:             eventForm.notes,
+      duration_type:     eventForm.duration_type,
+      booking_scope:     eventForm.booking_scope,
+      selected_room_template_ids: eventForm.booking_scope === 'per_room_type'
+        ? eventSelectedRoomTemplateIds.value
+        : [],
+    }
+    await createEventBooking(payload)
     ElMessage.success('Event booking berhasil dibuat!')
     isEventBookingForm.value = false
     loadDashboard()
@@ -1317,6 +1512,16 @@ const recalculatePrice = async () => {
     } finally {
       priceCalcLoading.value = false
     }
+
+    // Refresh play credits jika tanggal berubah dan customer adalah member
+    if (f.customer_id) {
+      const customer = customerOptions.value.find(c => c.id === f.customer_id)
+      if (customer?.type === 'member') {
+        getAvailableCredits(f.customer_id, f.store_id, f.booking_date)
+          .then(({ data }) => { availableCredits.value = data.data || [] })
+          .catch(() => {})
+      }
+    }
   }, 600)
 }
 
@@ -1351,7 +1556,7 @@ const onCustomerChange = async (customerId) => {
     if (customer.type === 'member') {
       // Load play credits dan vouchers paralel
       const [, ] = await Promise.allSettled([
-        getAvailableCredits(customerId, selectedStore.value)
+        getAvailableCredits(customerId, selectedStore.value,newBookingForm.booking_date)
           .then(({ data }) => { availableCredits.value = data.data || [] })
           .catch(() => { availableCredits.value = [] }),
         loadAvailableVouchers(customerId),
@@ -1757,6 +1962,20 @@ body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.
 .info-row > span:last-child,
 .info-row > strong { color: var(--text-primary); font-weight: 600; text-align: right; }
 
+/* Detail row — untuk blok deskripsi multi-baris di panel event */
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 12.5px;
+}
+.detail-label {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
 /* Ending soon */
 .ending-soon-alert {
   background: rgba(245,158,11,0.1);
@@ -1812,6 +2031,46 @@ body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.
   background: rgba(16,185,129,0.07);
   border: 1px solid rgba(16,185,129,0.22);
   border-radius: 8px; padding: 12px; margin-bottom: 12px;
+}
+
+/* Payment option cards */
+.payment-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--bg-card);
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+.payment-option:hover {
+  border-color: var(--color-primary);
+  background: rgba(2,130,222,0.04);
+}
+.payment-option--selected {
+  border-color: var(--color-success) !important;
+  background: rgba(16,185,129,0.08) !important;
+}
+.payment-option__check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--color-success);
+  transition: border-color 0.15s, background 0.15s;
+}
+.payment-option--selected .payment-option__check {
+  border-color: var(--color-success);
+  background: var(--color-success);
+  color: #fff;
 }
 
 /* Confirm modal rows */
@@ -1874,6 +2133,27 @@ body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.
   align-items: center;
   gap: 6px;
   margin-bottom: 14px;
+}
+
+/* Day-type badge inside price preview */
+.day-type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.day-type-badge.weekday {
+  background: rgba(59,130,246,0.12);
+  color: #2563EB;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+.day-type-badge.weekend {
+  background: rgba(217,119,6,0.12);
+  color: #D97706;
+  border: 1px solid rgba(217,119,6,0.3);
 }
 
 /* Price preview box (event) */
