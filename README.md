@@ -1,8 +1,6 @@
-# Quantum Gaming — Frontend Admin Dashboard
+# Gaming Lounge — Frontend Admin Dashboard
 
-> This file also serves as guidance for Claude Code (claude.ai/code) when working in this repository.
-
-Admin dashboard untuk manajemen cabang **Quantum Gaming** (PlayStation/Gaming rental).  
+Admin dashboard untuk manajemen cabang **Quantum Gaming* Center* (PlayStation/Gaming rental).  
 Dibangun dengan **Vue 3 + Vite + Element Plus**.
 
 ---
@@ -296,15 +294,6 @@ SYSTEM
 ```
 
 Sidebar group otomatis ter-expand jika route yang aktif termasuk di dalamnya (deteksi di `AdminLayout.vue` `onMounted`).
-
----
-
-## Autentikasi
-
-- Token disimpan di `localStorage` key `token`
-- Setiap request otomatis menambahkan `Authorization: Bearer <token>` via Axios interceptor
-- Response `401` → token dihapus, redirect ke `/login`
-- Saat refresh halaman, jika token ada tapi data staff kosong, otomatis memanggil `GET /auth/me`
 
 ---
 
