@@ -289,13 +289,6 @@ const filteredRoles = computed(() => {
   return roleList.value.filter(r => r.name.toLowerCase().includes(q))
 })
 
-const totalPermissions = computed(() =>
-  roleList.value.reduce((sum, r) => sum + (r.permissions?.length || 0), 0)
-)
-
-const totalStaffAssigned = computed(() =>
-  roleList.value.reduce((sum, r) => sum + (r.staff_count || 0), 0)
-)
 
 // ── CRUD ──
 const fetchRoles = async () => {

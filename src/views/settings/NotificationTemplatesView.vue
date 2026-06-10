@@ -298,8 +298,8 @@ const openEditor = (tmpl) => {
 const insertVariable = (key) => {
   const varText = `{{${key}}}`
 
-  let targetRef   = null
-  let targetField = ''
+  let targetRef
+  let targetField
 
   if (activeChannel.value === 'email') {
     if (activeInput.value === 'email_subject') {

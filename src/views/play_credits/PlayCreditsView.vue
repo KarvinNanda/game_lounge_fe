@@ -838,11 +838,6 @@ const openPackageForm = (pkg) => {
   packageFormVisible.value = true
 }
 
-const onIconChange = (file) => {
-  pkgIconFile.value = file.raw
-  pkgIconPreview.value = URL.createObjectURL(file.raw)
-}
-
 const handleSavePackage = async () => {
   await pkgFormRef.value.validate(async (valid) => {
     if (!valid) return

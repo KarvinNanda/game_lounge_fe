@@ -113,13 +113,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { validateResetToken, resetPassword } from '@/api/auth/authApi'
 
-const route    = useRoute()
-const router   = useRouter()
-const token    = route.params.token
+const route = useRoute()
+const token = route.params.token
 
 const validating   = ref(true)
 const tokenError   = ref(false)

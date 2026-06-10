@@ -1033,7 +1033,6 @@ const cancelForm = reactive({ reason: '' })
 const eventBookings         = ref([])
 const isEventBookingForm    = ref(false)
 const creatingEvent         = ref(false)
-const showEventSuccess      = ref(false)
 const showCancelEventDialog = ref(false)
 const cancellingEvent       = ref(false)
 const selectedEvent         = ref(null)
@@ -1133,7 +1132,7 @@ const voucherDiscount = computed(() => {
     return { amount: 0, invalid: true, reason: `Min. pembelian ${formatRp(v.min_purchase)}` }
   }
 
-  let amount = 0
+  let amount
   if (v.discount_type === 'percentage') {
     amount = Math.round(base * v.discount_value / 100)
     if (v.max_discount && amount > v.max_discount) amount = v.max_discount
