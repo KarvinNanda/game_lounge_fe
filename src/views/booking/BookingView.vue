@@ -968,7 +968,7 @@ import {
 } from '@/api/booking/eventBookingApi'
 import { getStores, getEffectiveOperatingHours } from '@/api/store/storeApi'
 import { getCustomers } from '@/api/customer/customerApi'
-import api from '@/api/index'
+import api, { publicApi } from '@/api/index'
 
 const { can } = usePermission()
 const authStore = useAuthStore()
@@ -1299,7 +1299,7 @@ const onEventStoreChange = async (storeId) => {
   if (!storeId) return
   loadingRoomTemplates.value = true
   try {
-    const { data } = await api.get(`/public/room-templates?store_id=${storeId}`)
+    const { data } = await publicApi.get(`/public/room-templates?store_id=${storeId}`)
     storeRoomTemplates.value = data.data || []
   } catch { /* biarkan kosong */ } finally { loadingRoomTemplates.value = false }
 }

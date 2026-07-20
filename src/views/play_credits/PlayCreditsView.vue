@@ -689,6 +689,7 @@ import {
   getMemberCredits, assignCredit, adjustCredit
 } from '@/api/play_credits/playCreditsApi'
 import { getStores } from '@/api/store/storeApi'
+import { getImageUrl } from '@/utils/imageHelper'
 import { getCustomers } from '@/api/customer/customerApi'
 
 const { can } = usePermission()
@@ -937,8 +938,6 @@ const handleAdjustCredit = async () => {
 const formatRp = (v) => `Rp ${(v || 0).toLocaleString('id-ID')}`
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'
 const formatTime = (d) => d ? new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'
-const getImageUrl = (path) => path?.startsWith('http') ? path : `${import.meta.env.VITE_API_URL?.replace('/api', '')}${path}`
-
 const getProgressColor = (percent) => {
   if (percent >= 60) return '#ef4444'
   if (percent >= 30) return '#f59e0b'

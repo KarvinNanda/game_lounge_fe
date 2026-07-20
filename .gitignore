@@ -6,11 +6,11 @@ dist/
 dist-ssr/
 
 # ── Environment Variables ──────────────────
+# .env dan .env.local diabaikan (berisi secret / URL lokal)
 .env
 .env.local
 .env.*.local
-.env.production
-.env.staging
+# .env.production sengaja di-commit — hanya berisi URL publik, bukan secret
 
 # ── Logs ──────────────────────────────────
 logs/
