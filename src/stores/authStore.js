@@ -2,13 +2,21 @@ import { defineStore } from 'pinia'
 import { getMe, login, logout } from '@/api/auth/authApi'
 import { getRoleById } from '@/api/role/roleApi'
 
+// Migrasi cookie-only: bersihkan token peninggalan auth lama (pre-httpOnly).
+// Berjalan sekali setiap app load — idempotent, aman jika sudah tidak ada.
+localStorage.removeItem('token')
+
+// Auth berbasis cookie httpOnly (staff_token) — JavaScript tidak bisa membaca
+// cookie tersebut, jadi satu-satunya cara mengetahui status login adalah
+// menanyakan server via GET /me. `authChecked` menandai pengecekan itu
+// sudah dilakukan untuk page-load ini.
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    token: localStorage.getItem('token') || null,
     staff: null,
+    authChecked: false,
   }),
   getters: {
-    isLoggedIn: (s) => !!s.token,
+    isLoggedIn: (s) => !!s.staff,
     isSystem:   (s) => !!(s.staff?.role?.is_system),
     // Normalize permissions to a flat array of strings
     // (backend may return string[] OR object[] with a 'name'/'slug'/'code' field)
@@ -20,10 +28,10 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async doLogin(username, password) {
       const { data } = await login({ username, password })
-      this.token = data.data.token
-      localStorage.setItem('token', this.token)
+      // Server mengirim Set-Cookie httpOnly — tidak ada token di response body
+      this.authChecked = true
 
-      if (data.data.staff) {
+      if (data.data?.staff) {
         this.staff = data.data.staff
       } else {
         await this.fetchMe()
@@ -38,9 +46,9 @@ export const useAuthStore = defineStore('auth', {
         this.staff = data.data
         await this._syncRolePermissions()
       } catch {
-        this.token = null
         this.staff = null
-        localStorage.removeItem('token')
+      } finally {
+        this.authChecked = true
       }
     },
 
@@ -70,10 +78,9 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async doLogout() {
+      // Server meng-clear cookie (Max-Age=0); client cukup reset state
       try { await logout() } catch {}
-      this.token = null
       this.staff = null
-      localStorage.removeItem('token')
     },
   },
 })

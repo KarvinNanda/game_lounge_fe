@@ -1,0 +1,28 @@
+# ── Dependencies (di-install ulang di dalam container) ────────
+node_modules
+
+# ── Git ───────────────────────────────────────────────────────
+.git
+.gitignore
+
+# ── Build output (di-generate ulang oleh npm run build) ───────
+dist
+dist-ssr
+coverage
+
+# ── Local env secrets (jangan masuk ke image) ─────────────────
+.env
+.env.local
+.env.*.local
+# .env.production TIDAK diabaikan — dibutuhkan saat build
+
+# ── Dev tooling & docs ────────────────────────────────────────
+*.md
+.vscode
+.idea
+.eslintcache
+*.log
+
+# ── OS artifacts ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db

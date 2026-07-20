@@ -515,6 +515,7 @@ import {
   updateCustomerNotes, deleteCustomer, resendPassword
 } from '@/api/customer/customerApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
+import { safeOpen, normalizeWhatsApp } from '@/utils/security'
 
 const { can } = usePermission()
 const { isMobile } = useBreakpoint()
@@ -719,9 +720,9 @@ const handleResendPassword = async (row) => {
 }
 
 const openWhatsApp = (number) => {
-  if (!number) return
-  const clean = number.replace(/\D/g, '')
-  window.open(`https://wa.me/62${clean.startsWith('0') ? clean.slice(1) : clean}`, '_blank')
+  const normalized = normalizeWhatsApp(number)
+  if (!normalized) return
+  safeOpen(`https://wa.me/${normalized}`)
 }
 
 // ── Helpers ───────────────────────────────────────────────────
