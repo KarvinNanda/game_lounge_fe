@@ -66,12 +66,13 @@ const router = createRouter({ history: createWebHistory(), routes })
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
-  // ── On page refresh: token exists but staff not loaded yet.
-  //    Fetch user data BEFORE permission checks so permissions
-  //    are available and the user lands on the correct page.
-  if (authStore.isLoggedIn && !authStore.staff) {
+  // ── Auth via cookie httpOnly: JS tidak bisa membaca cookie, jadi status
+  //    login diverifikasi ke server (GET /me) sekali per page-load.
+  //    Halaman recovery tidak butuh cek; halaman login butuh (untuk
+  //    redirect ke dashboard jika session masih aktif).
+  const needsAuthCheck = to.meta.requiresAuth !== false || to.path === '/login'
+  if (!authStore.authChecked && needsAuthCheck) {
     await authStore.fetchMe()
-    // fetchMe clears token on 401, so re-check login status below
   }
 
   // Not logged in → go to login

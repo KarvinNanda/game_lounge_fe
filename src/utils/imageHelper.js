@@ -1,16 +1,23 @@
 import { uploadFile } from '@/api/uploadApi'
+import { sanitizeUrl } from '@/utils/security'
 
+// Strip suffix /api/admin (atau /api legacy) untuk mendapatkan host backend —
+// asset statis (/assets/img/...) diserve dari root, bukan di bawah prefix API
 const getBaseUrl = () =>
-  (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api.*$/, '')
+  (import.meta.env.VITE_API_URL || 'http://localhost:8080/api/admin').replace(/\/api(\/admin)?$/, '')
 
 /**
  * Convert a relative path ("/assets/img/x.jpg") to the full backend URL.
- * Blob/data/http URLs are returned as-is.
+ * Blob/data-image/http(s) URLs are returned as-is — after passing the
+ * scheme allowlist in sanitizeUrl (javascript:, data:text/html, etc. are rejected).
  */
 export const getImageUrl = (path) => {
   if (!path) return null
-  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path
-  return `${getBaseUrl()}${path}`
+  const safe = sanitizeUrl(path)
+  if (!safe) return null
+  // Relative path → prefix with backend host
+  if (safe.startsWith('/')) return `${getBaseUrl()}${safe}`
+  return safe
 }
 
 /**
