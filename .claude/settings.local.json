@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx oxlint *)",
+      "Bash(npx vitest *)",
+      "Bash(npm run *)",
+      "Bash(npx vite *)",
+      "Bash(npm audit *)",
+      "Bash(npm uninstall *)",
+      "Bash(npm install *)",
+      "Bash(node -e \"console.log\\(require\\('xlsx/package.json'\\).version\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(npm update *)",
+      "Bash(npm view *)",
+      "Bash(grep -rn \"'/public\\\\|\\\\\"/public\\\\|\\\\`/public\" src/ --include=\"*.js\" --include=\"*.vue\")"
+    ]
+  }
+}
