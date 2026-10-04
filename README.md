@@ -42,11 +42,19 @@ cd game_lounge_fe
 npm install
 ```
 
-Buat file `.env` di root:
+Salin template env (file `.env.local` di-gitignore):
+
+```bash
+cp .env.example .env.local
+```
+
+Isi `.env.example`:
 
 ```env
-VITE_API_URL=http://localhost:8080/api
+VITE_API_URL=http://localhost:8080/api/admin
 ```
+
+Build production wajib punya `VITE_API_URL` (build gagal jika kosong). Di Coolify, set sebagai Build Variable.
 
 ---
 
@@ -94,7 +102,7 @@ const { can } = usePermission()
 ### API Layer
 
 `src/api/index.js` — Axios instance:
-- `baseURL`: env var `VITE_API_URL`, fallback ke `http://localhost:8080/api/v1`
+- `baseURL`: env var `VITE_API_URL`, fallback ke `http://localhost:8080/api/admin` (dev saja)
 - Token JWT diinjeksi dari `localStorage` di setiap request
 - Response `401` → hapus token + redirect ke `/login`
 

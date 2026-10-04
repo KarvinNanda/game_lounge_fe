@@ -10,11 +10,11 @@ dist
 dist-ssr
 coverage
 
-# ── Local env secrets (jangan masuk ke image) ─────────────────
+# ── Env files (jangan masuk ke image) ─────────────────────────
+# VITE_API_URL dikirim lewat build arg, bukan file .env
 .env
-.env.local
-.env.*.local
-# .env.production TIDAK diabaikan — dibutuhkan saat build
+.env.*
+!.env.example
 
 # ── Dev tooling & docs ────────────────────────────────────────
 *.md

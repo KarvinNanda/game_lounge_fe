@@ -16,7 +16,10 @@ RUN npm ci
 # Copy seluruh source dan build
 COPY . .
 
-# npm run build otomatis memuat .env.production karena Vite mode=production
+# VITE_API_URL di-bake ke bundle saat build (bukan runtime).
+# Di Coolify: set sebagai Build Variable. vite.config.js gagal jika kosong.
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 RUN npm run build
 
 # ── Stage 2: Serve dengan Nginx ─────────────────────────────

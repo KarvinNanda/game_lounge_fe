@@ -6,11 +6,11 @@ dist/
 dist-ssr/
 
 # ── Environment Variables ──────────────────
-# .env dan .env.local diabaikan (berisi secret / URL lokal)
+# Semua file env diabaikan. Hanya .env.example yang di-commit.
+# VITE_API_URL production di-set sebagai Build Variable di Coolify.
 .env
-.env.local
-.env.*.local
-# .env.production sengaja di-commit — hanya berisi URL publik, bukan secret
+.env.*
+!.env.example
 
 # ── Logs ──────────────────────────────────
 logs/
