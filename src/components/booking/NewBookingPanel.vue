@@ -219,119 +219,42 @@
       Lanjutkan →
     </el-button>
 
-      <!-- ════════════════════════════════════════════════════════
-           MODAL: Konfirmasi Booking
-      ════════════════════════════════════════════════════════ -->
-      <el-dialog v-model="showConfirmModal" title="KONFIRMASI BOOKING" width="420px" align-center>
-        <div v-if="priceCalc">
-          <!-- Customer summary -->
-          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-main);border-radius:8px;margin-bottom:16px">
-            <el-avatar :size="40" style="background:linear-gradient(135deg,#0282DE,#0262b0);font-weight:700;flex-shrink:0">
-              {{ newBookingForm.customer_name?.[0]?.toUpperCase() }}
-            </el-avatar>
-            <div>
-              <div style="font-weight:700">{{ newBookingForm.customer_name }}</div>
-              <div style="font-size:12px;color:var(--text-secondary)">
-                {{ newBookingForm.customer_whatsapp || newBookingForm.customer_email || 'Walk-in' }}
-              </div>
-            </div>
-          </div>
+      <BookingConfirmDialog
+        v-model="showConfirmModal"
+        :form="newBookingForm"
+        :price-calc="priceCalc"
+        :voucher-discount="voucherDiscount"
+        :voucher-name="selectedVoucherData?.name || ''"
+        :loading="creatingBooking"
+        @confirm="handleCreateBooking"
+      />
 
-          <div class="confirm-row"><span>Room</span><strong>{{ newBookingForm.room_name }}</strong></div>
-          <div class="confirm-row">
-            <span>Tanggal</span>
-            <span>{{ formatDateDisplay(newBookingForm.booking_date) }}</span>
-          </div>
-          <div class="confirm-row">
-            <span>Waktu</span>
-            <span>{{ newBookingForm.start_time }} – {{ newBookingForm.end_time }} ({{ newBookingForm.duration_hours }} Jam)</span>
-          </div>
-
-          <div style="background:var(--bg-card-hover);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin:12px 0">
-            <div v-for="item in priceCalc.breakdown" :key="item.time_range"
-                 style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
-              <span style="color:var(--text-secondary)">{{ item.description }}</span>
-              <span>{{ formatRp(item.amount) }}</span>
-            </div>
-            <div v-if="priceCalc.has_flash_sale"
-                 style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-danger);margin-bottom:5px">
-              <span>⚡ Flash Sale</span>
-              <span>- {{ formatRp(priceCalc.flash_discount) }}</span>
-            </div>
-            <!-- Voucher discount di confirm modal -->
-            <div v-if="voucherDiscount && !voucherDiscount.invalid"
-                 style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-success);margin-bottom:5px">
-              <span>🎟️ {{ selectedVoucherData?.name }}</span>
-              <span>- {{ formatRp(voucherDiscount.amount) }}</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border-color);font-weight:700">
-              <span>Total Bayar</span>
-              <span style="font-size:16px" :style="{ color: voucherDiscount && !voucherDiscount.invalid ? 'var(--color-success)' : 'var(--color-primary)' }">
-                {{ formatRp(voucherDiscount && !voucherDiscount.invalid ? voucherDiscount.finalPrice : priceCalc.final_price) }}
-              </span>
-            </div>
-          </div>
-
-          <div class="confirm-row">
-            <span>Payment</span>
-            <span>{{ newBookingForm.payment_method === 'play_credits' ? '🎮 Play Credits' : '💵 Cash' }}</span>
-          </div>
-          <div v-if="newBookingForm.voucher_code" class="confirm-row">
-            <span>Voucher</span>
-            <span style="font-family:monospace;font-weight:700;color:var(--color-primary)">{{ newBookingForm.voucher_code }}</span>
-          </div>
-        </div>
-
-        <template #footer>
-          <el-button @click="showConfirmModal = false">Kembali</el-button>
-          <el-button type="primary" :loading="creatingBooking" @click="handleCreateBooking">
-            <el-icon><Check /></el-icon> Konfirmasi Booking
-          </el-button>
-        </template>
-      </el-dialog>
-
-      <!-- ════════════════════════════════════════════════════════
-           MODAL: Booking Berhasil
-      ════════════════════════════════════════════════════════ -->
-      <el-dialog v-model="showSuccessModal" :show-close="false" width="380px" align-center>
-        <div style="text-align:center;padding:12px 0 20px">
-          <el-icon size="60" style="color:var(--color-success)"><CircleCheckFilled /></el-icon>
-          <h3 style="margin:12px 0 4px;font-size:18px">Booking Berhasil!</h3>
-          <p style="color:var(--text-secondary);font-size:13px;margin-bottom:16px">
-            Booking ruangan telah dikonfirmasi.
-          </p>
-          <div style="background:var(--bg-main);border:1px solid var(--border-color);border-radius:10px;padding:16px;display:inline-block;min-width:200px">
-            <div style="font-size:10px;color:var(--text-secondary);margin-bottom:6px;letter-spacing:1px">BOOKING ID</div>
-            <div style="font-size:24px;font-weight:800;color:var(--color-primary);letter-spacing:3px;font-family:monospace">
-              {{ createdBookingCode }}
-            </div>
-          </div>
-          <p v-if="newBookingForm.customer_whatsapp || newBookingForm.customer_email"
-             style="font-size:12px;color:var(--text-secondary);margin-top:12px">
-            Konfirmasi dikirim ke customer
-            <span v-if="newBookingForm.customer_email"> via email</span>
-            <span v-if="newBookingForm.customer_whatsapp"> & WhatsApp</span>.
-          </p>
-          <div style="display:flex;gap:10px;justify-content:center;margin-top:20px">
-            <el-button @click="viewCreatedBooking">Lihat di Kalender</el-button>
-            <el-button type="primary" @click="resetForNewBooking">+ Booking Lain</el-button>
-          </div>
-        </div>
-      </el-dialog>
+      <BookingSuccessDialog
+        v-model="showSuccessModal"
+        :code="createdBookingCode"
+        :whatsapp="newBookingForm.customer_whatsapp"
+        :email="newBookingForm.customer_email"
+        @view="viewCreatedBooking"
+        @again="resetForNewBooking"
+      />
   </div>
 </template>
 
 <script setup>
-// New regular booking: customer, time, price, voucher, play credits, the
-// confirm modal and the success modal. `selection` is the clicked slot;
+// New regular booking: customer, time, price, voucher and play credits.
+// Price + voucher preview live in useBookingPrice; the confirm and success
+// steps are BookingConfirmDialog and BookingSuccessDialog. `selection` is the clicked slot;
 // a new selection refills the form, like a new slot click did before.
 import { ref, reactive, computed, watch, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { createBooking, getAvailableCredits, calculatePrice } from '@/api/booking/bookingApi'
+import { createBooking, getAvailableCredits } from '@/api/booking/bookingApi'
 import { getCustomers } from '@/api/customer/customerApi'
 import api from '@/api/index'
 import { notifyError } from '@/utils/notify'
-import { formatRp, formatDateDisplay, formatDate } from '@/utils/format'
+import { formatRp, formatDate } from '@/utils/format'
+import { useBookingPrice } from '@/composables/useBookingPrice'
+import BookingConfirmDialog from './BookingConfirmDialog.vue'
+import BookingSuccessDialog from './BookingSuccessDialog.vue'
 
 const props = defineProps({
   // { storeId, roomId, roomName, date, startTime, endTime } of the clicked slot
@@ -347,8 +270,6 @@ const customerSearchLoading = ref(false)
 const availableCredits = ref([])
 const availableVouchers = ref([])
 const voucherOptionsLoading = ref(false)
-const priceCalc = ref(null)
-const priceCalcLoading = ref(false)
 
 const creatingBooking = ref(false)
 
@@ -374,31 +295,21 @@ const selectedCustomerIsMember = computed(() => {
   return c?.type === 'member'
 })
 
-// ── Voucher Discount Preview ──────────────────────────────────
-const selectedVoucherData = computed(() =>
-  availableVouchers.value.find(v => v.code === newBookingForm.voucher_code) || null
-)
+// ── Price + voucher preview ───────────────────────────────────
+const { priceCalc, priceCalcLoading, selectedVoucherData, voucherDiscount, recalculatePrice, cancelPriceCalc } =
+  useBookingPrice({ form: newBookingForm, rooms: () => props.rooms, vouchers: availableVouchers, onPriced: () => refreshCredits() })
 
-const voucherDiscount = computed(() => {
-  const v = selectedVoucherData.value
-  const base = priceCalc.value?.final_price
-  if (!v || !base) return null
-
-  // Cek minimum pembelian
-  if (v.min_purchase && base < v.min_purchase) {
-    return { amount: 0, invalid: true, reason: `Min. pembelian ${formatRp(v.min_purchase)}` }
+// Refresh play credits when the date may have changed and the customer is a member
+const refreshCredits = () => {
+  const f = newBookingForm
+  if (!f.customer_id) return
+  const customer = customerOptions.value.find(c => c.id === f.customer_id)
+  if (customer?.type === 'member') {
+    getAvailableCredits(f.customer_id, f.store_id, f.booking_date)
+      .then(({ data }) => { availableCredits.value = data.data || [] })
+      .catch(() => {})
   }
-
-  let amount
-  if (v.discount_type === 'percentage') {
-    amount = Math.round(base * v.discount_value / 100)
-    if (v.max_discount && amount > v.max_discount) amount = v.max_discount
-  } else {
-    amount = Math.min(v.discount_value, base)
-  }
-
-  return { amount, invalid: false, finalPrice: base - amount }
-})
+}
 
 // ── Customer Search ───────────────────────────────────────────
 const searchCustomers = async (q) => {
@@ -417,51 +328,6 @@ const setDuration = (hours) => {
   const endH = (startH + hours) % 24
   newBookingForm.end_time = `${String(endH).padStart(2,'0')}:00`
   recalculatePrice()
-}
-
-let priceCalcTimer = null
-const recalculatePrice = async () => {
-  const f = newBookingForm
-  if (!f.store_id || !f.booking_date || !f.start_time || !f.end_time) return
-
-  // debounce
-  clearTimeout(priceCalcTimer)
-  priceCalcTimer = setTimeout(async () => {
-    const room = props.rooms.find(r => r.id === f.room_id)
-    if (!room) return
-
-    priceCalcLoading.value = true
-    try {
-      const { data } = await calculatePrice({
-        store_id: f.store_id,
-        room_template_id: room.room_template_id || room.room_template?.id,
-        booking_date: f.booking_date,
-        start_time: f.start_time,
-        end_time: f.end_time,
-      })
-      priceCalc.value = data.data
-
-      // Recalculate duration_hours from start/end
-      let sH = parseInt(f.start_time.split(':')[0])
-      let eH = parseInt(f.end_time.split(':')[0])
-      if (eH < sH) eH += 24
-      newBookingForm.duration_hours = eH - sH
-    } catch {
-      priceCalc.value = null
-    } finally {
-      priceCalcLoading.value = false
-    }
-
-    // Refresh play credits jika tanggal berubah dan customer adalah member
-    if (f.customer_id) {
-      const customer = customerOptions.value.find(c => c.id === f.customer_id)
-      if (customer?.type === 'member') {
-        getAvailableCredits(f.customer_id, f.store_id, f.booking_date)
-          .then(({ data }) => { availableCredits.value = data.data || [] })
-          .catch(() => {})
-      }
-    }
-  }, 600)
 }
 
 const loadAvailableVouchers = async (customerId) => {
@@ -585,9 +451,7 @@ watch(() => props.selection, (sel) => {
   recalculatePrice()
 }, { immediate: true })
 
-onUnmounted(() => {
-  clearTimeout(priceCalcTimer)
-})
+onUnmounted(cancelPriceCalc)
 </script>
 
 <style scoped src="./panel.css"></style>
@@ -681,14 +545,4 @@ onUnmounted(() => {
   background: var(--color-success);
   color: #fff;
 }
-.confirm-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 9px 0; border-bottom: 1px solid var(--border-color);
-  gap: 10px;
-}
-.confirm-row > span:first-child {
-  color: var(--text-secondary); font-size: 12px; font-weight: 600; flex-shrink: 0;
-}
-.confirm-row > span:last-child,
-.confirm-row > strong { color: var(--text-primary); font-weight: 700; font-size: 13px; text-align: right; }
 </style>
