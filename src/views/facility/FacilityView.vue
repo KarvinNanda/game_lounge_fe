@@ -33,7 +33,7 @@
           placeholder="Semua Kategori"
           clearable
           style="width:160px"
-          @change="fetchFacilities"
+          @change="applyFilters"
         >
           <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
         </el-select>
@@ -42,7 +42,7 @@
           placeholder="Semua Status"
           clearable
           style="width:140px"
-          @change="fetchFacilities"
+          @change="applyFilters"
         >
           <el-option label="Aktif" value="active" />
           <el-option label="Nonaktif" value="inactive" />
@@ -176,9 +176,15 @@ const pagination = reactive({ page: 1, per_page: 10, total: 0 })
 const filters = reactive({ search: '', category_id: null, status: null })
 let debounceTimer = null
 
+// Filter changes start again at page 1; the pager keeps calling fetchFacilities.
+const applyFilters = () => {
+  pagination.page = 1
+  fetchFacilities()
+}
+
 const debouncedFetch = () => {
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(fetchFacilities, 400)
+  debounceTimer = setTimeout(applyFilters, 400)
 }
 
 const fetchFacilities = async () => {
@@ -237,7 +243,7 @@ const deleteFacility = async (row) => {
 
 const resetFilters = () => {
   Object.assign(filters, { search: '', category_id: null, status: null })
-  fetchFacilities()
+  applyFilters()
 }
 
 onMounted(() => {

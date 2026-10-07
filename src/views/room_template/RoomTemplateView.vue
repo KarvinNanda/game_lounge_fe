@@ -29,7 +29,7 @@
           @input="debouncedFetch"
         />
         <template #actions>
-          <el-button plain @click="search = ''; fetchTemplates()">
+          <el-button plain @click="search = ''; applyFilters()">
             <el-icon><RefreshRight /></el-icon> Reset
           </el-button>
         </template>
@@ -172,9 +172,15 @@ const total = ref(0)
 const stats = reactive({ total: 0, active: 0, inactive: 0, used_in_stores: 0 })
 let debounceTimer = null
 
+// Filter changes start again at page 1; the pager keeps calling fetchTemplates.
+const applyFilters = () => {
+  page.value = 1
+  fetchTemplates()
+}
+
 const debouncedFetch = () => {
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(fetchTemplates, 400)
+  debounceTimer = setTimeout(applyFilters, 400)
 }
 
 const fetchTemplates = async () => {

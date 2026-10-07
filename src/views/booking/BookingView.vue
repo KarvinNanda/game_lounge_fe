@@ -122,6 +122,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { notifyError } from '@/utils/notify'
+import { businessDayWIB, shiftDate } from '@/utils/bookingTime'
 import BookingFilterBar from '@/components/booking/BookingFilterBar.vue'
 import BookingGrid from '@/components/booking/BookingGrid.vue'
 import BookingDetailPanel from '@/components/booking/BookingDetailPanel.vue'
@@ -136,7 +137,7 @@ const { can } = usePermission()
 
 // ── State ─────────────────────────────────────────────────────
 const selectedStore = ref('')
-const selectedDate = ref(new Date().toISOString().split('T')[0])
+const selectedDate = ref(businessDayWIB())
 const selectedRoom = ref('')
 
 // Calendar data for the selected branch + date (dashboard, hours, events)
@@ -238,16 +239,14 @@ const closeNewBookingForm = () => {
 // ── Booking Detail Actions ────────────────────────────────────
 const handleBookingClick = (bk) => {
   selectedBooking.value = bk
-  console.log(bk);
   isNewBookingForm.value = false
   isNewBookingMode.value = false
 }
 
 // ── Date Navigation ───────────────────────────────────────────
 const changeDate = (delta) => {
-  const d = new Date(selectedDate.value)
-  d.setDate(d.getDate() + delta)
-  selectedDate.value = d.toISOString().split('T')[0]
+  // The date picker is clearable: step from the current business day when it is empty.
+  selectedDate.value = shiftDate(selectedDate.value || businessDayWIB(), delta)
   loadDashboard()
 }
 

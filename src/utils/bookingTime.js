@@ -16,3 +16,23 @@ export const hasStarted = (booking, now = new Date()) => {
   if (![y, m, d, hh, mm].every(Number.isFinite)) return false
   return now.getTime() >= Date.UTC(y, m - 1, d, hh - WIB_OFFSET_HOURS, mm)
 }
+
+/** 'YYYY-MM-DD' of `now` in WIB, independent of the laptop's timezone. */
+export const todayWIB = (now = new Date()) =>
+  new Date(now.getTime() + WIB_OFFSET_HOURS * 3600000).toISOString().slice(0, 10)
+
+/** Calendar arithmetic on a 'YYYY-MM-DD' string; no timezone involved. */
+export const shiftDate = (ymd, days) => {
+  const [y, m, d] = ymd.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10)
+}
+
+// A business day runs from opening past midnight to closing (latest close is
+// 02:00, earliest opening 10:00). Until this hour the dashboard stays on the
+// business day that is still running, so night staff see their sessions.
+// Change it if a branch ever closes after 06:00 or opens before it.
+const BUSINESS_DAY_CUTOFF_HOURS = 6
+
+/** 'YYYY-MM-DD' of the business day running at `now` (WIB, 06:00 cutoff). */
+export const businessDayWIB = (now = new Date()) =>
+  todayWIB(new Date(now.getTime() - BUSINESS_DAY_CUTOFF_HOURS * 3600000))

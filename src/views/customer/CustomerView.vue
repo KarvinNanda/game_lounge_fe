@@ -28,11 +28,11 @@
           clearable
           @input="debounceFetch"
         />
-        <el-select v-model="filters.status" placeholder="Semua Status" clearable style="width:140px" @change="fetchCustomers">
+        <el-select v-model="filters.status" placeholder="Semua Status" clearable style="width:140px" @change="applyFilters">
           <el-option label="Active" value="active" />
           <el-option label="Inactive" value="inactive" />
         </el-select>
-        <el-select v-model="filters.gender" placeholder="Semua Gender" clearable style="width:140px" @change="fetchCustomers">
+        <el-select v-model="filters.gender" placeholder="Semua Gender" clearable style="width:140px" @change="applyFilters">
           <el-option label="Laki-laki" value="male" />
           <el-option label="Perempuan" value="female" />
         </el-select>
@@ -562,10 +562,16 @@ const formRules = {
 
 // ── Debounce Search ───────────────────────────────────────────
 
+// Filter changes start again at page 1; the pager keeps calling fetchCustomers.
+const applyFilters = () => {
+  filters.page = 1
+  fetchCustomers()
+}
+
 let debounceTimer = null
 const debounceFetch = () => {
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => { filters.page = 1; fetchCustomers() }, 400)
+  debounceTimer = setTimeout(applyFilters, 400)
 }
 
 // ── Data Fetching ─────────────────────────────────────────────

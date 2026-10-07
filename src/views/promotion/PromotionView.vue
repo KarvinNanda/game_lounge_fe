@@ -22,12 +22,12 @@
       <FilterBar>
         <el-input v-model="filters.search" placeholder="Cari nama atau kode voucher..."
           prefix-icon="Search" style="width:260px" clearable @input="debounceSearch" />
-        <el-select v-model="filters.status" placeholder="Semua Status" clearable style="width:140px" @change="fetchVouchers">
+        <el-select v-model="filters.status" placeholder="Semua Status" clearable style="width:140px" @change="applyFilters">
           <el-option label="Aktif" value="active" />
           <el-option label="Kadaluwarsa" value="expired" />
           <el-option label="Nonaktif" value="inactive" />
         </el-select>
-        <el-select v-model="filters.type" placeholder="Semua Jenis" clearable style="width:160px" @change="fetchVouchers">
+        <el-select v-model="filters.type" placeholder="Semua Jenis" clearable style="width:160px" @change="applyFilters">
           <el-option label="Booking Ruangan" value="booking" />
           <el-option label="Play Credits" value="play_credits" />
           <el-option label="Keduanya" value="both" />
@@ -627,10 +627,16 @@ watch([() => form.is_all_room_types, voucherRoomTemplateIds], () => {
 }, { deep: true })
 
 // ── Debounce ──────────────────────────────────────────────────
+// Filter changes start again at page 1; the pager keeps calling fetchVouchers.
+const applyFilters = () => {
+  filters.page = 1
+  fetchVouchers()
+}
+
 let debounceTimer = null
 const debounceSearch = () => {
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(() => { filters.page = 1; fetchVouchers() }, 400)
+  debounceTimer = setTimeout(applyFilters, 400)
 }
 
 // ── Fetch ─────────────────────────────────────────────────────

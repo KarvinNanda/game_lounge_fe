@@ -7,7 +7,7 @@
       description="Banner slider yang tampil di halaman home customer. Drag untuk mengubah urutan, atau gunakan tombol panah."
     >
       <template #actions>
-        <el-button type="primary" @click="openForm(null)">
+        <el-button v-if="can('settings.branches')" type="primary" @click="openForm(null)">
           <el-icon><Plus /></el-icon> Tambah Banner
         </el-button>
       </template>
@@ -25,7 +25,7 @@
     <!-- List Banner -->
     <div v-loading="loading">
       <div v-if="!banners.length" style="text-align:center;padding:40px;color:var(--text-secondary)">
-        Belum ada banner. Klik "Tambah Banner" untuk mulai.
+        Belum ada banner.<template v-if="can('settings.branches')"> Klik "Tambah Banner" untuk mulai.</template>
       </div>
 
       <div v-else class="banner-list">
@@ -62,7 +62,7 @@
           </div>
 
           <!-- Aksi -->
-          <div class="banner-actions">
+          <div v-if="can('settings.branches')" class="banner-actions">
             <!-- Reorder: biru aktif, abu disabled -->
             <el-button
               size="small" circle
@@ -218,6 +218,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
+import { usePermission } from '@/composables/usePermission'
 import {
   getBannersAdmin, createBanner, updateBanner,
   deleteBanner, toggleBanner, reorderBanners
@@ -226,6 +227,8 @@ import { uploadImage, getImageUrl } from '@/utils/imageHelper'
 import PageHeader from '@/components/ui/PageHeader.vue'
 
 // ── State ─────────────────────────────────────────────────────
+const { can } = usePermission()
+
 const loading     = ref(false)
 const saving      = ref(false)
 const banners     = ref([])

@@ -30,7 +30,7 @@
           <div style="display:flex;gap:10px;margin-bottom:16px">
             <el-input v-model="pkgFilter.search" placeholder="Search package name..." prefix-icon="Search"
               style="width:260px" clearable @input="debouncePkg" />
-            <el-select v-model="pkgFilter.status" placeholder="Semua Status" clearable style="width:150px" @change="fetchPackages">
+            <el-select v-model="pkgFilter.status" placeholder="Semua Status" clearable style="width:150px" @change="applyPkgFilters">
               <el-option label="Aktif" value="active" />
               <el-option label="Nonaktif" value="inactive" />
             </el-select>
@@ -165,10 +165,10 @@
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
             <el-input v-model="memberFilter.search" placeholder="Search nama member..."
               prefix-icon="Search" style="width:200px" clearable @input="debounceMembers" />
-            <el-select v-model="memberFilter.package_id" placeholder="Semua Paket" clearable style="width:150px" @change="fetchMemberCredits">
+            <el-select v-model="memberFilter.package_id" placeholder="Semua Paket" clearable style="width:150px" @change="applyMemberFilters">
               <el-option v-for="p in activePackages" :key="p.id" :label="p.name" :value="p.id" />
             </el-select>
-            <el-select v-model="memberFilter.status" placeholder="Semua Status" clearable style="width:140px" @change="fetchMemberCredits">
+            <el-select v-model="memberFilter.status" placeholder="Semua Status" clearable style="width:140px" @change="applyMemberFilters">
               <el-option label="Aktif" value="active" />
               <el-option label="Kadaluwarsa" value="expired" />
             </el-select>
@@ -761,16 +761,27 @@ const computedNewExpiry = computed(() => {
   return `${formatDate(d.toISOString())} (${daysLeft} hari lagi)`
 })
 
+// ── Filters ───────────────────────────────────────────────────
+// Filter changes start again at page 1; the pagers keep calling the fetch functions.
+const applyPkgFilters = () => {
+  pkgFilter.page = 1
+  fetchPackages()
+}
+const applyMemberFilters = () => {
+  memberFilter.page = 1
+  fetchMemberCredits()
+}
+
 // ── Debounce ──────────────────────────────────────────────────
 let pkgTimer = null
 const debouncePkg = () => {
   clearTimeout(pkgTimer)
-  pkgTimer = setTimeout(() => { pkgFilter.page = 1; fetchPackages() }, 400)
+  pkgTimer = setTimeout(applyPkgFilters, 400)
 }
 let memberTimer = null
 const debounceMembers = () => {
   clearTimeout(memberTimer)
-  memberTimer = setTimeout(() => { memberFilter.page = 1; fetchMemberCredits() }, 400)
+  memberTimer = setTimeout(applyMemberFilters, 400)
 }
 
 // ── Fetchers ──────────────────────────────────────────────────
