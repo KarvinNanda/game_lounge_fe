@@ -219,6 +219,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import {
   getBannersAdmin, createBanner, updateBanner,
   deleteBanner, toggleBanner, reorderBanners
@@ -250,7 +251,7 @@ const fetchBanners = async () => {
   try {
     const { data } = await getBannersAdmin()
     banners.value = data.data || []
-  } catch { ElMessage.error('Gagal memuat banner') }
+  } catch (e) { notifyError(e, 'Gagal memuat banner') }
   finally { loading.value = false }
 }
 
@@ -284,7 +285,7 @@ const handleSave = async () => {
       }
       formVisible.value = false
       fetchBanners()
-    } catch (e) { ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan') }
+    } catch (e) { notifyError(e, 'Gagal menyimpan') }
     finally { saving.value = false }
   })
 }
@@ -294,7 +295,7 @@ const handleUpload = async (file, field) => {
   try {
     const url = await uploadImage(file, 'banners')
     form[field] = url
-  } catch { ElMessage.error('Gagal upload gambar') }
+  } catch (e) { notifyError(e, 'Gagal upload gambar') }
   return false // prevent auto upload by el-upload
 }
 
@@ -304,9 +305,9 @@ const handleToggle = async (banner) => {
   try {
     await toggleBanner(banner.id)
     ElMessage.success(`Banner ${banner.is_active ? 'diaktifkan' : 'dinonaktifkan'}`)
-  } catch {
+  } catch (e) {
     banner.is_active = !banner.is_active // rollback
-    ElMessage.error('Gagal mengubah status banner')
+    notifyError(e, 'Gagal mengubah status banner')
   } finally { togglingId.value = null }
 }
 
@@ -329,7 +330,7 @@ const saveOrder = async () => {
     const orders = banners.value.map((b, i) => ({ id: b.id, sort_order: i }))
     await reorderBanners(orders)
     // tidak perlu toast — perubahan sudah terlihat langsung di UI
-  } catch { ElMessage.error('Gagal menyimpan urutan') }
+  } catch (e) { notifyError(e, 'Gagal menyimpan urutan') }
 }
 
 const moveUp = async (index) => {
@@ -362,7 +363,7 @@ onMounted(fetchBanners)
 
 .info-box {
   background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);
-  border-radius:8px;padding:10px 14px;font-size:13px;color:#93C5FD;
+  border-radius:8px;padding:10px 14px;font-size:13px;color:var(--action);
   display:flex;align-items:flex-start;gap:8px;
 }
 

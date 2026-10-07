@@ -60,7 +60,9 @@
         @change="loadDashboard"
       />
       <!-- Cabang — badge jika terkunci ke 1 store, dropdown jika bisa pilih -->
-      <div v-if="isStoreLocked" class="store-locked-badge">
+      <el-alert v-if="noAccess" type="warning" :closable="false" show-icon
+        title="Tidak ada cabang aktif yang bisa Anda akses. Hubungi admin." />
+      <div v-else-if="isStoreLocked" class="store-locked-badge">
         <el-icon><Location /></el-icon>
         <span>{{ lockedStoreName }}</span>
       </div>
@@ -317,7 +319,7 @@
               @click="openCompleteConfirm">
               <el-icon><CircleCheck /></el-icon> Mark as Completed
             </el-button>
-            <el-button v-if="can('bookings.cancel')" type="danger" plain style="width:100%;justify-content:flex-start"
+            <el-button v-if="can('bookings.cancel') && !hasStarted(selectedBooking)" type="danger" plain style="width:100%;justify-content:flex-start"
               @click="openCancelForm">
               <el-icon><CircleClose /></el-icon> Cancel Booking
             </el-button>
@@ -956,8 +958,9 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { usePermission } from '@/composables/usePermission'
-import { useAuthStore } from '@/stores/authStore'
+import { hasStarted } from '@/utils/bookingTime'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getDashboard, createBooking, cancelBooking, completeBooking,
@@ -966,12 +969,12 @@ import {
 import {
   getEventDashboard, createEventBooking, cancelEventBooking, previewEventPrice
 } from '@/api/booking/eventBookingApi'
-import { getStores, getEffectiveOperatingHours } from '@/api/store/storeApi'
+import { getEffectiveOperatingHours } from '@/api/store/storeApi'
+import { useAllowedStores } from '@/composables/useAllowedStores'
 import { getCustomers } from '@/api/customer/customerApi'
 import api, { publicApi } from '@/api/index'
 
 const { can } = usePermission()
-const authStore = useAuthStore()
 
 // ── Constants ─────────────────────────────────────────────────
 const SLOT_WIDTH = 100  // px per jam
@@ -984,7 +987,6 @@ const CLOSE_HOUR_REF = ref(26)  // 26 = 02:00 next day
 const effectiveHours = ref(null) // { open_time, close_time, is_holiday, holiday_name, holiday_type }
 
 const loading = ref(false)
-const stores = ref([])
 const selectedStore = ref('')
 const selectedDate = ref(new Date().toISOString().split('T')[0])
 const selectedRoom = ref('')
@@ -1095,27 +1097,13 @@ const selectedCustomerIsMember = computed(() => {
 const gridTotalWidth = computed(() => 140 + timeSlots.value.length * SLOT_WIDTH)
 
 // ── Store Access Filter ───────────────────────────────────────
-// Daftar store yang boleh diakses staff ini
-const accessibleStores = computed(() => {
-  const staff = authStore.staff
-  // Super admin atau is_all_stores = true → gunakan semua store dari API
-  if (!staff || staff.is_all_stores) return stores.value
-  // Staff biasa → hanya store yang di-assign
-  return (staff.staff_stores || []).map(ss => ss.store).filter(Boolean)
-})
+// Cabang yang boleh dipakai staff ini (dari store_access di /auth/me).
+// Booking selalu butuh satu cabang, jadi tidak ada opsi "Semua Cabang".
+const { stores: accessibleStores, noAccess, loadStores } = useAllowedStores({ allowAll: false })
 
 // Dropdown tidak bisa diubah jika staff hanya punya tepat 1 store
-const isStoreLocked = computed(() => {
-  const staff = authStore.staff
-  if (!staff || staff.is_all_stores) return false
-  return (staff.staff_stores || []).length === 1
-})
-
-// Label badge untuk store terkunci
-const lockedStoreName = computed(() => {
-  if (!isStoreLocked.value) return ''
-  return authStore.staff?.staff_stores?.[0]?.store?.name || ''
-})
+const isStoreLocked = computed(() => !noAccess.value && accessibleStores.value.length === 1)
+const lockedStoreName = computed(() => (isStoreLocked.value ? accessibleStores.value[0].name : ''))
 
 // ── Voucher Discount Preview ──────────────────────────────────
 const selectedVoucherData = computed(() =>
@@ -1200,8 +1188,8 @@ const loadDashboard = async () => {
     eventBookings.value = eventRes.status === 'fulfilled'
       ? (eventRes.value.data.data || [])
       : []
-  } catch {
-    ElMessage.error('Gagal memuat jadwal')
+  } catch (e) {
+    notifyError(e, 'Gagal memuat jadwal')
     dashboardData.value = null
     allRooms.value = []
     effectiveHours.value = null
@@ -1395,7 +1383,7 @@ const handleCreateEventBooking = async () => {
     isEventBookingForm.value = false
     loadDashboard()
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal membuat event booking')
+    notifyError(e, 'Gagal membuat event booking')
   } finally { creatingEvent.value = false }
 }
 
@@ -1422,7 +1410,7 @@ const handleCancelEvent = async () => {
       selectedEvent.value = null
       loadDashboard()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal membatalkan')
+      notifyError(e, 'Gagal membatalkan')
     } finally { cancellingEvent.value = false }
   })
 }
@@ -1592,7 +1580,6 @@ const handleCreateBooking = async () => {
       booking_date: newBookingForm.booking_date,
       start_time: newBookingForm.start_time,
       end_time: newBookingForm.end_time,
-      duration_hours: newBookingForm.duration_hours,
       payment_method: newBookingForm.payment_method === 'cash' ? 'cash' : 'play_credits',
       play_credit_id: newBookingForm.payment_method !== 'cash' ? newBookingForm.play_credit_id : null,
       voucher_code: newBookingForm.voucher_code || null,
@@ -1604,7 +1591,7 @@ const handleCreateBooking = async () => {
     showSuccessModal.value = true
     loadDashboard()
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal membuat booking')
+    notifyError(e, 'Gagal membuat booking')
   } finally { creatingBooking.value = false }
 }
 
@@ -1648,7 +1635,7 @@ const handleCancelBooking = async () => {
       selectedBooking.value = null
       loadDashboard()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal membatalkan booking')
+      notifyError(e, 'Gagal membatalkan booking')
     } finally { cancellingBooking.value = false }
   })
 }
@@ -1697,23 +1684,10 @@ const getStatusTagType = (s) => ({
 onMounted(async () => {
   generateTimeSlots()
   try {
-    const staff = authStore.staff
-
-    if (!staff || staff.is_all_stores) {
-      // Super admin / all stores → fetch semua store dari API
-      const { data } = await getStores({ per_page: 100, status: 'active' })
-      stores.value = data.data || []
-    } else {
-      // Staff biasa → ambil langsung dari data staff, tidak perlu API call
-      stores.value = (staff.staff_stores || []).map(ss => ss.store).filter(Boolean)
-    }
-
-    if (stores.value.length > 0) {
-      selectedStore.value = stores.value[0].id
-      await loadDashboard()
-    }
-  } catch {
-    ElMessage.error('Gagal memuat data cabang')
+    selectedStore.value = await loadStores()
+    if (selectedStore.value) await loadDashboard()
+  } catch (e) {
+    notifyError(e, 'Gagal memuat data cabang')
   }
 })
 
@@ -1748,19 +1722,18 @@ onUnmounted(() => {
 
 /* ── Holiday Warning Banner ───────────────────────── */
 .holiday-banner {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  border-radius: 8px;
+  background: var(--el-color-warning-light-9);
+  border: 1px solid var(--el-color-warning-light-7);
+  border-radius: var(--radius-lg);
   padding: 10px 14px;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 12.5px;
-  color: #D97706;
+  font-size: var(--font-size-sm);
+  color: var(--warning);
   margin-bottom: 10px;
   flex-wrap: wrap;
 }
-body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.08); }
 
 /* ── Main layout ─────────────────────────────────────── */
 .main-area {
@@ -1848,21 +1821,21 @@ body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.
   position: absolute; top: 5px; bottom: 5px;
   border-radius: 6px; padding: 4px 8px;
   cursor: pointer; overflow: hidden;
-  transition: filter 0.15s, transform 0.15s;
+  transition: filter var(--motion-fast) var(--ease-out);
   display: flex; flex-direction: column;
   justify-content: center; z-index: 2;
 }
-.booking-block:hover { filter: brightness(1.12); transform: scaleY(1.03); }
+.booking-block:hover { filter: brightness(1.08); }
 
-/* Dark mode blocks (default) */
-.block-upcoming  { background: rgba(2,130,222,0.25); color: #7DEBFF; border: 1px solid rgba(2,130,222,0.55); }
-.block-ongoing   { background: rgba(16,185,129,0.22); color: #86efcd; border: 1px solid rgba(16,185,129,0.5); }
-.block-completed { background: rgba(100,116,139,0.18); color: var(--text-secondary); border: 1px solid var(--border-color); }
-.block-cancelled { background: rgba(239,68,68,0.14); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); text-decoration: line-through; }
+/* Booking blocks — solid colours, white text ≥ 4.5:1 */
+.block-upcoming  { background: var(--el-color-primary); color: #fff; border: 1px solid var(--el-color-primary-dark-2); }
+.block-ongoing   { background: var(--el-color-success); color: #fff; border: 1px solid var(--el-color-success-dark-2); }
+.block-completed { background: var(--el-color-info);    color: #fff; border: 1px solid var(--el-color-info-dark-2); }
+.block-cancelled { background: var(--el-color-danger);  color: #fff; border: 1px solid var(--el-color-danger-dark-2); text-decoration: line-through; }
 .ending-soon     { border-color: #F59E0B !important; box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
 
 .block-name { font-weight: 700; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.block-time { font-size: 10px; font-weight: 600; opacity: 0.8; margin-top: 1px; }
+.block-time { font-size: 11px; font-weight: 600; margin-top: 1px; }
 
 /* Empty grid */
 .empty-grid-state {
@@ -1980,7 +1953,7 @@ body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.
   background: rgba(245,158,11,0.1);
   border: 1px solid rgba(245,158,11,0.35);
   border-radius: 8px; padding: 10px 13px;
-  font-size: 12px; font-weight: 700; color: #fbbf24;
+  font-size: 12px; font-weight: 700; color: var(--warning);
   display: flex; align-items: center; gap: 7px; margin-top: 10px;
 }
 
@@ -2084,7 +2057,6 @@ body.light-mode .holiday-banner { color: #92400e; background: rgba(245,158,11,0.
 .confirm-row > span:last-child,
 .confirm-row > strong { color: var(--text-primary); font-weight: 700; font-size: 13px; text-align: right; }
 
-/* Light mode overrides are in theme.css (global) to avoid :global() compound-selector issues */
 
 /* ── Event Booking ───────────────────────────────────────── */
 

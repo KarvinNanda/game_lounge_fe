@@ -373,6 +373,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { createStore, updateStore, getStoreById, toggleStoreRoom } from '@/api/store/storeApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
@@ -434,9 +435,9 @@ const handleToggleRoom = async (room, isActive) => {
   try {
     await toggleStoreRoom(room.id, isActive)
     ElMessage.success(`${room.name} berhasil ${isActive ? 'diaktifkan' : 'dinonaktifkan'}`)
-  } catch {
+  } catch (e) {
     room.is_active = !isActive
-    ElMessage.error('Gagal mengubah status ruangan')
+    notifyError(e, 'Gagal mengubah status ruangan')
   } finally {
     togglingRoomId.value = null
   }
@@ -494,7 +495,7 @@ const submit = async (status) => {
     ElMessage.success('Store berhasil disimpan!')
     router.push('/store')
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan store')
+    notifyError(e, 'Gagal menyimpan store')
   } finally {
     saving.value = false
   }

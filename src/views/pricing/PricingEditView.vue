@@ -557,6 +557,7 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getPricingByStore, updatePricingConfig,
@@ -669,8 +670,8 @@ const loadPricing = async () => {
 
     // FIX Bug 3: build package rows dengan type casting yang benar
     buildPackageRows(p.package_prices || [])
-  } catch {
-    ElMessage.error('Gagal memuat data pricing')
+  } catch (e) {
+    notifyError(e, 'Gagal memuat data pricing')
   } finally {
     loading.value = false
   }
@@ -717,8 +718,8 @@ const handleSaveAll = async () => {
     await savePackagePrices(false)
     ElMessage.success('Pricing berhasil disimpan & dipublish')
     router.push('/pricing')
-  } catch {
-    ElMessage.error('Gagal menyimpan pricing')
+  } catch (e) {
+    notifyError(e, 'Gagal menyimpan pricing')
   } finally {
     saving.value = false
   }
@@ -781,7 +782,7 @@ const handleAddSchedule = async () => {
     Object.assign(scheduleForm, { start_time: '10:00', end_time: '15:00' })
     await loadPricing()
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal menambahkan jadwal')
+    notifyError(e, 'Gagal menambahkan jadwal')
   } finally {
     savingSchedule.value = false
   }
@@ -848,7 +849,7 @@ const handleSaveFS = async () => {
     showFlashSaleForm.value = false
     await loadFlashSales()
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan flash sale')
+    notifyError(e, 'Gagal menyimpan flash sale')
   } finally {
     savingFS.value = false
   }
@@ -876,7 +877,7 @@ const runCalculation = async () => {
     const { data } = await calculatePrice({ store_id: storeId, ...calcForm })
     calcResult.value = data.data
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal menghitung harga')
+    notifyError(e, 'Gagal menghitung harga')
   } finally {
     calculating.value = false
   }
@@ -899,7 +900,7 @@ const saveEventPrice = async () => {
   try {
     await upsertEventPrice(storeId, { price_per_day: eventPrice.value })
     ElMessage.success('Harga event berhasil disimpan')
-  } catch { ElMessage.error('Gagal menyimpan harga event') }
+  } catch (e) { notifyError(e, 'Gagal menyimpan harga event') }
   finally { savingEvent.value = false }
 }
 
@@ -980,7 +981,7 @@ onMounted(async () => {
 /* Note box */
 .note-box {
   background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2);
-  border-radius:6px; padding:8px 10px; font-size:12px; color:#fbbf24;
+  border-radius:6px; padding:8px 10px; font-size:12px; color:var(--warning);
   display:flex; align-items:flex-start; gap:6px;
 }
 </style>

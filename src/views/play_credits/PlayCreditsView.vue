@@ -679,10 +679,12 @@
 </template>
 
 <script setup>
+import { fetchAllPages } from '@/utils/fetchAllPages'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getPackages, getActivePackages, createPackage, updatePackage, deletePackage,
@@ -800,8 +802,7 @@ const fetchMemberCredits = async () => {
 const loadMemberCustomers = async () => {
   customerOptionsLoading.value = true
   try {
-    const { data } = await getCustomers({ type: 'member', per_page: 200 })
-    customerOptions.value = data.data || []
+    customerOptions.value = await fetchAllPages((page) => getCustomers({ type: 'member', ...page }))
   } catch {
     customerOptions.value = []
   } finally {
@@ -864,7 +865,7 @@ const handleSavePackage = async () => {
       packageFormVisible.value = false
       fetchPackages()
       loadActivePackages()
-    } catch (e) { ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan paket') }
+    } catch (e) { notifyError(e, 'Gagal menyimpan paket') }
     finally { pkgFormLoading.value = false }
   })
 }
@@ -899,7 +900,7 @@ const handleAssign = async () => {
       ElMessage.success('Credits berhasil di-assign ke customer')
       assignDialogVisible.value = false
       fetchMemberCredits()
-    } catch (e) { ElMessage.error(e?.response?.data?.message || 'Gagal assign credits') }
+    } catch (e) { notifyError(e, 'Gagal assign credits') }
     finally { assignLoading.value = false }
   })
 }
@@ -930,7 +931,7 @@ const handleAdjustCredit = async () => {
     ElMessage.success('Credits berhasil diupdate')
     editCreditVisible.value = false
     fetchMemberCredits()
-  } catch (e) { ElMessage.error(e?.response?.data?.message || 'Gagal update credits') }
+  } catch (e) { notifyError(e, 'Gagal update credits') }
   finally { adjustLoading.value = false }
 }
 
@@ -985,12 +986,12 @@ onMounted(async () => {
 
 .info-box {
   background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2);
-  border-radius:8px; padding:10px 14px; font-size:12px; color:#93c5fd;
+  border-radius:8px; padding:10px 14px; font-size:12px; color:var(--action);
   display:flex; align-items:center; gap:8px;
 }
 .note-box {
   background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2);
-  border-radius:6px; padding:8px 10px; font-size:12px; color:#fbbf24;
+  border-radius:6px; padding:8px 10px; font-size:12px; color:var(--warning);
   display:flex; align-items:flex-start; gap:6px;
 }
 

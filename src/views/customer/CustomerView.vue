@@ -410,7 +410,7 @@
         </div>
 
         <!-- Info: auto generate password -->
-        <div v-if="!editingCustomer" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:8px;padding:10px 12px;font-size:12px;color:#a78bfa;margin-top:4px;display:flex;align-items:flex-start;gap:6px">
+        <div v-if="!editingCustomer" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--violet);margin-top:4px;display:flex;align-items:flex-start;gap:6px">
           <el-icon style="flex-shrink:0;margin-top:1px"><InfoFilled /></el-icon>
           Password akan di-generate otomatis dari nama customer dan dikirim ke email (jika diisi).
         </div>
@@ -508,6 +508,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getCustomers, getCustomerById,
@@ -592,8 +593,8 @@ const selectCustomer = async (row) => {
     if (isMobile.value) detailDrawerVisible.value = true
     notesInput.value = data.data.notes || ''
     editingNotes.value = false
-  } catch {
-    ElMessage.error('Gagal memuat detail customer')
+  } catch (e) {
+    notifyError(e, 'Gagal memuat detail customer')
   }
 }
 
@@ -647,7 +648,7 @@ const handleSubmit = async () => {
       formVisible.value = false
       fetchCustomers()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan customer')
+      notifyError(e, 'Gagal menyimpan customer')
     } finally {
       formLoading.value = false
     }
@@ -673,8 +674,8 @@ const saveNotes = async () => {
     selectedCustomer.value = data.data
     editingNotes.value = false
     ElMessage.success('Catatan berhasil disimpan')
-  } catch {
-    ElMessage.error('Gagal menyimpan catatan')
+  } catch (e) {
+    notifyError(e, 'Gagal menyimpan catatan')
   } finally {
     savingNotes.value = false
   }

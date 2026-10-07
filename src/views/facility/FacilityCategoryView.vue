@@ -112,6 +112,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import {
   getFacilityCategories,
   createFacilityCategory,
@@ -171,7 +172,7 @@ const save = async () => {
       drawerVisible.value = false
       fetchCategories()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan kategori')
+      notifyError(e, 'Gagal menyimpan kategori')
     } finally {
       saving.value = false
     }

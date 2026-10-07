@@ -26,7 +26,7 @@
                 :label="cat.name" :value="cat.id" />
             </el-select>
           </div>
-          <div class="toolbar-right">
+          <div v-if="canEdit" class="toolbar-right">
             <el-button @click="handleSyncMoka" :loading="syncLoading" type="info" plain>
               🔄 Sync dari Moka
             </el-button>
@@ -47,7 +47,7 @@
             :class="{ active: selectedCategory === cat.id }"
           >
             <span @click="selectedCategory = cat.id; fetchItems()">{{ cat.name }}</span>
-            <el-icon @click.stop="editCategory(cat)" class="pill-edit-icon">
+            <el-icon v-if="canEdit" @click.stop="editCategory(cat)" class="pill-edit-icon">
               <Edit />
             </el-icon>
           </div>
@@ -76,7 +76,7 @@
           </el-table-column>
           <el-table-column label="Tersedia" width="110" align="center">
             <template #default="{ row }">
-              <el-switch v-model="row.is_available" @change="toggleAvailable(row)" />
+              <el-switch v-model="row.is_available" :disabled="!canEdit" @change="toggleAvailable(row)" />
             </template>
           </el-table-column>
           <el-table-column label="Status" width="100" align="center">
@@ -92,7 +92,7 @@
               <span v-else style="color:var(--text-muted);font-size:11px">Manual</span>
             </template>
           </el-table-column>
-          <el-table-column label="Aksi" width="80" align="center">
+          <el-table-column v-if="canEdit" label="Aksi" width="80" align="center">
             <template #default="{ row }">
               <el-button @click="openItemDialog(row)" size="small" circle plain>
                 <el-icon><Edit /></el-icon>
@@ -119,8 +119,10 @@
         <!-- Filter orders -->
         <div class="toolbar">
           <div class="toolbar-left">
-            <el-select v-model="orderFilter.store_id" placeholder="Semua Cabang"
-              clearable style="width:180px" @change="fetchOrders">
+            <el-alert v-if="noAccess" type="warning" :closable="false" show-icon
+              title="Tidak ada cabang aktif yang bisa Anda akses. Hubungi admin." />
+            <el-select v-else v-model="orderFilter.store_id" :placeholder="canPickAll ? 'Semua Cabang' : 'Pilih Cabang'"
+              :clearable="canPickAll" style="width:180px" @change="fetchOrders">
               <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
             </el-select>
             <el-select v-model="orderFilter.status" placeholder="Semua Status"
@@ -178,7 +180,7 @@
             </div>
 
             <!-- Action buttons -->
-            <div class="order-actions">
+            <div v-if="canEdit" class="order-actions">
               <el-button v-if="order.status === 'pending'"
                 @click="updateStatus(order.id, 'preparing')"
                 type="warning" size="small">
@@ -280,14 +282,24 @@
 <script setup>
 import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import api from '@/api/index'
+import { usePermission } from '@/composables/usePermission'
+import { useAllowedStores } from '@/composables/useAllowedStores'
+
+// Backend: reading needs orders_fnb.view (route guard); every write
+// (category/item CRUD, Moka sync, order status) needs orders_fnb.edit.
+const { can } = usePermission()
+const canEdit = computed(() => can('orders_fnb.edit'))
+
+// Order list needs a branch for limited staff; "Semua Cabang" only for all_stores
+const { stores, canPickAll, noAccess, loadStores } = useAllowedStores({ allowAll: true })
 
 // ── State ─────────────────────────────────────────────────────
 const activeTab        = ref('menu')
 const categories       = ref([])
 const items            = ref([])
 const orders           = ref([])
-const stores           = ref([])
 const selectedCategory = ref('')
 const loadingItems     = ref(false)
 const loadingOrders    = ref(false)
@@ -317,7 +329,7 @@ const pendingCount = computed(() =>
 // ── Fetch ──────────────────────────────────────────────────────
 const fetchCategories = async () => {
   try {
-    const { data } = await api.get('/admin/fnb/categories')
+    const { data } = await api.get('/fnb/categories')
     categories.value = data.data || []
   } catch { /* silent */ }
 }
@@ -325,24 +337,18 @@ const fetchItems = async () => {
   loadingItems.value = true
   try {
     const params = selectedCategory.value ? { category_id: selectedCategory.value } : {}
-    const { data } = await api.get('/admin/fnb/items', { params })
+    const { data } = await api.get('/fnb/items', { params })
     items.value = data.data || []
-  } catch { ElMessage.error('Gagal memuat item') }
+  } catch (e) { notifyError(e, 'Gagal memuat item') }
   finally { loadingItems.value = false }
 }
 const fetchOrders = async () => {
   loadingOrders.value = true
   try {
-    const { data } = await api.get('/admin/fnb/orders', { params: orderFilter })
+    const { data } = await api.get('/fnb/orders', { params: orderFilter })
     orders.value = data.data || []
-  } catch { ElMessage.error('Gagal memuat pesanan') }
+  } catch (e) { notifyError(e, 'Gagal memuat pesanan') }
   finally { loadingOrders.value = false }
-}
-const fetchStores = async () => {
-  try {
-    const { data } = await api.get('/admin/stores')
-    stores.value = data.data || []
-  } catch { /* silent */ }
 }
 
 // ── Category CRUD ─────────────────────────────────────────────
@@ -364,16 +370,16 @@ const saveCategory = async () => {
   savingCategory.value = true
   try {
     if (editingCategory.value) {
-      await api.put(`/admin/fnb/categories/${editingCategory.value.id}`, { ...categoryForm })
+      await api.put(`/fnb/categories/${editingCategory.value.id}`, { ...categoryForm })
       ElMessage.success('Kategori berhasil diupdate')
     } else {
-      await api.post('/admin/fnb/categories', { ...categoryForm })
+      await api.post('/fnb/categories', { ...categoryForm })
       ElMessage.success('Kategori berhasil dibuat')
     }
     categoryDialogVisible.value = false
     await fetchCategories()
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan kategori')
+    notifyError(e, 'Gagal menyimpan kategori')
   } finally { savingCategory.value = false }
 }
 
@@ -406,21 +412,21 @@ const saveItem = async () => {
   savingItem.value = true
   try {
     if (editingItem.value) {
-      await api.put(`/admin/fnb/items/${editingItem.value.id}`, { ...itemForm })
+      await api.put(`/fnb/items/${editingItem.value.id}`, { ...itemForm })
       ElMessage.success('Item berhasil diupdate')
     } else {
-      await api.post('/admin/fnb/items', { ...itemForm })
+      await api.post('/fnb/items', { ...itemForm })
       ElMessage.success('Item berhasil ditambahkan')
     }
     itemDialogVisible.value = false
     await fetchItems()
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan item')
+    notifyError(e, 'Gagal menyimpan item')
   } finally { savingItem.value = false }
 }
 const toggleAvailable = async (row) => {
   try {
-    await api.put(`/admin/fnb/items/${row.id}`, {
+    await api.put(`/fnb/items/${row.id}`, {
       category_id:  row.category_id,
       name:         row.name,
       price:        row.price,
@@ -428,19 +434,19 @@ const toggleAvailable = async (row) => {
       is_available: row.is_available,
       is_active:    row.is_active,
     })
-  } catch {
+  } catch (e) {
     row.is_available = !row.is_available // rollback
-    ElMessage.error('Gagal mengubah ketersediaan')
+    notifyError(e, 'Gagal mengubah ketersediaan')
   }
 }
 
 // ── Order actions ─────────────────────────────────────────────
 const updateStatus = async (orderId, status) => {
   try {
-    await api.put(`/admin/fnb/orders/${orderId}/status`, { status })
+    await api.put(`/fnb/orders/${orderId}/status`, { status })
     ElMessage.success('Status pesanan diperbarui')
     await fetchOrders()
-  } catch { ElMessage.error('Gagal update status pesanan') }
+  } catch (e) { notifyError(e, 'Gagal update status pesanan') }
 }
 
 // ── Moka Sync ─────────────────────────────────────────────────
@@ -453,14 +459,14 @@ const handleSyncMoka = async () => {
   } catch { return } // user cancel
   syncLoading.value = true
   try {
-    const { data } = await api.post('/admin/fnb/sync-moka')
+    const { data } = await api.post('/fnb/sync-moka')
     const d = data.data || {}
     ElMessage.success(
       `Sync berhasil! ${d.categories_synced ?? 0} kategori, ${d.items_synced ?? 0} item diperbarui.`
     )
     await Promise.all([fetchCategories(), fetchItems()])
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Sync Moka gagal. Periksa konfigurasi API key.')
+    notifyError(e, 'Sync Moka gagal. Periksa konfigurasi API key.')
   } finally { syncLoading.value = false }
 }
 
@@ -476,8 +482,11 @@ const formatTime = (d) =>
 // ── Auto-refresh orders (30s) ─────────────────────────────────
 let refreshInterval = null
 onMounted(async () => {
-  await Promise.all([fetchCategories(), fetchItems(), fetchOrders(), fetchStores()])
-  refreshInterval = setInterval(fetchOrders, 30000)
+  try {
+    orderFilter.store_id = await loadStores()
+  } catch { /* dropdown stays empty; orders below show their own error */ }
+  await Promise.all([fetchCategories(), fetchItems(), !noAccess.value && fetchOrders()])
+  if (!noAccess.value) refreshInterval = setInterval(fetchOrders, 30000)
 })
 onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval) })
 </script>

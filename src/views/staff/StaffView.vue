@@ -284,6 +284,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { useAuthStore } from '@/stores/authStore'
 import { getStaffs, createStaff, updateStaff, deleteStaff as apiDelete, resetStaffPassword } from '@/api/staff/staffApi'
 import AuditTrail from '@/components/AuditTrail.vue'
@@ -429,7 +430,7 @@ const save = async () => {
       drawerVisible.value = false
       fetchStaffs()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan staff')
+      notifyError(e, 'Gagal menyimpan staff')
     } finally {
       saving.value = false
     }
@@ -470,7 +471,7 @@ const handleResetPassword = async (row) => {
     await resetStaffPassword(row.id)
     ElMessage.success('Password berhasil direset. Email konfirmasi dikirim ke staff.')
   } catch (e) {
-    if (e !== 'cancel') ElMessage.error(e?.response?.data?.message || 'Gagal reset password')
+    if (e !== 'cancel') notifyError(e, 'Gagal reset password')
   } finally {
     resettingPassword.value = false
   }

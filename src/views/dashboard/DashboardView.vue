@@ -38,7 +38,9 @@
         ><el-icon><Calendar /></el-icon> Custom</el-button>
       </div>
 
-      <el-select v-model="filters.store_id" placeholder="Semua Cabang" clearable size="small" :style="{ width: isMobile ? '100%' : '160px' }" @change="loadAll">
+      <el-alert v-if="noAccess" type="warning" :closable="false" show-icon
+        title="Tidak ada cabang aktif yang bisa Anda akses. Hubungi admin." />
+      <el-select v-else v-model="filters.store_id" :placeholder="canPickAll ? 'Semua Cabang' : 'Pilih Cabang'" :clearable="canPickAll" size="small" :style="{ width: isMobile ? '100%' : '160px' }" @change="loadAll">
         <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
       </el-select>
 
@@ -290,15 +292,18 @@
 </template>
 
 <script setup>
+import { fetchAllPages } from '@/utils/fetchAllPages'
+import { cssVar } from '@/utils/cssVar'
 import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import * as echarts from 'echarts'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { getSalesSummary, getSalesTrend, getTransactions } from '@/api/sales/salesApi'
-import { getStores } from '@/api/store/storeApi'
+import { useAllowedStores } from '@/composables/useAllowedStores'
 
 // ── Breakpoint ────────────────────────────────────────────────
 const { isMobile } = useBreakpoint()
@@ -307,7 +312,8 @@ const { isMobile } = useBreakpoint()
 const loading      = ref(false)
 const summary      = ref(null)
 const trendData    = ref([])
-const stores       = ref([])
+// Cabang sesuai store_access. "Semua Cabang" ('') hanya untuk staff all_stores.
+const { stores, canPickAll, noAccess, loadStores } = useAllowedStores({ allowAll: true })
 const customRange  = ref(null)
 
 const trendChartRef = ref(null)
@@ -373,9 +379,8 @@ const buildParams = () => ({
 })
 
 // theme-aware colors (no bg on chart — transparent)
-const isLight      = () => document.body.classList.contains('light-mode')
-const ctColor      = () => isLight() ? '#2d4a6e' : '#C9D4E2'
-const gridColor    = () => isLight() ? '#c0d4f0' : '#0e3272'
+const ctColor   = () => cssVar('--text-secondary')
+const gridColor = () => cssVar('--border')
 
 // ── Helpers: parse trend response (try beberapa kemungkinan struktur) ──
 const parseTrendData = (resData) => {
@@ -417,7 +422,7 @@ const loadAll = async () => {
     renderDonutChart()
   } catch (err) {
     console.error('[SalesTrend] loadAll error:', err)
-    ElMessage.error('Gagal memuat data sales')
+    notifyError(err, 'Gagal memuat data sales')
   } finally {
     loading.value = false
   }
@@ -545,11 +550,10 @@ const renderDonutChart = () => {
 const handleExport = async (format) => {
   ElMessage.info('Mengambil data...')
   try {
-    const { data } = await getTransactions({ ...buildParams(), type: txFilter.value, page: 1, per_page: 9999 })
-    const rows = data.data || []
+    const rows = await fetchAllPages((page) => getTransactions({ ...buildParams(), type: txFilter.value, ...page }))
     if (format === 'excel') exportToExcel(rows)
     else exportToPDF(rows)
-  } catch { ElMessage.error('Gagal export') }
+  } catch (e) { notifyError(e, 'Gagal export') }
 }
 
 const exportToExcel = (rows) => {
@@ -596,10 +600,10 @@ watch(trendData, () => nextTick(renderTrendChart), { deep: false })
 
 onMounted(async () => {
   try {
-    const { data } = await getStores({ per_page: 100, status: 'active' })
-    stores.value = data.data || []
+    filters.store_id = await loadStores()
   } catch {}
-  await loadAll()
+  // Tanpa akses cabang, API menolak setiap request; jangan kirim apa pun
+  if (!noAccess.value) await loadAll()
   window.addEventListener('resize', onResize)
   // Belt-and-suspenders: retry chart render after browser layout settles
   setTimeout(() => {

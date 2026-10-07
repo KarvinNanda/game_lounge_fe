@@ -578,6 +578,7 @@ import { ref, reactive, onMounted, watch } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getVouchers, getVoucherById, generateCode,
@@ -750,7 +751,7 @@ const handleSubmit = async () => {
       formVisible.value = false
       fetchVouchers()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan voucher')
+      notifyError(e, 'Gagal menyimpan voucher')
     } finally { formLoading.value = false }
   })
 }
@@ -760,7 +761,7 @@ const viewDetail = async (row) => {
     const { data } = await getVoucherById(row.id)
     selectedVoucher.value = data.data
     detailVisible.value = true
-  } catch { ElMessage.error('Gagal memuat detail voucher') }
+  } catch (e) { notifyError(e, 'Gagal memuat detail voucher') }
 }
 
 const handleDelete = async (row) => {

@@ -1,0 +1,200 @@
+/* ════════════════════════════════════════════════════════
+   Design tokens — single source of truth (light only)
+   Layers: primitive → semantic → Element Plus (--el-*)
+   Contrast pairs are pinned by tests/tokens.spec.js.
+════════════════════════════════════════════════════════ */
+:root {
+  /* ── Primitive: brand ─────────────────────────────── */
+  --blue-500: #0282DE;  /* brand; decorative only, white text on it is 4.0:1 */
+  --blue-600: #0272C4;  /* actions; white text 4.99:1 */
+  --blue-700: #025B9D;
+  --blue-50:  #F2F8FC;
+  --navy-900: #0B1B3F;
+
+  /* ── Primitive: neutral (slate) ───────────────────── */
+  --slate-0:   #FFFFFF;
+  --slate-50:  #F8FAFC;
+  --slate-100: #F1F5F9;
+  --slate-200: #E2E8F0;
+  --slate-300: #CBD5E1;
+  --slate-400: #8494A8;
+  --slate-500: #5B6B80;
+  --slate-700: #334155;
+  --slate-900: #0F172A;
+
+  /* ── Semantic ─────────────────────────────────────── */
+  --surface:        var(--slate-0);
+  --surface-page:   var(--slate-50);
+  --surface-muted:  var(--slate-100);
+  --border:         var(--slate-200);
+  --border-strong:  var(--slate-400);  /* form control boundary, 3.1:1 */
+  --text-primary:   var(--slate-900);
+  --text-secondary: var(--slate-700);
+  --text-muted:     var(--slate-500);
+  --action:         var(--blue-600);
+  --action-hover:   var(--blue-700);
+  --action-soft:    var(--blue-50);
+  --focus-ring:     var(--blue-500);
+  --success:        #047857;
+  --warning:        #B45309;
+  --danger:         #D42222;
+  --violet:         #6D28D9;  /* happy-hour / member accents, 7:1 on white */
+
+  /* Sidebar */
+  --sidebar-width:       232px;
+  --sidebar-bg:          var(--navy-900);
+  --sidebar-text:        var(--slate-300);
+  --sidebar-label:       #94A3B8;
+  --sidebar-text-active: #FFFFFF;
+  --sidebar-hover-bg:    rgba(255, 255, 255, 0.06);
+  --sidebar-active-bg:   rgba(2, 130, 222, 0.22);
+  --sidebar-divider:     rgba(255, 255, 255, 0.08);
+  --sidebar-accent:      var(--blue-500);
+
+  /* Spacing — dense dashboard scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+
+  /* Typography */
+  --font-sans: 'Inter Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs:   12px;
+  --font-size-sm:   13px;
+  --font-size-base: 14px;
+  --font-size-lg:   16px;
+  --font-size-xl:   20px;
+
+  /* Motion */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Layout */
+  --header-height: 56px;
+
+  /* ── Legacy aliases (views still use these names) ─── */
+  --bg-main:             var(--surface-page);
+  --bg-card:             var(--surface);
+  --bg-card-hover:       var(--surface-muted);
+  --border-color:        var(--border);
+  --color-primary:       var(--action);
+  --color-primary-light: var(--action);  /* was cyan #19B9EE: fails AA as text on white */
+  --color-primary-dark:  var(--action-hover);
+  --color-primary-soft:  var(--action-soft);
+  --color-primary-glow:  transparent;
+  --color-accent:        var(--blue-500);
+  --color-ice:           var(--blue-500);
+  --color-success:       var(--success);
+  --color-warning:       var(--warning);
+  --color-danger:        var(--danger);
+  --color-info:          var(--action);
+
+  /* ── Element Plus mapping ─────────────────────────── */
+  --el-font-family:    var(--font-sans);
+  --el-font-size-base: var(--font-size-base);
+
+  --el-text-color-primary:     var(--text-primary);
+  --el-text-color-regular:     var(--text-secondary);
+  --el-text-color-secondary:   var(--text-muted);
+  --el-text-color-placeholder: var(--text-muted);
+  --el-text-color-disabled:    var(--slate-400);
+
+  --el-border-color:             var(--border-strong);
+  --el-border-color-hover:       var(--slate-500);
+  --el-border-color-light:       var(--border);
+  --el-border-color-lighter:     var(--border);
+  --el-border-color-extra-light: var(--surface-muted);
+  --el-border-color-dark:        var(--slate-300);
+  --el-border-color-darker:      var(--slate-400);
+
+  --el-bg-color:         var(--surface);
+  --el-bg-color-page:    var(--surface-page);
+  --el-bg-color-overlay: var(--surface);
+  --el-fill-color:             var(--surface-muted);
+  --el-fill-color-light:       var(--surface-page);
+  --el-fill-color-lighter:     var(--surface-page);
+  --el-fill-color-extra-light: var(--surface-page);
+  --el-fill-color-blank:       var(--surface);
+  --el-fill-color-dark:        var(--slate-200);
+  --el-disabled-bg-color:      var(--surface-muted);
+
+  --el-border-radius-base:  var(--radius-md);
+  --el-border-radius-small: var(--radius-sm);
+
+  --el-box-shadow:         var(--shadow-md);
+  --el-box-shadow-light:   var(--shadow-md);
+  --el-box-shadow-lighter: var(--shadow-sm);
+
+  --el-transition-duration:      var(--motion-base);
+  --el-transition-duration-fast: var(--motion-fast);
+
+  --el-mask-color:            rgba(255, 255, 255, 0.8);
+  --el-overlay-color-lighter: rgba(15, 23, 42, 0.45);
+
+  /* Colour scales: light-N = mix with white N×10%, dark-2 = mix with black 20%.
+     light-9 is a 95% mix (not 90%) so base-colour text on it stays ≥ 4.5:1. */
+  --el-color-primary: var(--blue-600);
+  --el-color-primary-light-3: #4E9CD6;
+  --el-color-primary-light-5: #81B9E2;
+  --el-color-primary-light-7: #B3D5ED;
+  --el-color-primary-light-8: #CCE3F3;
+  --el-color-primary-light-9: #F2F8FC;
+  --el-color-primary-dark-2: var(--blue-700);
+  --el-color-primary-rgb: 2, 114, 196;
+
+  --el-color-success: #047857;
+  --el-color-success-light-3: #4FA189;
+  --el-color-success-light-5: #82BCAB;
+  --el-color-success-light-7: #B4D7CD;
+  --el-color-success-light-8: #CDE4DD;
+  --el-color-success-light-9: #F2F8F7;
+  --el-color-success-dark-2: #036046;
+  --el-color-success-rgb: 4, 120, 87;
+
+  --el-color-warning: #B45309;
+  --el-color-warning-light-3: #CB8753;
+  --el-color-warning-light-5: #DAA984;
+  --el-color-warning-light-7: #E9CBB5;
+  --el-color-warning-light-8: #F0DDCE;
+  --el-color-warning-light-9: #FBF6F3;
+  --el-color-warning-dark-2: #904207;
+  --el-color-warning-rgb: 180, 83, 9;
+
+  --el-color-danger: #D42222;
+  --el-color-danger-light-3: #E16464;
+  --el-color-danger-light-5: #EA9191;
+  --el-color-danger-light-7: #F2BDBD;
+  --el-color-danger-light-8: #F6D3D3;
+  --el-color-danger-light-9: #FDF4F4;
+  --el-color-danger-dark-2: #AA1B1B;
+  --el-color-danger-rgb: 212, 34, 34;
+
+  /* Element Plus uses "error" for ElMessage.error / el-alert; same scale as danger */
+  --el-color-error: var(--el-color-danger);
+  --el-color-error-light-3: var(--el-color-danger-light-3);
+  --el-color-error-light-5: var(--el-color-danger-light-5);
+  --el-color-error-light-7: var(--el-color-danger-light-7);
+  --el-color-error-light-8: var(--el-color-danger-light-8);
+  --el-color-error-light-9: var(--el-color-danger-light-9);
+  --el-color-error-dark-2: var(--el-color-danger-dark-2);
+  --el-color-error-rgb: var(--el-color-danger-rgb);
+
+  --el-color-info: #5B6B80;
+  --el-color-info-light-3: #8C97A6;
+  --el-color-info-light-5: #ADB5C0;
+  --el-color-info-light-7: #CED3D9;
+  --el-color-info-light-8: #DEE1E6;
+  --el-color-info-light-9: #F7F8F9;
+  --el-color-info-dark-2: #495666;
+  --el-color-info-rgb: 91, 107, 128;
+}

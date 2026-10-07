@@ -30,9 +30,9 @@
             </div>
             <div class="meta-item">
               <el-icon><OfficeBuilding /></el-icon>
-              <span v-if="staff?.is_all_stores">Semua Cabang</span>
-              <span v-else-if="staff?.staff_stores?.length">
-                {{ staff.staff_stores.map(ss => ss.store?.name).join(', ') }}
+              <span v-if="hasAllBranches">Semua Cabang</span>
+              <span v-else-if="branches.length">
+                {{ branches.map(s => s.name).join(', ') }}
               </span>
               <span v-else style="color:var(--text-muted)">—</span>
             </div>
@@ -65,13 +65,13 @@
             <div class="info-row">
               <span class="info-label">Akses Cabang</span>
               <span class="info-value">
-                <template v-if="staff?.is_all_stores">
+                <template v-if="hasAllBranches">
                   <el-tag size="small" type="success" plain>Semua Cabang</el-tag>
                 </template>
-                <template v-else-if="staff?.staff_stores?.length">
+                <template v-else-if="branches.length">
                   <div style="display:flex;flex-wrap:wrap;gap:4px">
-                    <el-tag v-for="ss in staff.staff_stores" :key="ss.id" size="small" plain>
-                      {{ ss.store?.name }}
+                    <el-tag v-for="s in branches" :key="s.id" size="small" plain>
+                      {{ s.name }}
                     </el-tag>
                   </div>
                 </template>
@@ -143,11 +143,18 @@
 <script setup>
 import { ref, reactive, computed } from 'vue'
 import { ElMessage } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { useAuthStore } from '@/stores/authStore'
+import { useAllowedStores } from '@/composables/useAllowedStores'
 import { updateStaff } from '@/api/staff/staffApi'
 
 const authStore = useAuthStore()
 const staff = computed(() => authStore.staff)
+
+// Branch access from store_access (what the backend enforces). Names are
+// only needed for limited staff; "all branches" needs no request.
+const { stores: branches, canPickAll: hasAllBranches, loadStores } = useAllowedStores({ allowAll: true })
+if (!hasAllBranches.value) loadStores().catch(() => {})
 const pwFormRef = ref()
 const changingPw = ref(false)
 
@@ -190,7 +197,7 @@ const changePassword = async () => {
       Object.assign(pwForm, { old_password: '', new_password: '', confirm_password: '' })
       pwFormRef.value.resetFields()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal mengubah password')
+      notifyError(e, 'Gagal mengubah password')
     } finally {
       changingPw.value = false
     }

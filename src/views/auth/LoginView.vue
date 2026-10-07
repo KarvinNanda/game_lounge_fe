@@ -1,28 +1,32 @@
 <template>
-  <div class="login-page">
-    <div class="login-card">
-      <div class="login-logo">
-        <img src="@/assets/logo.png" alt="Quantum Gaming" class="logo-img" />
-        <div>
-          <div class="logo-title">QUANTUM GAMING</div>
-        </div>
+  <main class="login-page">
+    <section class="login-card" aria-labelledby="login-heading">
+      <div class="login-brand">
+        <img src="@/assets/logo.png" alt="" class="login-logo" />
+        <span class="login-brand-name">Quantum Gaming</span>
       </div>
-      <h2 class="login-heading">Selamat Datang</h2>
-      <p class="login-desc">Masuk ke dashboard admin Quantum</p>
+      <h1 id="login-heading" class="login-heading">Masuk ke dashboard admin</h1>
 
-      <el-form :model="form" :rules="rules" ref="formRef" @submit.prevent="handleLogin">
-        <el-form-item prop="username">
-          <el-input v-model="form.username" placeholder="Username" size="large" prefix-icon="User" />
+      <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent="handleLogin">
+        <el-form-item label="Username" prop="username">
+          <el-input v-model="form.username" size="large" autocomplete="username" prefix-icon="User" />
         </el-form-item>
-        <el-form-item prop="password">
-          <el-input v-model="form.password" type="password" placeholder="Password" size="large" prefix-icon="Lock" show-password />
+        <el-form-item label="Password" prop="password">
+          <el-input
+            v-model="form.password"
+            type="password"
+            size="large"
+            autocomplete="current-password"
+            prefix-icon="Lock"
+            show-password
+          />
         </el-form-item>
-        <el-button type="primary" size="large" :loading="loading" @click="handleLogin" style="width:100%;margin-top:8px">
+        <el-button type="primary" size="large" native-type="submit" :loading="loading" class="login-submit">
           Masuk
         </el-button>
       </el-form>
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
 
 <script setup>
@@ -30,6 +34,7 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/authStore'
+import { loginErrorMessage } from '@/utils/authErrors'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -43,46 +48,57 @@ const rules = {
 }
 
 const handleLogin = async () => {
-  if (!formRef.value) return
-  await formRef.value.validate(async (valid) => {
-    if (!valid) return
-    loading.value = true
-    try {
-      await authStore.doLogin(form.username, form.password)
-      ElMessage.success('Login berhasil!')
-      router.push('/dashboard')
-    } catch (err) {
-      ElMessage.error(err?.response?.data?.message || 'Login gagal')
-    } finally {
-      loading.value = false
-    }
-  })
+  // One login at a time. Lock before validating so two submits in the same
+  // tick cannot both pass, and stay locked after success until the page
+  // changes (the dashboard chunk can take a while to load).
+  if (loading.value || !formRef.value) return
+  loading.value = true
+
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) {
+    loading.value = false
+    return
+  }
+
+  try {
+    await authStore.doLogin(form.username, form.password)
+  } catch (err) {
+    form.password = ''
+    ElMessage.error(loginErrorMessage(err))
+    loading.value = false
+    return
+  }
+  router.push('/dashboard')
 }
 </script>
 
 <style scoped>
 .login-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-main);
+  padding: var(--space-4);
+  background: var(--surface-page);
 }
 .login-card {
-  width: 400px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 40px;
+  width: 100%;
+  max-width: 380px;
+  padding: var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
-.login-logo {
-  display: flex; align-items: center; gap: 12px; margin-bottom: 32px;
+.login-brand { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-5); }
+.login-logo { width: 48px; height: 48px; object-fit: contain; }
+.login-brand-name {
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-primary);
 }
-.logo-img {
-  width: 90px; height: 90px; object-fit: contain; border-radius: 10px;
-}
-.logo-title { font-size: 15px; font-weight: 800; letter-spacing: 1px; color: var(--text-primary); }
-.logo-sub { font-size: 10px; color: var(--text-secondary); letter-spacing: 0.5px; }
-.login-heading { font-size: 22px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
-.login-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 28px; }
+.login-heading { margin-bottom: var(--space-5); font-size: var(--font-size-xl); font-weight: 600; }
+.login-submit { width: 100%; margin-top: var(--space-2); }
 </style>

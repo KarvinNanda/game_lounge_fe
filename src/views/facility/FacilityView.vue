@@ -179,6 +179,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { getFacilities, deleteFacility as apiDelete, updateFacility, getFacilityCategories } from '@/api/facility/facilityApi'
 import { getImageUrl } from '@/utils/imageHelper'
 
@@ -233,8 +234,8 @@ const toggleActive = async (row) => {
     await updateFacility(row.id, { is_active: !row.is_active,name: row.name, category_id: row.category_id,description: row.description,icon_url: row.icon_url })
     row.is_active = !row.is_active
     ElMessage.success('Status fasilitas diperbarui')
-  } catch {
-    ElMessage.error('Gagal mengubah status')
+  } catch (e) {
+    notifyError(e, 'Gagal mengubah status')
   }
 }
 

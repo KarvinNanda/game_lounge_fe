@@ -246,8 +246,8 @@ onMounted(() => {
 
 .card-rules { display:flex; gap:8px; flex-wrap:wrap; }
 .rule-badge { display:flex; align-items:center; gap:4px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:600; }
-.rule-hh { background:rgba(124,58,237,0.15); color:#a78bfa; }
-.rule-pkg { background:rgba(16,185,129,0.15); color:#34d399; }
+.rule-hh { background:rgba(124,58,237,0.15); color:var(--violet); }
+.rule-pkg { background:rgba(16,185,129,0.15); color:var(--success); }
 
 .no-pricing-hint { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--color-warning); margin-top:6px; }
 
@@ -260,6 +260,6 @@ onMounted(() => {
   background:rgba(59,130,246,0.08); border:1px solid rgba(59,130,246,0.2);
   border-radius:8px; padding:12px 16px;
   display:flex; align-items:center; gap:8px;
-  font-size:12px; color:#93c5fd;
+  font-size:12px; color:var(--action);
 }
 </style>

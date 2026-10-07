@@ -228,6 +228,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { getTemplates, updateTemplate, previewTemplate } from '@/api/notification_template/notificationTemplateApi'
 
@@ -271,8 +272,8 @@ const fetchTemplates = async () => {
   try {
     const { data } = await getTemplates()
     templates.value = data.data || []
-  } catch {
-    ElMessage.error('Gagal memuat template notifikasi')
+  } catch (e) {
+    notifyError(e, 'Gagal memuat template notifikasi')
   } finally {
     loading.value = false
   }
@@ -339,8 +340,8 @@ const handlePreview = async () => {
       channel: activeChannel.value,
     })
     previewRendered.value = data.data?.rendered || data.data || ''
-  } catch {
-    ElMessage.error('Gagal generate preview')
+  } catch (e) {
+    notifyError(e, 'Gagal generate preview')
   } finally {
     previewing.value = false
   }
@@ -361,7 +362,7 @@ const handleSave = async () => {
     editorVisible.value = false
     fetchTemplates()
   } catch (e) {
-    ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan template')
+    notifyError(e, 'Gagal menyimpan template')
   } finally {
     saving.value = false
   }

@@ -51,3 +51,7 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# ── Local design docs (not committed) ──────
+docs/superpowers/
+.superpowers/

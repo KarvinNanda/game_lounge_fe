@@ -114,7 +114,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { validateResetToken, resetPassword } from '@/api/auth/authApi'
 
 const route = useRoute()
@@ -150,7 +150,7 @@ const handleReset = async () => {
       })
       resetSuccess.value = true
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal reset password')
+      notifyError(e, 'Gagal reset password')
     } finally {
       loading.value = false
     }

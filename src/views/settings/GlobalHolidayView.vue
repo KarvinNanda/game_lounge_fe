@@ -212,6 +212,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import {
   getGlobalHolidays,
   createGlobalHoliday,
@@ -295,7 +296,7 @@ const save = async () => {
       drawerVisible.value = false
       fetchHolidays()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan')
+      notifyError(e, 'Gagal menyimpan')
     } finally {
       saving.value = false
     }

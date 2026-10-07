@@ -268,6 +268,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { getStores, deleteStore as apiDelete, updateStore, updateStoreRoom, getGlobalHolidays } from '@/api/store/storeApi'
 import { getImageUrl } from '@/utils/imageHelper'
 
@@ -338,8 +339,8 @@ const toggleStatus = async (row) => {
     await updateStore(row.id, { status: next,name: row.name, address: row.address, whatsapp: row.whatsapp, photo_url: row.photo_url })
     row.status = next
     ElMessage.success('Status store diperbarui')
-  } catch {
-    ElMessage.error('Gagal mengubah status')
+  } catch (e) {
+    notifyError(e, 'Gagal mengubah status')
   }
 }
 
@@ -370,8 +371,8 @@ const handleToggleRoom = async (room) => {
     await updateStoreRoom(room.id, { is_active: next })
     room.is_active = next
     ElMessage.success(`Ruangan ${next ? 'diaktifkan' : 'dinonaktifkan'}`)
-  } catch {
-    ElMessage.error('Gagal mengubah status ruangan')
+  } catch (e) {
+    notifyError(e, 'Gagal mengubah status ruangan')
   } finally {
     togglingRoom.value = null
   }

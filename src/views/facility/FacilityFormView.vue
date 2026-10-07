@@ -123,6 +123,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { createFacility, updateFacility, getFacilityById, getFacilityCategories } from '@/api/facility/facilityApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
 
@@ -207,7 +208,7 @@ const save = async () => {
       }
       router.push('/facility')
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan fasilitas')
+      notifyError(e, 'Gagal menyimpan fasilitas')
     } finally {
       saving.value = false
     }

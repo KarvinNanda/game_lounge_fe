@@ -172,6 +172,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { getRoomTemplates, updateRoomTemplate, deleteRoomTemplate as apiDelete } from '@/api/room_template/roomTemplateApi'
 import { getImageUrl } from '@/utils/imageHelper'
 
@@ -215,8 +216,8 @@ const toggleActive = async (row) => {
     await updateRoomTemplate(row.id, { is_active: !row.is_active,name: row.name, capacity_min: row.capacity_min, capacity_max: row.capacity_max,image_url: row.image_url })
     row.is_active = !row.is_active
     ElMessage.success('Status berhasil diperbarui')
-  } catch {
-    ElMessage.error('Gagal mengubah status')
+  } catch (e) {
+    notifyError(e, 'Gagal mengubah status')
   }
 }
 

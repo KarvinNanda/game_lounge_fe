@@ -192,6 +192,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { getRoles, createRole, updateRole, deleteRole as apiDelete } from '@/api/role/roleApi'
 import AuditTrail from '@/components/AuditTrail.vue'
 
@@ -216,7 +217,7 @@ const permissionGroups = reactive([
   { key: 'bookings', label: 'Bookings', description: 'Kelola booking & pembayaran.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'bookings.view', checked: false }, { label: 'Create', value: 'bookings.create', checked: false }, { label: 'Edit', value: 'bookings.edit', checked: false }, { label: 'Cancel', value: 'bookings.cancel', checked: false }] },
   { key: 'rooms', label: 'Rooms', description: 'Kelola data room & console.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'rooms.view', checked: false }, { label: 'Create', value: 'rooms.create', checked: false }, { label: 'Edit', value: 'rooms.edit', checked: false }, { label: 'Delete', value: 'rooms.delete', checked: false }] },
   { key: 'schedule', label: 'Schedule', description: 'Kelola jadwal & kalender.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'schedule.view', checked: false }, { label: 'Edit', value: 'schedule.edit', checked: false }] },
-  { key: 'orders_fnb', label: 'Orders (F&B)', description: 'Kelola pesanan makanan & minuman.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'orders_fnb.view', checked: false }, { label: 'Create', value: 'orders_fnb.create', checked: false }, { label: 'Edit', value: 'orders_fnb.edit', checked: false }, { label: 'Cancel', value: 'orders_fnb.cancel', checked: false }] },
+  { key: 'orders_fnb', label: 'Orders (F&B)', description: 'Kelola pesanan makanan & minuman.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'orders_fnb.view', checked: false }, { label: 'Edit', value: 'orders_fnb.edit', checked: false }] },
   { key: 'customers', label: 'Customers', description: 'Kelola data pelanggan.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'customers.view', checked: false }, { label: 'Create', value: 'customers.create', checked: false }, { label: 'Edit', value: 'customers.edit', checked: false }] },
   { key: 'membership', label: 'Membership', description: 'Kelola paket membership.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'membership.view', checked: false }, { label: 'Create', value: 'membership.create', checked: false }, { label: 'Edit', value: 'membership.edit', checked: false }] },
   { key: 'play_credits', label: 'Play Credits', description: 'Kelola paket play credits.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'play_credits.view', checked: false }, { label: 'Create', value: 'play_credits.create', checked: false }, { label: 'Edit', value: 'play_credits.edit', checked: false }] },
@@ -333,7 +334,7 @@ const save = async () => {
       drawerVisible.value = false
       fetchRoles()
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan role')
+      notifyError(e, 'Gagal menyimpan role')
     } finally {
       saving.value = false
     }

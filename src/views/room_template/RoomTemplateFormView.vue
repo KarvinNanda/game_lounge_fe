@@ -184,9 +184,11 @@
 </template>
 
 <script setup>
+import { fetchAllPages } from '@/utils/fetchAllPages'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { notifyError } from '@/utils/notify'
 import { createRoomTemplate, updateRoomTemplate, getRoomTemplateById } from '@/api/room_template/roomTemplateApi'
 import { getFacilities } from '@/api/facility/facilityApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
@@ -276,7 +278,7 @@ const save = async () => {
       }
       router.push('/room-template')
     } catch (e) {
-      ElMessage.error(e?.response?.data?.message || 'Gagal menyimpan room')
+      notifyError(e, 'Gagal menyimpan room')
     } finally {
       saving.value = false
     }
@@ -286,8 +288,7 @@ const save = async () => {
 onMounted(async () => {
   facilitiesLoading.value = true
   try {
-    const { data } = await getFacilities({ per_page: 200 })
-    facilities.value = data.data || []
+    facilities.value = await fetchAllPages((page) => getFacilities(page))
   } catch {} finally {
     facilitiesLoading.value = false
   }

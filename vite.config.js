@@ -32,6 +32,11 @@ export default defineConfig(({ command, mode }) => {
       environment: 'jsdom',
       globals: true,
       include: ['tests/**/*.spec.js'],
+      // Let Vite transform element-plus in tests. Run raw in Node, its
+      // `import AsyncValidator from 'async-validator'` gets the CJS module
+      // object, `new AsyncValidator` throws, and ElForm treats every form
+      // as valid. The browser build is not affected (Vite pre-bundles it).
+      server: { deps: { inline: ['element-plus'] } },
       coverage: {
         provider: 'v8',
         reporter: ['text', 'html'],

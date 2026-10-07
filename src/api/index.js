@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
 // Semua rute admin berada di bawah prefix /api/admin (cookie staff_token
 // ber-Path=/api/admin — tidak pernah terkirim ke rute customer/public)
@@ -36,6 +37,10 @@ api.interceptors.response.use(
       if (path !== '/login' && !path.startsWith('/admin-recovery')) {
         window.location.href = '/login'
       }
+    } else if (error.response?.status === 403) {
+      // Role tidak punya izin untuk aksi ini — session tetap valid, jangan
+      // logout. grouping: beberapa 403 sekaligus tampil sebagai satu pesan.
+      ElMessage.error({ message: 'Anda tidak punya akses untuk aksi ini.', grouping: true })
     }
     return Promise.reject(error)
   }
