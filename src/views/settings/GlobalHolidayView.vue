@@ -28,7 +28,7 @@
           placeholder="Filter tahun"
           :style="{ width: '130px' }"
           clearable
-          @change="fetchHolidays"
+          @change="applyFilters"
         />
         <template #actions>
           <el-button plain @click="resetFilters">
@@ -241,9 +241,15 @@ const formRules = {
   close_time: [{ required: true, message: 'Jam tutup wajib diisi', trigger: 'change' }],
 }
 
+// Filter changes start again at page 1; the pager keeps calling fetchHolidays.
+const applyFilters = () => {
+  page.value = 1
+  fetchHolidays()
+}
+
 const debouncedFetch = () => {
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(fetchHolidays, 400)
+  debounceTimer = setTimeout(applyFilters, 400)
 }
 
 const fetchHolidays = async () => {
@@ -316,7 +322,7 @@ const removeHoliday = async (row) => {
 const resetFilters = () => {
   search.value = ''
   yearFilter.value = null
-  fetchHolidays()
+  applyFilters()
 }
 
 const formatDate = (val) => {

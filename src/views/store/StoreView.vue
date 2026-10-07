@@ -28,7 +28,7 @@
           clearable
           @input="debouncedFetch"
         />
-        <el-select v-model="statusFilter" placeholder="Semua Status" clearable style="width:140px" @change="fetchStores">
+        <el-select v-model="statusFilter" placeholder="Semua Status" clearable style="width:140px" @change="applyFilters">
           <el-option label="Aktif" value="active" />
           <el-option label="Nonaktif" value="inactive" />
           <el-option label="Draft" value="draft" />
@@ -269,9 +269,15 @@ const togglingRoom = ref(null)
 const globalHolidays = ref([])
 let debounceTimer = null
 
+// Filter changes start again at page 1; the pager keeps calling fetchStores.
+const applyFilters = () => {
+  page.value = 1
+  fetchStores()
+}
+
 const debouncedFetch = () => {
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(fetchStores, 400)
+  debounceTimer = setTimeout(applyFilters, 400)
 }
 
 const fetchStores = async () => {
@@ -343,7 +349,7 @@ const deleteStore = async (row) => {
 const resetFilters = () => {
   search.value = ''
   statusFilter.value = null
-  fetchStores()
+  applyFilters()
 }
 
 const handleToggleRoom = async (room) => {

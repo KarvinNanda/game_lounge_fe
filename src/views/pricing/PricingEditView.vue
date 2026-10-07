@@ -566,6 +566,7 @@ import {
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 import { getEventPrice, upsertEventPrice } from '@/api/booking/eventBookingApi'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import { businessDayWIB } from '@/utils/bookingTime'
 
 const { can } = usePermission()
 const { isMobile } = useBreakpoint()
@@ -607,7 +608,7 @@ const pricingConfig = reactive({
 })
 
 const calcForm = reactive({
-  booking_date: new Date().toISOString().split('T')[0],
+  booking_date: businessDayWIB(),
   room_template_id: null,
   start_time: '13:00',
   end_time: '20:00',
@@ -692,7 +693,6 @@ const buildPackageRows = (packagePrices) => {
     })
     return { id: t.id, name: t.name, prices }
   })
-  console.log(packageEditRows.value)
 }
 
 const loadFlashSales = async () => {

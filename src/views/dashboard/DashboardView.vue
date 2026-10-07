@@ -384,7 +384,6 @@ const parseTrendData = (resData) => {
   if (Array.isArray(d?.data))         return d.data
   if (Array.isArray(resData?.items))  return resData.items
   if (Array.isArray(resData))         return resData
-  console.warn('[SalesTrend] Struktur response tidak dikenali:', resData)
   return []
 }
 
@@ -398,17 +397,12 @@ const loadAll = async () => {
       getSalesTrend({ ...params, granularity: filters.granularity }),
     ])
     summary.value = sRes.data.data
-
-    // Debug: lihat raw response trend di console browser
-    console.log('[SalesTrend] raw response:', tRes.data)
     trendData.value = parseTrendData(tRes.data)
-    console.log('[SalesTrend] parsed items:', trendData.value)
 
     await nextTick()
     renderTrendChart()
     renderDonutChart()
   } catch (err) {
-    console.error('[SalesTrend] loadAll error:', err)
     notifyError(err, 'Gagal memuat data sales')
   } finally {
     loading.value = false
@@ -418,7 +412,6 @@ const loadAll = async () => {
 const loadTrend = async () => {
   try {
     const { data } = await getSalesTrend({ ...buildParams(), granularity: filters.granularity })
-    console.log('[SalesTrend] loadTrend raw:', data)
     trendData.value = parseTrendData(data)
     renderTrendChart()
   } catch {}
@@ -449,8 +442,7 @@ const renderTrendChart = () => {
   try {
     if (!trendChart) trendChart = echarts.init(trendChartRef.value)
     trendChart.resize()
-  } catch (e) {
-    console.error('[SalesTrend] ECharts init failed:', e)
+  } catch {
     return
   }
 

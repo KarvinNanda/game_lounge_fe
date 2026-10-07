@@ -37,6 +37,11 @@ export default defineConfig([
       // render time (962cae9: formatDate in NewBookingPanel). Lint is the only
       // check CI runs, so catch it here.
       'vue/no-undef-properties': 'error',
+      // Console output leaks customer PII and business data (bookings, sales,
+      // pricing); an Axios error also carries the request and response bodies.
+      // Auth is an httpOnly cookie, so no token is exposed. Errors reach the
+      // user via notifyError.
+      'no-console': 'error',
     },
   },
 ])

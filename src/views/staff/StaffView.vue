@@ -26,10 +26,10 @@
           clearable
           @input="debouncedFetch"
         />
-        <el-select v-model="filters.role_id" placeholder="Semua Role" clearable style="width:150px" @change="fetchStaffs">
+        <el-select v-model="filters.role_id" placeholder="Semua Role" clearable style="width:150px" @change="applyFilters">
           <el-option v-for="r in roles" :key="r.id" :label="r.name" :value="r.id" />
         </el-select>
-        <el-select v-model="filters.store_id" placeholder="Semua Cabang" clearable style="width:160px" @change="fetchStaffs">
+        <el-select v-model="filters.store_id" placeholder="Semua Cabang" clearable style="width:160px" @change="applyFilters">
           <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
         </el-select>
         <template #actions>
@@ -324,9 +324,15 @@ const formRules = computed(() => ({
   role_id: [{ required: true, message: 'Role wajib dipilih', trigger: 'change' }],
 }))
 
+// Filter changes start again at page 1; the pager keeps calling fetchStaffs.
+const applyFilters = () => {
+  pagination.page = 1
+  fetchStaffs()
+}
+
 const debouncedFetch = () => {
   clearTimeout(debounceTimer)
-  debounceTimer = setTimeout(fetchStaffs, 400)
+  debounceTimer = setTimeout(applyFilters, 400)
 }
 
 const fetchStaffs = async () => {
@@ -443,7 +449,7 @@ const removeStaff = async (row) => {
 
 const resetFilters = () => {
   Object.assign(filters, { search: '', role_id: null, store_id: null })
-  fetchStaffs()
+  applyFilters()
 }
 
 const handleResetPassword = async (row) => {
