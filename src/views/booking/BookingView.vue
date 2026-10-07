@@ -12,21 +12,21 @@
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="regular" style="padding:10px 16px">
-                <div style="display:flex;align-items:center;gap:10px">
-                  <el-icon size="18" style="color:var(--color-primary)"><CalendarIcon /></el-icon>
+              <el-dropdown-item command="regular">
+                <div class="u-flex u-gap-2 new-booking-option">
+                  <el-icon size="18" class="u-text-action"><CalendarIcon /></el-icon>
                   <div>
-                    <div style="font-weight:600;font-size:13px">Regular Booking</div>
-                    <div style="font-size:11px;color:var(--text-secondary)">Booking per ruangan</div>
+                    <div class="u-fw-semibold u-text-sm">Regular Booking</div>
+                    <div class="u-text-xs u-text-secondary">Booking per ruangan</div>
                   </div>
                 </div>
               </el-dropdown-item>
-              <el-dropdown-item command="event" style="padding:10px 16px">
-                <div style="display:flex;align-items:center;gap:10px">
-                  <el-icon size="18" style="color:#D97706"><Star /></el-icon>
+              <el-dropdown-item command="event">
+                <div class="u-flex u-gap-2 new-booking-option">
+                  <el-icon class="event-option-icon" size="18"><Star /></el-icon>
                   <div>
-                    <div style="font-weight:600;font-size:13px">Event Booking</div>
-                    <div style="font-size:11px;color:var(--text-secondary)">Booking 1 gedung penuh</div>
+                    <div class="u-fw-semibold u-text-sm">Event Booking</div>
+                    <div class="u-text-xs u-text-secondary">Booking 1 gedung penuh</div>
                   </div>
                 </div>
               </el-dropdown-item>
@@ -40,7 +40,7 @@
     <div v-if="isNewBookingMode && !isNewBookingForm" class="new-booking-banner">
       <el-icon size="16"><InfoFilled /></el-icon>
       <span>NEW BOOKING MODE — Klik slot kosong pada kalender untuk membuat booking baru.</span>
-      <el-button size="small" text style="color:white;margin-left:auto" @click="toggleNewBookingMode">Batalkan</el-button>
+      <el-button class="banner-cancel" size="small" text @click="toggleNewBookingMode">Batalkan</el-button>
     </div>
 
     <BookingFilterBar
@@ -165,8 +165,6 @@ const panelMode = computed(() => {
   return 'empty'
 })
 
-// ── Computed ──────────────────────────────────────────────────
-
 // ── Store Access Filter ───────────────────────────────────────
 // Cabang yang boleh dipakai staff ini (dari store_access di /auth/me).
 // Booking selalu butuh satu cabang, jadi tidak ada opsi "Semua Cabang".
@@ -176,10 +174,7 @@ const { stores: accessibleStores, noAccess, loadStores } = useAllowedStores({ al
 const isStoreLocked = computed(() => !noAccess.value && accessibleStores.value.length === 1)
 const lockedStoreName = computed(() => (isStoreLocked.value ? accessibleStores.value[0].name : ''))
 
-// ── Grid Logic ────────────────────────────────────────────────
 // ── Event Booking Helpers ─────────────────────────────────────
-
-
 const handleNewBookingCommand = (command) => {
   if (command === 'regular') {
     toggleNewBookingMode()
@@ -250,7 +245,6 @@ const changeDate = (delta) => {
   loadDashboard()
 }
 
-// ── Helpers ───────────────────────────────────────────────────
 // ── Mount ─────────────────────────────────────────────────────
 onMounted(async () => {
   try {
@@ -266,12 +260,10 @@ onMounted(async () => {
 <style scoped>
 .booking-page { display:flex; flex-direction:column; min-height:0; }
 
-/* ── Header ──────────────────────────────────────────── */
-
 /* ── Banner ──────────────────────────────────────────── */
 .new-booking-banner {
-  background: linear-gradient(135deg, var(--color-primary), #0262b0);
-  color: #fff; padding: 10px 16px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--action), var(--action-hover));
+  color: var(--text-on-action); padding: 10px 16px; border-radius: 8px;
   display: flex; align-items: center; gap: 10px;
   font-size: 13px; font-weight: 700; margin-bottom: 10px;
   letter-spacing: 0.2px;
@@ -285,36 +277,13 @@ onMounted(async () => {
 }
 
 /* ── Right Panel ─────────────────────────────────────── */
-
 .slide-enter-active, .slide-leave-active { transition: all 0.22s ease; }
 .slide-enter-from, .slide-leave-to { opacity: 0; transform: translateX(20px); }
 
-/* Room chip */
-
-/* Info section */
-/* Label kiri */
-/* Value kanan — teks lebih tebal */
-
-/* Detail row — untuk blok deskripsi multi-baris di panel event */
-
-/* Ending soon */
-
-/* Price breakdown */
-
-/* Credits section */
-
-/* Payment option cards */
-
-/* Confirm modal rows */
-
-/* ── Event Booking ───────────────────────────────────────── */
-
-/* Event form badge */
-
-/* Day-type badge inside price preview */
-
-/* Price preview box (event) */
-
-/* Cancel info (event detail) */
-
+/* C3: former inline styles */
+/* Dropdown items are teleported and render no scoped root; the inner slot content does get the scope.
+   Element Plus already pads items 5px 16px, so this adds the rest of the old 10px 16px. */
+.new-booking-option { padding: var(--space-1) 0; }
+.event-option-icon { color: var(--warning); }
+.banner-cancel { color: var(--text-on-action); margin-left: auto; }
 </style>

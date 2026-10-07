@@ -11,7 +11,7 @@
           <h1 class="page-title">Customer / Member Management</h1>
           <p class="page-desc">Kelola data pelanggan dan riwayat transaksi</p>
         </div>
-        <div style="display:flex;gap:8px">
+        <div class="header-actions">
           <el-button v-if="can('customers.create')" @click="openForm(null)">
             <el-icon><Plus /></el-icon> Add Customer
           </el-button>
@@ -20,19 +20,19 @@
 
       <!-- Filters -->
       <FilterBar>
-        <el-input
+        <el-input class="filter-search"
           v-model="filters.search"
           placeholder="Search customer name or WhatsApp..."
           prefix-icon="Search"
-          style="flex:1;min-width:180px"
+         
           clearable
           @input="debounceFetch"
         />
-        <el-select v-model="filters.status" placeholder="Semua Status" clearable style="width:140px" @change="applyFilters">
+        <el-select class="filter-select" v-model="filters.status" placeholder="Semua Status" clearable @change="applyFilters">
           <el-option label="Active" value="active" />
           <el-option label="Inactive" value="inactive" />
         </el-select>
-        <el-select v-model="filters.gender" placeholder="Semua Gender" clearable style="width:140px" @change="applyFilters">
+        <el-select class="filter-select" v-model="filters.gender" placeholder="Semua Gender" clearable @change="applyFilters">
           <el-option label="Laki-laki" value="male" />
           <el-option label="Perempuan" value="female" />
         </el-select>
@@ -43,15 +43,15 @@
 
       <!-- Mobile Card List -->
       <div v-if="isMobile" class="m-card-list">
-        <div class="m-card" v-for="row in customerList" :key="row.id" @click="selectCustomer(row)" style="cursor:pointer">
-          <div class="m-card-icon" style="background:var(--color-primary);color:#fff;font-weight:700;font-size:16px">
+        <div class="m-card m-card-clickable" v-for="row in customerList" :key="row.id" @click="selectCustomer(row)">
+          <div class="m-card-icon m-card-avatar">
             {{ row.name?.[0]?.toUpperCase() }}
           </div>
           <div class="m-card-body">
             <div class="m-card-title">{{ row.name }}</div>
             <div class="m-card-meta">{{ row.whatsapp }} · {{ row.total_visit || 0 }}x visit</div>
           </div>
-          <div class="m-card-end" style="align-items:center;flex-direction:row;gap:6px">
+          <div class="m-card-end m-card-end-row">
             <el-tag :type="row.type === 'member' ? 'warning' : 'info'" size="small">{{ row.type === 'member' ? 'Member' : 'Regular' }}</el-tag>
             <el-dropdown trigger="click" @command="(cmd) => handleCommand(cmd, row)">
               <el-button size="small" circle plain @click.stop><el-icon><MoreFilled /></el-icon></el-button>
@@ -60,7 +60,7 @@
                   <el-dropdown-item command="view"><el-icon><View /></el-icon> Lihat Detail</el-dropdown-item>
                   <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
                   <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Resend Password</el-dropdown-item>
-                  <el-dropdown-item v-if="can('customers.edit')" command="delete" style="color:var(--color-danger)"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
+                  <el-dropdown-item v-if="can('customers.edit')" command="delete" class="u-text-danger"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -75,19 +75,19 @@
           v-loading="loading"
           highlight-current-row
           @row-click="selectCustomer"
-          style="width:100%"
+          class="u-w-full"
           :row-class-name="({ row }) => row.id === selectedCustomer?.id ? 'selected-row' : ''"
         >
           <!-- Customer (avatar + name + badge) -->
           <el-table-column label="CUSTOMER" min-width="180">
             <template #default="{ row }">
-              <div style="display:flex;align-items:center;gap:10px">
-                <!-- <el-avatar :size="36" :src="row.avatar_url" style="flex-shrink:0">
+              <div class="u-flex u-gap-2">
+                <!-- <el-avatar class="no-shrink" :size="36" :src="row.avatar_url">
                   {{ row.name?.[0]?.toUpperCase() }}
                 </el-avatar> -->
                 <div>
-                  <div style="font-weight:600;font-size:13px">{{ row.name }}</div>
-                  <el-tag :type="row.type === 'member' ? 'warning' : 'info'" size="small" style="margin-top:2px">
+                  <div class="u-fw-semibold u-text-sm">{{ row.name }}</div>
+                  <el-tag :type="row.type === 'member' ? 'warning' : 'info'" size="small" class="u-mt-1">
                     {{ row.type === 'member' ? 'Member' : 'Regular' }}
                   </el-tag>
                 </div>
@@ -98,8 +98,8 @@
           <!-- WhatsApp -->
           <el-table-column label="WHATSAPP" width="150">
             <template #default="{ row }">
-              <div style="display:flex;align-items:center;gap:6px;font-size:12px">
-                <span style="color:#25D366">●</span>
+              <div class="u-flex u-gap-1 u-text-xs">
+                <span class="wa-dot">●</span>
                 {{ row.whatsapp }}
               </div>
             </template>
@@ -108,9 +108,9 @@
           <!-- Last Visit -->
           <el-table-column label="LAST VISIT" width="130">
             <template #default="{ row }">
-              <div style="font-size:12px">
+              <div class="u-text-xs">
                 <div>{{ row.last_visit_date || '-' }}</div>
-                <div style="color:var(--text-secondary)">{{ row.last_visit_time || '' }}</div>
+                <div class="u-text-secondary">{{ row.last_visit_time || '' }}</div>
               </div>
             </template>
           </el-table-column>
@@ -118,7 +118,7 @@
           <!-- Total Visit -->
           <el-table-column label="TOTAL VISIT" width="100">
             <template #default="{ row }">
-              <span style="font-weight:600">{{ row.total_visit || 0 }}x</span>
+              <span class="u-fw-semibold">{{ row.total_visit || 0 }}x</span>
             </template>
           </el-table-column>
 
@@ -126,14 +126,14 @@
           <el-table-column label="FAVORITE ROOM" width="140">
             <template #default="{ row }">
               <el-tag v-if="row.favorite_room" size="small">{{ row.favorite_room }}</el-tag>
-              <span v-else style="color:var(--text-muted);font-size:12px">-</span>
+              <span v-else class="u-text-muted u-text-xs">-</span>
             </template>
           </el-table-column>
 
           <!-- Total Spent -->
           <el-table-column label="TOTAL SPENT" width="130">
             <template #default="{ row }">
-              <span style="font-size:12px;font-weight:600">{{ formatRp(row.total_spent || 0) }}</span>
+              <span class="u-text-xs u-fw-semibold">{{ formatRp(row.total_spent || 0) }}</span>
             </template>
           </el-table-column>
 
@@ -149,7 +149,7 @@
           <!-- Aksi -->
           <el-table-column label="AKSI" width="80" fixed="right">
             <template #default="{ row }">
-              <div style="display:flex;gap:4px">
+              <div class="m-card-actions">
                 <el-dropdown trigger="click" @command="(cmd) => handleCommand(cmd, row)">
                   <el-button size="small" circle plain @click.stop>
                     <el-icon><MoreFilled /></el-icon>
@@ -158,7 +158,7 @@
                     <el-dropdown-menu>
                       <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
                       <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Resend Password</el-dropdown-item>
-                      <el-dropdown-item v-if="can('customers.edit')" command="delete" style="color:var(--color-danger)"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
+                      <el-dropdown-item v-if="can('customers.edit')" command="delete" class="u-text-danger"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -170,7 +170,7 @@
 
       <!-- Pagination -->
       <div class="pagination-bar">
-        <span style="font-size:12px;color:var(--text-secondary)">
+        <span class="u-text-xs u-text-secondary">
           Showing {{ (filters.page - 1) * filters.per_page + 1 }}–{{ Math.min(filters.page * filters.per_page, total) }} of {{ total }} customers
         </span>
         <TablePagination
@@ -266,7 +266,7 @@
       <!-- ── Favorite Room ── -->
       <div class="dp-section" v-if="selectedCustomer.favorite_room_types?.length">
         <div class="dp-section-title">Favorite Room</div>
-        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+        <div class="tag-list">
           <el-tag v-for="fav in selectedCustomer.favorite_room_types" :key="fav.id" size="small" type="info">
             {{ fav.room_template?.name }}
           </el-tag>
@@ -275,8 +275,8 @@
 
       <!-- ── Catatan ── -->
       <div class="dp-section">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div class="dp-section-title" style="margin-bottom:0">Catatan</div>
+        <div class="u-flex u-justify-between u-mb-2">
+          <div class="dp-section-title no-mb">Catatan</div>
           <button v-if="!editingNotes && can('customers.edit')" class="dp-link-btn" @click="startEditNotes">
             <el-icon><Edit /></el-icon> Edit
           </button>
@@ -286,7 +286,7 @@
         </div>
         <div v-else>
           <el-input v-model="notesInput" type="textarea" :rows="3" placeholder="Tambahkan catatan..." />
-          <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+          <div class="notes-actions">
             <el-button size="small" @click="cancelEditNotes">Batal</el-button>
             <el-button size="small" type="primary" :loading="savingNotes" @click="saveNotes">Simpan</el-button>
           </div>
@@ -317,8 +317,8 @@
 
     <!-- Empty detail state -->
     <div class="detail-panel empty-detail" v-else>
-      <el-icon size="40" style="color:var(--text-muted)"><UserFilled /></el-icon>
-      <p style="color:var(--text-muted);margin-top:10px;font-size:13px">Pilih customer untuk melihat detail</p>
+      <el-icon size="40" class="u-text-muted"><UserFilled /></el-icon>
+      <p class="u-text-muted u-mt-2 u-text-sm">Pilih customer untuk melihat detail</p>
     </div>
 
     <!-- ══════════════════════════════════════════════════════════
@@ -333,7 +333,7 @@
     >
       <el-form :model="form" :rules="formRules" ref="formRef" label-position="top">
         <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
-          <el-form-item label="Nama Lengkap *" prop="name" style="grid-column:1/-1">
+          <el-form-item class="full-row" label="Nama Lengkap *" prop="name">
             <el-input v-model="form.name" placeholder="Contoh: Viking Pratama" />
           </el-form-item>
 
@@ -343,7 +343,7 @@
 
           <el-form-item label="Email">
             <el-input v-model="form.email" placeholder="email@gmail.com" />
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
+            <div class="u-text-xs u-text-muted u-mt-1">
               Password akan dikirim ke email ini
             </div>
           </el-form-item>
@@ -354,12 +354,12 @@
               type="date"
               format="DD MMMM YYYY"
               value-format="YYYY-MM-DD"
-              style="width:100%"
+              class="u-w-full"
             />
           </el-form-item>
 
           <el-form-item label="Gender">
-            <el-select v-model="form.gender" placeholder="Pilih gender" style="width:100%">
+            <el-select v-model="form.gender" placeholder="Pilih gender" class="u-w-full">
               <el-option label="Laki-laki" value="male" />
               <el-option label="Perempuan" value="female" />
             </el-select>
@@ -370,25 +370,25 @@
           </el-form-item>
 
           <el-form-item label="Tipe Customer">
-            <el-select v-model="form.type" style="width:100%">
+            <el-select v-model="form.type" class="u-w-full">
               <el-option label="Regular" value="regular" />
               <el-option label="Member" value="member" />
             </el-select>
           </el-form-item>
 
           <el-form-item v-if="editingCustomer" label="Status">
-            <el-select v-model="form.status" style="width:100%">
+            <el-select v-model="form.status" class="u-w-full">
               <el-option label="Active" value="active" />
               <el-option label="Inactive" value="inactive" />
             </el-select>
           </el-form-item>
 
-          <el-form-item label="Favorite Room" style="grid-column:1/-1">
+          <el-form-item class="full-row" label="Favorite Room">
             <el-select
               v-model="form.favorite_room_ids"
               multiple
               placeholder="Pilih room favorit"
-              style="width:100%"
+              class="u-w-full"
             >
               <el-option
                 v-for="t in roomTemplates"
@@ -399,7 +399,7 @@
             </el-select>
           </el-form-item>
 
-          <el-form-item label="Catatan" style="grid-column:1/-1">
+          <el-form-item class="full-row" label="Catatan">
             <el-input
               v-model="form.notes"
               type="textarea"
@@ -410,8 +410,8 @@
         </div>
 
         <!-- Info: auto generate password -->
-        <div v-if="!editingCustomer" style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--violet);margin-top:4px;display:flex;align-items:flex-start;gap:6px">
-          <el-icon style="flex-shrink:0;margin-top:1px"><InfoFilled /></el-icon>
+        <div class="member-info-note" v-if="!editingCustomer">
+          <el-icon class="member-info-icon"><InfoFilled /></el-icon>
           Password akan di-generate otomatis dari nama customer dan dikirim ke email (jika diisi).
         </div>
 
@@ -442,7 +442,7 @@
     >
       <div v-if="selectedCustomer">
         <!-- Profile -->
-        <div class="profile-card" style="padding:0 0 14px">
+        <div class="profile-card drawer-body">
           <div class="profile-avatar">{{ selectedCustomer.name?.[0]?.toUpperCase() }}</div>
           <div class="profile-info">
             <div class="profile-name">{{ selectedCustomer.name }}</div>
@@ -837,7 +837,7 @@ onMounted(async () => {
   width: 52px; height: 52px; border-radius: 50%;
   background: var(--color-primary);
   display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 700; color: #fff;
+  font-size: 20px; font-weight: 700; color: var(--text-on-action);
   flex-shrink: 0;
 }
 .profile-info { flex: 1; min-width: 0; }
@@ -876,7 +876,7 @@ onMounted(async () => {
 .dp-action-row .dp-action-btn { flex: 1; }
 .dp-action-wa {
   background: linear-gradient(135deg, rgba(37,211,102,0.12), rgba(37,211,102,0.06));
-  color: #18a34a; border-color: rgba(37,211,102,0.35);
+  color: var(--success); border-color: rgba(37,211,102,0.35);
   font-size: 13px; padding: 9px 12px;
 }
 .dp-action-wa:hover { background: rgba(37,211,102,0.2); box-shadow: 0 2px 8px rgba(37,211,102,0.2); }
@@ -938,6 +938,7 @@ onMounted(async () => {
 .dp-see-all { display: flex; width: 100%; justify-content: center; margin-top: 8px; }
 
 /* Selected row highlight */
+/* Element Plus paints hovered/striped rows with `.el-table__body tr…>td` (higher specificity); the selected row must win. */
 :deep(.selected-row td) { background: rgba(124,58,237,0.07) !important; }
 :deep(.el-table__row) { cursor: pointer; }
 
@@ -965,4 +966,22 @@ onMounted(async () => {
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.header-actions { display: flex; gap: var(--space-2); }
+.filter-search { flex: 1; min-width: 180px; }
+.filter-select { width: 140px; }
+.m-card-clickable { cursor: pointer; }
+.m-card-avatar { background: var(--action); color: var(--text-on-action); font-weight: 700; font-size: var(--font-size-lg); }
+.m-card-end-row { align-items: center; flex-direction: row; gap: var(--space-1); }
+.no-shrink { flex-shrink: 0; }
+.wa-dot { color: var(--brand-whatsapp); }
+.m-card-actions { display: flex; gap: var(--space-1); }
+.tag-list { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
+.no-mb { margin-bottom: 0; }
+.notes-actions { display: flex; gap: var(--space-1); margin-top: var(--space-2); justify-content: flex-end; }
+.full-row { grid-column: 1 / -1; }
+.member-info-note { background: rgba(124,58,237,0.08); border: 1px solid rgba(124,58,237,0.2); border-radius: var(--radius-lg); padding: var(--space-2) var(--space-3); font-size: var(--font-size-xs); color: var(--violet); margin-top: var(--space-1); display: flex; align-items: flex-start; gap: var(--space-1); }
+.member-info-icon { flex-shrink: 0; }
+.drawer-body { padding: 0 0 var(--space-3); }
 </style>

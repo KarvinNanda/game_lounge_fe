@@ -12,11 +12,11 @@
     <!-- Table Card -->
     <el-card shadow="never" class="table-card">
       <FilterBar>
-        <el-input
+        <el-input class="filter-search"
           v-model="search"
           placeholder="Cari nama hari libur..."
           prefix-icon="Search"
-          style="width:260px"
+         
           clearable
           @input="debouncedFetch"
         />
@@ -41,39 +41,39 @@
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in holidays" :key="row.id">
           <div class="m-card-icon">
-            <el-icon size="18" style="color:var(--color-danger)"><Calendar /></el-icon>
+            <el-icon size="18" class="u-text-danger"><Calendar /></el-icon>
           </div>
           <div class="m-card-body">
             <div class="m-card-title">{{ row.name }}</div>
             <div class="m-card-meta">{{ formatDate(row.date) }}</div>
           </div>
           <div class="m-card-end">
-            <div style="display:flex;gap:4px">
+            <div class="m-card-actions">
               <el-button v-if="can('settings.branches')" size="small" circle plain @click="openDrawer(row)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('settings.branches')" size="small" circle plain type="danger" @click="removeHoliday(row)"><el-icon><Delete /></el-icon></el-button>
             </div>
           </div>
         </div>
-        <div v-if="!loading && holidays.length === 0" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
+        <div class="table-empty" v-if="!loading && holidays.length === 0">
           Belum ada tanggal merah
         </div>
       </div>
 
       <!-- Desktop table -->
       <div class="table-wrap">
-        <el-table :data="holidays" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada tanggal merah">
+        <el-table :data="holidays" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada tanggal merah">
           <el-table-column label="Nama Hari Libur" min-width="240">
             <template #default="{ row }">
               <div class="holiday-name-cell">
-                <div class="hday-icon"><el-icon style="color:var(--color-danger)"><Calendar /></el-icon></div>
-                <span style="font-weight:600;font-size:13px;color:var(--text-primary)">{{ row.name }}</span>
+                <div class="hday-icon"><el-icon class="u-text-danger"><Calendar /></el-icon></div>
+                <span class="holiday-name">{{ row.name }}</span>
               </div>
             </template>
           </el-table-column>
 
           <el-table-column label="Tanggal" width="160">
             <template #default="{ row }">
-              <span style="font-size:13px;color:var(--text-secondary);font-variant-numeric:tabular-nums">
+              <span class="holiday-date">
                 {{ formatDate(row.date) }}
               </span>
             </template>
@@ -81,7 +81,7 @@
 
           <el-table-column label="Hari" width="120" v-if="!isMobile && !isTablet">
             <template #default="{ row }">
-              <span style="font-size:12px;color:var(--text-secondary)">{{ getDayName(row.date) }}</span>
+              <span class="u-text-xs u-text-secondary">{{ getDayName(row.date) }}</span>
             </template>
           </el-table-column>
 
@@ -99,7 +99,7 @@
 
           <el-table-column label="Keterangan" min-width="160" v-if="!isMobile && !isTablet">
             <template #default="{ row }">
-              <span style="font-size:12px;color:var(--text-secondary)">{{ row.description || '—' }}</span>
+              <span class="u-text-xs u-text-secondary">{{ row.description || '—' }}</span>
             </template>
           </el-table-column>
 
@@ -153,18 +153,18 @@
               format="DD MMM YYYY"
               value-format="YYYY-MM-DD"
               placeholder="Pilih tanggal"
-              style="width:100%"
+              class="u-w-full"
             />
           </el-form-item>
           <!-- Jam Operasional Khusus -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="two-col">
             <el-form-item label="Jam Buka *" prop="open_time">
               <el-time-picker
                 v-model="form.open_time"
                 format="HH:mm"
                 value-format="HH:mm"
                 placeholder="10:00"
-                style="width:100%"
+                class="u-w-full"
               />
             </el-form-item>
             <el-form-item label="Jam Tutup *" prop="close_time">
@@ -173,7 +173,7 @@
                 format="HH:mm"
                 value-format="HH:mm"
                 placeholder="02:00"
-                style="width:100%"
+                class="u-w-full"
               />
             </el-form-item>
           </div>
@@ -191,8 +191,8 @@
 
       <template #footer>
         <div class="drawer-footer">
-          <el-button @click="drawerVisible = false" style="flex:1">Batal</el-button>
-          <el-button type="primary" :loading="saving" @click="save" style="flex:1">
+          <el-button @click="drawerVisible = false" class="u-flex-1">Batal</el-button>
+          <el-button type="primary" :loading="saving" @click="save" class="u-flex-1">
             {{ form.id ? 'Simpan Perubahan' : 'Tambah' }}
           </el-button>
         </div>
@@ -343,7 +343,6 @@ onMounted(fetchHolidays)
 </script>
 
 <style scoped>
-.table-card { border-color:var(--border-color) !important; }
 
 .holiday-name-cell { display:flex; align-items:center; gap:10px; }
 .hday-icon {
@@ -380,4 +379,12 @@ onMounted(fetchHolidays)
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta  { font-size:11px; color:var(--text-secondary); margin-top:2px; }
 .m-card-end   { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.filter-search { width: 260px; }
+.m-card-actions { display: flex; gap: var(--space-1); }
+.table-empty { text-align: center; padding: calc(var(--space-4) * 2); color: var(--text-muted); font-size: var(--font-size-sm); }
+.holiday-name { font-weight: 600; font-size: var(--font-size-sm); color: var(--text-primary); }
+.holiday-date { font-size: var(--font-size-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 </style>

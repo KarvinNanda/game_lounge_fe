@@ -9,15 +9,15 @@
 
     <!-- Filter -->
     <FilterBar>
-      <el-input
+      <el-input class="filter-search"
         v-model="search"
         placeholder="Cari cabang..."
         prefix-icon="Search"
-        style="width:300px"
+       
         clearable
         @input="debouncedFetch"
       />
-      <el-select v-model="statusFilter" placeholder="Semua Status" clearable style="width:180px" @change="fetchPricings">
+      <el-select class="filter-status" v-model="statusFilter" placeholder="Semua Status" clearable @change="fetchPricings">
         <el-option label="Sudah Setup" value="has_pricing" />
         <el-option label="Belum Setup" value="no_pricing" />
       </el-select>
@@ -46,7 +46,7 @@
             {{ item.status === 'active' ? 'Aktif' : 'Draft' }}
           </el-tag>
           <div v-if="item.has_pricing" class="pricing-badge">
-            <el-icon style="font-size:10px"><Check /></el-icon> Pricing OK
+            <el-icon class="u-text-xs"><Check /></el-icon> Pricing OK
           </div>
         </div>
 
@@ -79,17 +79,17 @@
           </template>
         </div>
 
-        <el-button
+        <el-button class="card-action-btn"
           v-if="can('pricing.edit')"
           type="primary"
-          style="width:100%;border-radius:0 0 10px 10px"
+         
           @click="goToEdit(item)"
         >
           <el-icon><Edit /></el-icon> Edit Pricing →
         </el-button>
-        <div
+        <div class="card-action-note"
           v-else
-          style="width:100%;padding:9px 0;text-align:center;font-size:13px;color:var(--text-muted);border-top:1px solid var(--border-color)"
+         
         >
           <el-icon><View /></el-icon> View Only
         </div>
@@ -102,13 +102,13 @@
     </EmptyState>
 
     <!-- Pagination -->
-    <div v-if="total > perPage" style="display:flex;justify-content:flex-end;margin-top:20px">
+    <div class="pager-row" v-if="total > perPage">
       <TablePagination v-model:page="page" :page-size="perPage" :total="total" :sizes="false" @change="fetchPricings" />
     </div>
 
     <!-- Info Box -->
-    <div class="info-box" style="margin-top:20px">
-      <el-icon style="color:var(--color-info);flex-shrink:0"><InfoFilled /></el-icon>
+    <div class="info-box info-note">
+      <el-icon class="info-note-icon"><InfoFilled /></el-icon>
       <span>Harga yang telah dipublish akan otomatis digunakan di website booking dan sistem booking admin.</span>
     </div>
   </div>
@@ -204,7 +204,7 @@ onMounted(() => {
 .status-badge { position:absolute; top:10px; left:10px; }
 .pricing-badge {
   position:absolute; top:10px; right:10px;
-  background:rgba(16,185,129,0.85); color:#fff;
+  background:rgba(16,185,129,0.85); color:var(--text-on-action);
   font-size:10px; font-weight:600;
   padding:3px 8px; border-radius:20px;
   display:flex; align-items:center; gap:3px;
@@ -231,4 +231,13 @@ onMounted(() => {
   display:flex; align-items:center; gap:8px;
   font-size:12px; color:var(--action);
 }
+
+/* C3: former inline styles */
+.filter-search { width: 300px; }
+.filter-status { width: 180px; }
+.card-action-btn { width: 100%; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.card-action-note { width: 100%; padding: var(--space-2) 0; text-align: center; font-size: var(--font-size-sm); color: var(--text-muted); border-top: 1px solid var(--border); }
+.pager-row { display: flex; justify-content: flex-end; margin-top: var(--space-5); }
+.info-note { margin-top: var(--space-5); }
+.info-note-icon { color: var(--action); flex-shrink: 0; }
 </style>

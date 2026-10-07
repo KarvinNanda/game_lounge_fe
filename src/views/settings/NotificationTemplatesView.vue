@@ -5,7 +5,7 @@
 
     <!-- ── Info box ── -->
     <div class="info-banner">
-      <el-icon style="flex-shrink:0;margin-top:1px"><InfoFilled /></el-icon>
+      <el-icon class="info-banner-icon"><InfoFilled /></el-icon>
       <span>
         Gunakan <strong class="var-inline">&#123;&#123;nama_variabel&#125;&#125;</strong> untuk data dinamis.
         Contoh: <span class="var-inline">&#123;&#123;nama_customer&#125;&#125;</span> akan diganti nama asli saat pesan dikirim.
@@ -31,11 +31,11 @@
           <div class="card-desc">{{ tmpl.description }}</div>
           <div class="card-channels">
             <el-tag size="small" :type="tmpl.is_email_active ? 'info' : 'danger'">
-              <el-icon style="margin-right:3px"><Message /></el-icon>
+              <el-icon class="channel-icon"><Message /></el-icon>
               Email {{ tmpl.is_email_active ? 'Aktif' : 'Nonaktif' }}
             </el-tag>
             <el-tag size="small" :type="tmpl.is_whatsapp_active ? 'success' : 'danger'">
-              <el-icon style="margin-right:3px"><ChatDotRound /></el-icon>
+              <el-icon class="channel-icon"><ChatDotRound /></el-icon>
               WA {{ tmpl.is_whatsapp_active ? 'Aktif' : 'Nonaktif' }}
             </el-tag>
           </div>
@@ -88,7 +88,7 @@
               <span class="var-code">&#123;&#123;{{ v.key }}&#125;&#125;</span>
               <span class="var-label">{{ v.label }}</span>
             </div>
-            <div v-if="parsedVariables.length === 0" style="font-size:11px;color:var(--text-muted)">
+            <div v-if="parsedVariables.length === 0" class="u-text-xs u-text-muted">
               Tidak ada variabel untuk template ini
             </div>
           </div>
@@ -138,7 +138,7 @@
               </el-form>
 
               <div class="format-tips">
-                <div class="tips-title">💡 Tips Format Email</div>
+                <div class="tips-title"><el-icon aria-hidden="true"><Opportunity /></el-icon> Tips Format Email</div>
                 <div class="tips-body">
                   Tulis teks biasa, tekan Enter untuk baris baru.<br>
                   Klik variabel di atas untuk sisipkan otomatis.
@@ -179,7 +179,7 @@
               </el-form>
 
               <div class="format-tips">
-                <div class="tips-title">💡 Tips Format WhatsApp</div>
+                <div class="tips-title"><el-icon aria-hidden="true"><Opportunity /></el-icon> Tips Format WhatsApp</div>
                 <div class="tips-body">
                   *teks* untuk <strong>tebal</strong> &nbsp;·&nbsp;
                   _teks_ untuk <em>miring</em> &nbsp;·&nbsp;
@@ -208,8 +208,8 @@
 
         <!-- ── Drawer Footer ── -->
         <div class="drawer-footer">
-          <el-button style="flex:1" @click="editorVisible = false">Batal</el-button>
-          <el-button type="primary" style="flex:1" :loading="saving" @click="handleSave">
+          <el-button class="u-flex-1" @click="editorVisible = false">Batal</el-button>
+          <el-button type="primary" class="u-flex-1" :loading="saving" @click="handleSave">
             <el-icon><Check /></el-icon> Simpan Template
           </el-button>
         </div>
@@ -375,13 +375,13 @@ const BG_MAP = {
   booking_confirmation: 'rgba(16,185,129,0.1)',
 }
 const COLOR_MAP = {
-  customer_welcome:     '#7C3AED',
-  voucher_notification: '#D97706',
-  booking_confirmation: '#059669',
+  customer_welcome:     'var(--violet)',
+  voucher_notification: 'var(--warning)',
+  booking_confirmation: 'var(--success)',
 }
 const getIcon      = (key) => ICON_MAP[key]  || 'Bell'
 const getIconBg    = (key) => BG_MAP[key]    || 'rgba(124,58,237,0.1)'
-const getIconColor = (key) => COLOR_MAP[key] || '#7C3AED'
+const getIconColor = (key) => COLOR_MAP[key] || 'var(--violet)'
 
 onMounted(fetchTemplates)
 </script>
@@ -542,4 +542,8 @@ onMounted(fetchTemplates)
   .var-chip { padding:4px 8px; }
   .var-label { display:none; }
 }
+
+/* C3: former inline styles */
+.info-banner-icon { flex-shrink: 0; }
+.channel-icon { margin-right: var(--space-1); }
 </style>

@@ -20,28 +20,28 @@
     <!-- Table -->
     <el-card shadow="never" class="table-card">
       <FilterBar>
-        <el-input
+        <el-input class="filter-search"
           v-model="filters.search"
           placeholder="Cari nama fasilitas..."
           prefix-icon="Search"
-          style="width:240px"
+         
           clearable
           @input="debouncedFetch"
         />
-        <el-select
+        <el-select class="filter-category"
           v-model="filters.category_id"
           placeholder="Semua Kategori"
           clearable
-          style="width:160px"
+         
           @change="applyFilters"
         >
           <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
         </el-select>
-        <el-select
+        <el-select class="filter-status"
           v-model="filters.status"
           placeholder="Semua Status"
           clearable
-          style="width:140px"
+         
           @change="applyFilters"
         >
           <el-option label="Aktif" value="active" />
@@ -57,8 +57,8 @@
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in facilityList" :key="row.id">
           <div class="m-card-icon">
-            <img v-if="row.icon_url" :src="getImageUrl(row.icon_url)" :alt="row.name" style="width:28px;height:28px;object-fit:contain" />
-            <el-icon v-else size="18" style="color:var(--text-muted)"><Picture /></el-icon>
+            <img class="m-card-img" v-if="row.icon_url" :src="getImageUrl(row.icon_url)" :alt="row.name" />
+            <el-icon v-else size="18" class="u-text-muted"><Picture /></el-icon>
           </div>
           <div class="m-card-body">
             <div class="m-card-title">{{ row.name }}</div>
@@ -66,7 +66,7 @@
           </div>
           <div class="m-card-end">
             <el-tag :type="row.is_active ? 'success' : 'danger'" size="small">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</el-tag>
-            <div style="display:flex;gap:4px">
+            <div class="m-card-actions">
               <el-button v-if="can('settings.branches')" size="small" circle plain @click="$router.push(`/facility/${row.id}/edit`)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('settings.branches')" size="small" circle plain type="danger" @click="deleteFacility(row)"><el-icon><Delete /></el-icon></el-button>
             </div>
@@ -75,7 +75,7 @@
       </div>
 
       <div class="table-wrap">
-      <el-table :data="facilityList" v-loading="loading" size="small" style="width:100%" empty-text="Tidak ada fasilitas ditemukan">
+      <el-table :data="facilityList" v-loading="loading" size="small" class="u-w-full" empty-text="Tidak ada fasilitas ditemukan">
         <el-table-column label="Fasilitas" min-width="220">
           <template #default="{ row }">
             <div class="facility-cell">
@@ -91,7 +91,7 @@
           <template #default="{ row }">
             <div class="facility-icon">
                 <img v-if="row.icon_url" :src="getImageUrl(row.icon_url)" :alt="row.name" />
-                <el-icon v-else size="16" style="color:var(--text-muted)"><Picture /></el-icon>
+                <el-icon v-else size="16" class="u-text-muted"><Picture /></el-icon>
               </div>
           </template>
         </el-table-column>
@@ -256,7 +256,6 @@ onMounted(() => {
 /* Stats */
 
 /* Table */
-.table-card { border-color: var(--border-color) !important; }
 
 .facility-cell { display: flex; align-items: center; gap: 12px; }
 .facility-icon {
@@ -302,4 +301,11 @@ onMounted(() => {
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.filter-search { width: 240px; }
+.filter-category { width: 160px; }
+.filter-status { width: 140px; }
+.m-card-img { width: 28px; height: 28px; object-fit: contain; }
+.m-card-actions { display: flex; gap: var(--space-1); }
 </style>

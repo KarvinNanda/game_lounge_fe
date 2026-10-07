@@ -2,7 +2,7 @@
   <!-- Event Booking Form Panel -->
   <div class="right-panel">
     <div class="panel-header">
-      <span style="font-size:14px;font-weight:700">EVENT BOOKING BARU</span>
+      <span class="panel-title">EVENT BOOKING BARU</span>
       <el-button circle text @click="emit('close')"><el-icon><Close /></el-icon></el-button>
     </div>
 
@@ -29,8 +29,8 @@
           maxlength="500"
           show-word-limit
         />
-        <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
-          💡 Deskripsi ini akan ditampilkan kepada customer di halaman konfirmasi booking.
+        <div class="u-text-xs u-text-muted u-mt-1">
+          <el-icon aria-hidden="true"><Opportunity /></el-icon> Deskripsi ini akan ditampilkan kepada customer di halaman konfirmasi booking.
         </div>
       </el-form-item>
 
@@ -42,7 +42,7 @@
           :remote-method="searchCustomers"
           :loading="customerSearchLoading"
           placeholder="Cari nama / WhatsApp customer..."
-          style="width:100%"
+          class="u-w-full"
           clearable
           @change="onEventCustomerChange"
         >
@@ -52,19 +52,19 @@
             :label="c.name"
             :value="c.id"
           >
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
-              <span style="font-weight:600;font-size:13px">{{ c.name }} - {{ c.whatsapp }}</span>
+            <div class="u-flex u-justify-between u-gap-1">
+              <span class="u-fw-semibold u-text-sm">{{ c.name }} - {{ c.whatsapp }}</span>
               <el-tag :type="c.type === 'member' ? 'warning' : 'info'" size="small">
                 {{ c.type === 'member' ? 'Member' : 'Regular' }}
               </el-tag>
             </div>
-            <div v-if="c.whatsapp || c.phone" style="display:flex;align-items:center;gap:4px;margin-top:2px">
-              <span style="font-size:10px;font-weight:600;color:#25D366;">WA</span>
-              <span style="font-size:10px;color:var(--text-secondary)">{{ c.whatsapp || c.phone }}</span>
+            <div v-if="c.whatsapp || c.phone" class="u-flex u-gap-1 u-mt-1">
+              <span class="wa-badge">WA</span>
+              <span class="u-text-xs u-text-secondary">{{ c.whatsapp || c.phone }}</span>
             </div>
           </el-option>
         </el-select>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">
+        <div class="u-text-xs u-text-muted u-mt-1">
           Kosongkan untuk penyelenggara baru — isi manual di bawah
         </div>
       </el-form-item>
@@ -73,7 +73,7 @@
       <el-form-item label="Nama Penyelenggara *">
         <el-input v-model="eventForm.customer_name" placeholder="Nama penyelenggara" />
       </el-form-item>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="two-col">
         <el-form-item label="WhatsApp">
           <el-input v-model="eventForm.customer_whatsapp" placeholder="08xx-xxxx" />
         </el-form-item>
@@ -85,17 +85,17 @@
       <!-- Tanggal -->
       <el-form-item label="Tanggal *">
         <el-date-picker v-model="eventForm.booking_date" type="date"
-          value-format="YYYY-MM-DD" format="dddd, DD MMM YYYY" style="width:100%"
+          value-format="YYYY-MM-DD" format="dddd, DD MMM YYYY" class="u-w-full"
           @change="previewEventPriceCalc" />
       </el-form-item>
 
       <!-- Tipe Durasi -->
       <el-form-item label="Tipe Durasi *">
         <el-radio-group v-model="eventForm.duration_type" @change="previewEventPriceCalc">
-          <el-radio-button value="hourly">🕐 Per Jam</el-radio-button>
-          <el-radio-button value="full_day">📅 Full 1 Hari</el-radio-button>
+          <el-radio-button value="hourly"><el-icon aria-hidden="true"><Clock /></el-icon> Per Jam</el-radio-button>
+          <el-radio-button value="full_day"><el-icon aria-hidden="true"><Calendar /></el-icon> Full 1 Hari</el-radio-button>
         </el-radio-group>
-        <div style="font-size:11px;color:var(--text-secondary);margin-top:5px">
+        <div class="field-hint">
           <template v-if="eventForm.duration_type === 'full_day'">
             Seluruh jam operasional akan diblokir. Harga = harga event per hari.
           </template>
@@ -106,20 +106,20 @@
       </el-form-item>
 
       <!-- Jam (hanya jika hourly) -->
-      <div v-if="eventForm.duration_type === 'hourly'"
-           style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="two-col" v-if="eventForm.duration_type === 'hourly'"
+          >
         <el-form-item label="Jam Mulai *">
           <el-time-picker v-model="eventForm.start_time" format="HH:mm"
-            value-format="HH:mm" style="width:100%" @change="previewEventPriceCalc" />
+            value-format="HH:mm" class="u-w-full" @change="previewEventPriceCalc" />
         </el-form-item>
         <el-form-item label="Jam Selesai *">
           <el-time-picker v-model="eventForm.end_time" format="HH:mm"
-            value-format="HH:mm" style="width:100%" @change="previewEventPriceCalc" />
+            value-format="HH:mm" class="u-w-full" @change="previewEventPriceCalc" />
         </el-form-item>
       </div>
 
       <!-- Info full_day -->
-      <div v-else class="info-box" style="margin-bottom:12px">
+      <div v-else class="info-box u-mb-3">
         <el-icon><InfoFilled /></el-icon>
         <span>Jam akan otomatis disesuaikan dengan jam operasional store pada tanggal tersebut.</span>
       </div>
@@ -127,36 +127,36 @@
       <!-- Scope Ruangan -->
       <el-form-item label="Scope Ruangan *">
         <el-radio-group v-model="eventForm.booking_scope">
-          <el-radio-button value="full_venue">🏠 Full 1 Gedung</el-radio-button>
-          <el-radio-button value="per_room_type">📋 Per Tipe Ruangan</el-radio-button>
+          <el-radio-button value="full_venue"><el-icon aria-hidden="true"><House /></el-icon> Full 1 Gedung</el-radio-button>
+          <el-radio-button value="per_room_type"><el-icon aria-hidden="true"><List /></el-icon> Per Tipe Ruangan</el-radio-button>
         </el-radio-group>
       </el-form-item>
 
       <!-- Pilih tipe ruangan (per_room_type) -->
       <el-form-item v-if="eventForm.booking_scope === 'per_room_type'"
         label="Tipe Ruangan yang Diblokir *">
-        <div v-if="loadingRoomTemplates" style="color:var(--text-muted);font-size:12px">
+        <div v-if="loadingRoomTemplates" class="u-text-muted u-text-xs">
           <el-icon class="is-loading"><Loading /></el-icon> Memuat tipe ruangan...
         </div>
-        <div v-else-if="!storeRoomTemplates.length" style="color:var(--text-muted);font-size:12px">
+        <div v-else-if="!storeRoomTemplates.length" class="u-text-muted u-text-xs">
           Pilih cabang terlebih dahulu
         </div>
-        <el-checkbox-group v-else v-model="eventSelectedRoomTemplateIds"
-          style="display:flex;flex-wrap:wrap;gap:6px">
-          <el-checkbox v-for="rt in storeRoomTemplates" :key="rt.id" :value="rt.id"
-            style="margin:0">
+        <el-checkbox-group class="chip-list" v-else v-model="eventSelectedRoomTemplateIds"
+         >
+          <el-checkbox class="chip-check" v-for="rt in storeRoomTemplates" :key="rt.id" :value="rt.id"
+           >
             {{ rt.name }}
           </el-checkbox>
         </el-checkbox-group>
-        <!-- <div style="font-size:11px;color:var(--text-muted);margin-top:5px">
+        <!-- <div class="field-note">
           Semua unit dari tipe yang dipilih akan diblokir.
         </div> -->
       </el-form-item>
 
       <!-- Preview harga -->
       <div v-if="eventPricePreview" class="price-preview-box">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-          <div style="font-size:11px;color:var(--text-secondary)">KALKULASI HARGA</div>
+        <div class="u-flex u-gap-2 u-mb-1">
+          <div class="u-text-xs u-text-secondary">KALKULASI HARGA</div>
           <span
             v-if="eventPricePreview.day_type"
             :class="['day-type-badge', eventPricePreview.day_type === 'weekday' ? 'weekday' : 'weekend']"
@@ -164,16 +164,16 @@
             {{ eventPricePreview.day_type === 'weekday' ? 'Weekday' : 'Weekend / Hari Libur' }}
           </span>
         </div>
-        <div v-if="eventPricePreview.active_price" style="font-size:11px;color:var(--text-secondary)">
+        <div v-if="eventPricePreview.active_price" class="u-text-xs u-text-secondary">
           Harga aktif: <strong>{{ formatRp(eventPricePreview.active_price) }}</strong>/hari
         </div>
-        <div v-if="eventPricePreview.duration_hours" style="font-size:11px;color:var(--text-secondary)">
+        <div v-if="eventPricePreview.duration_hours" class="u-text-xs u-text-secondary">
           Durasi: <strong>{{ eventPricePreview.duration_hours }} jam</strong>
           <template v-if="eventPricePreview.formula">
             &nbsp;·&nbsp; {{ eventPricePreview.formula }}
           </template>
         </div>
-        <div style="font-size:18px;font-weight:700;color:var(--color-primary);margin-top:6px">
+        <div class="price-total">
           {{ formatRp(eventPricePreview.total_price) }}
         </div>
       </div>
@@ -183,7 +183,7 @@
       </el-form-item>
     </el-form>
 
-    <el-button type="primary" style="width:100%;margin-top:8px"
+    <el-button type="primary" class="u-w-full u-mt-2"
       :loading="creatingEvent"
       :disabled="!eventForm.event_name || !eventForm.customer_name || !eventForm.booking_date ||
         (eventForm.duration_type === 'hourly' && (!eventForm.start_time || !eventForm.end_time)) ||
@@ -376,12 +376,12 @@ const handleCreateEventBooking = async () => {
 }
 .day-type-badge.weekday {
   background: rgba(59,130,246,0.12);
-  color: #2563EB;
+  color: var(--action);
   border: 1px solid rgba(59,130,246,0.3);
 }
 .day-type-badge.weekend {
   background: rgba(217,119,6,0.12);
-  color: #D97706;
+  color: var(--warning);
   border: 1px solid rgba(217,119,6,0.3);
 }
 .price-preview-box {
@@ -391,4 +391,14 @@ const handleCreateEventBooking = async () => {
   padding: 12px;
   margin: 8px 0 14px;
 }
+
+/* C3: former inline styles */
+.panel-title { font-size: var(--font-size-base); font-weight: 700; }
+.wa-badge { font-size: var(--font-size-xs); font-weight: 600; color: var(--brand-whatsapp); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.field-hint { font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: var(--space-1); }
+.chip-list { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.chip-check { margin: 0; }
+.field-note { font-size: var(--font-size-xs); color: var(--text-muted); margin-top: var(--space-1); }
+.price-total { font-size: var(--font-size-lg); font-weight: 700; color: var(--action); margin-top: var(--space-1); }
 </style>

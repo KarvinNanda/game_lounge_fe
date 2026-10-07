@@ -14,12 +14,12 @@
           <span><el-icon><Coin /></el-icon> Play Credits Package</span>
         </template>
 
-        <div style="margin-top:16px">
+        <div class="u-mt-4">
           <!-- Header Tab -->
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+          <div class="detail-head">
             <div>
-              <h3 style="font-size:16px;font-weight:700;margin-bottom:4px">Play Credits Package</h3>
-              <p style="font-size:12px;color:var(--text-secondary)">Kelola paket play credits yang tersedia untuk dijual</p>
+              <h3 class="detail-name">Play Credits Package</h3>
+              <p class="u-text-xs u-text-secondary">Kelola paket play credits yang tersedia untuk dijual</p>
             </div>
             <el-button v-if="can('play_credits.create')" type="primary" @click="openPackageForm(null)">
               <el-icon><Plus /></el-icon> Create New Package
@@ -27,10 +27,10 @@
           </div>
 
           <!-- Filter -->
-          <div style="display:flex;gap:10px;margin-bottom:16px">
-            <el-input v-model="pkgFilter.search" placeholder="Search package name..." prefix-icon="Search"
-              style="width:260px" clearable @input="debouncePkg" />
-            <el-select v-model="pkgFilter.status" placeholder="Semua Status" clearable style="width:150px" @change="applyPkgFilters">
+          <div class="summary-row">
+            <el-input class="filter-search" v-model="pkgFilter.search" placeholder="Search package name..." prefix-icon="Search"
+              clearable @input="debouncePkg" />
+            <el-select class="filter-w150" v-model="pkgFilter.status" placeholder="Semua Status" clearable @change="applyPkgFilters">
               <el-option label="Aktif" value="active" />
               <el-option label="Nonaktif" value="inactive" />
             </el-select>
@@ -38,11 +38,11 @@
 
           <!-- Package Table -->
           <el-card shadow="never">
-            <div v-if="isMobile" class="m-card-list" style="margin-bottom:12px">
+            <div v-if="isMobile" class="m-card-list u-mb-3">
               <div class="m-card" v-for="row in packageList" :key="row.id">
                 <div class="m-card-icon">
-                  <img v-if="row.icon_url" :src="getImageUrl(row.icon_url)" style="width:40px;height:40px;border-radius:8px;object-fit:cover" />
-                  <el-icon v-else size="18" style="color:var(--color-primary)"><Coin /></el-icon>
+                  <img class="img-40-cover" v-if="row.icon_url" :src="getImageUrl(row.icon_url)" />
+                  <el-icon v-else size="18" class="u-text-action"><Coin /></el-icon>
                 </div>
                 <div class="m-card-body">
                   <div class="m-card-title">{{ row.name }}</div>
@@ -50,7 +50,7 @@
                 </div>
                 <div class="m-card-end">
                   <el-tag :type="row.is_active ? 'success' : 'danger'" size="small">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</el-tag>
-                  <div style="display:flex;gap:4px">
+                  <div class="m-card-actions">
                     <el-button v-if="can('play_credits.edit')" size="small" circle plain @click="openPackageForm(row)"><el-icon><Edit /></el-icon></el-button>
                     <el-button v-if="can('play_credits.edit')" size="small" circle plain type="danger" @click="handleDeletePackage(row)"><el-icon><Delete /></el-icon></el-button>
                   </div>
@@ -59,19 +59,19 @@
             </div>
 
             <div class="table-wrap">
-            <el-table :data="packageList" v-loading="pkgLoading" size="small" style="width:100%">
+            <el-table :data="packageList" v-loading="pkgLoading" size="small" class="u-w-full">
 
               <el-table-column label="NAMA PAKET" min-width="220">
                 <template #default="{ row }">
-                  <div style="display:flex;align-items:center;gap:12px">
+                  <div class="u-flex u-gap-3">
                     <div class="pkg-icon-wrap">
-                      <img v-if="row.icon_url" :src="getImageUrl(row.icon_url)"
-                        style="width:44px;height:44px;border-radius:10px;object-fit:cover" />
-                      <div v-else class="pkg-icon-placeholder" style="width:44px;height:44px"><el-icon size="20"><Coin /></el-icon></div>
+                      <img class="img-44-cover" v-if="row.icon_url" :src="getImageUrl(row.icon_url)"
+                        />
+                      <div v-else class="pkg-icon-placeholder img-44"><el-icon size="20"><Coin /></el-icon></div>
                     </div>
                     <div>
-                      <div style="font-weight:600;font-size:13px">{{ row.name }}</div>
-                      <div style="font-size:11px;color:var(--text-secondary)">{{ row.description || '-' }}</div>
+                      <div class="u-fw-semibold u-text-sm">{{ row.name }}</div>
+                      <div class="u-text-xs u-text-secondary">{{ row.description || '-' }}</div>
                     </div>
                   </div>
                 </template>
@@ -79,14 +79,14 @@
 
               <el-table-column label="TOTAL JAM" width="110">
                 <template #default="{ row }">
-                  <span style="font-weight:600">{{ row.total_hours }} Jam</span>
+                  <span class="u-fw-semibold">{{ row.total_hours }} Jam</span>
                 </template>
               </el-table-column>
 
               <el-table-column label="CABANG BERLAKU" min-width="180" v-if="!isTablet && !isMobile">
                 <template #default="{ row }">
-                  <span v-if="row.apply_to_all_stores" style="font-size:12px;color:var(--text-secondary)">Semua Cabang</span>
-                  <span v-else style="font-size:12px">
+                  <span v-if="row.apply_to_all_stores" class="u-text-xs u-text-secondary">Semua Cabang</span>
+                  <span v-else class="u-text-xs">
                     {{ row.package_stores?.map(s => s.store?.name).join(', ') || '-' }}
                   </span>
                 </template>
@@ -94,7 +94,7 @@
 
               <el-table-column label="HARGA" width="130">
                 <template #default="{ row }">
-                  <span style="font-weight:600;color:var(--color-primary)">{{ formatRp(row.price) }}</span>
+                  <span class="u-fw-semibold u-text-action">{{ formatRp(row.price) }}</span>
                 </template>
               </el-table-column>
 
@@ -112,7 +112,7 @@
 
               <el-table-column label="AKSI" width="90" fixed="right">
                 <template #default="{ row }">
-                  <div style="display:flex;gap:6px">
+                  <div class="row-gap-sm">
                     <el-button v-if="can('play_credits.edit')" size="small" circle plain @click="openPackageForm(row)">
                       <el-icon><Edit /></el-icon>
                     </el-button>
@@ -124,8 +124,8 @@
               </el-table-column>
             </el-table>
 
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
-              <span style="font-size:12px;color:var(--text-secondary)">
+            <div class="u-flex u-justify-between u-mt-3">
+              <span class="u-text-xs u-text-secondary">
                 Showing {{ packageList.length }} to {{ pkgTotal }} packages
               </span>
               <TablePagination v-model:page="pkgFilter.page" :page-size="pkgFilter.per_page" :total="pkgTotal" :sizes="false" @change="fetchPackages" />
@@ -143,12 +143,12 @@
           <span><el-icon><User /></el-icon> Member Play Credits</span>
         </template>
 
-        <div style="margin-top:16px">
+        <div class="u-mt-4">
           <!-- Header Tab -->
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+          <div class="detail-head-tight">
             <div>
-              <h3 style="font-size:16px;font-weight:700;margin-bottom:2px">Member Play Credits (Aktif)</h3>
-              <p style="font-size:12px;color:var(--text-secondary)">Daftar paket Play Credits aktif yang dimiliki member.</p>
+              <h3 class="detail-name-tight">Member Play Credits (Aktif)</h3>
+              <p class="u-text-xs u-text-secondary">Daftar paket Play Credits aktif yang dimiliki member.</p>
             </div>
             <el-button v-if="can('play_credits.create')" type="primary" @click="openAssignDialog">
               <el-icon><Plus /></el-icon> Assign Credits
@@ -156,24 +156,24 @@
           </div>
 
           <!-- Info -->
-          <div class="info-box" style="margin-bottom:14px">
+          <div class="info-box u-mb-3">
             <el-icon><InfoFilled /></el-icon>
             Menampilkan paket yang masih aktif dan belum kedaluwarsa.
           </div>
 
           <!-- Filters -->
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-            <el-input v-model="memberFilter.search" placeholder="Search nama member..."
-              prefix-icon="Search" style="width:200px" clearable @input="debounceMembers" />
-            <el-select v-model="memberFilter.package_id" placeholder="Semua Paket" clearable style="width:150px" @change="applyMemberFilters">
+          <div class="filter-row">
+            <el-input class="filter-w200" v-model="memberFilter.search" placeholder="Search nama member..."
+              prefix-icon="Search" clearable @input="debounceMembers" />
+            <el-select class="filter-w150" v-model="memberFilter.package_id" placeholder="Semua Paket" clearable @change="applyMemberFilters">
               <el-option v-for="p in activePackages" :key="p.id" :label="p.name" :value="p.id" />
             </el-select>
-            <el-select v-model="memberFilter.status" placeholder="Semua Status" clearable style="width:140px" @change="applyMemberFilters">
+            <el-select class="filter-w140" v-model="memberFilter.status" placeholder="Semua Status" clearable @change="applyMemberFilters">
               <el-option label="Aktif" value="active" />
               <el-option label="Kadaluwarsa" value="expired" />
             </el-select>
-            <el-input v-model="memberFilter.whatsapp" placeholder="No. WhatsApp"
-              style="width:180px" clearable @input="debounceMembers">
+            <el-input class="filter-w180" v-model="memberFilter.whatsapp" placeholder="No. WhatsApp"
+              clearable @input="debounceMembers">
               <template #prepend><el-icon><Phone /></el-icon></template>
             </el-input>
             <el-button plain @click="resetMemberFilter"><el-icon><RefreshRight /></el-icon> Reset Filter</el-button>
@@ -181,9 +181,9 @@
 
           <!-- Member Credits Table -->
           <el-card shadow="never">
-            <div v-if="isMobile" class="m-card-list" style="margin-bottom:12px">
+            <div v-if="isMobile" class="m-card-list u-mb-3">
               <div class="m-card" v-for="row in memberCreditList" :key="row.id">
-                <div class="m-card-icon" style="background:var(--color-primary);color:#fff;font-weight:700;font-size:14px">
+                <div class="m-card-icon m-card-avatar">
                   {{ row.customer?.name?.[0]?.toUpperCase() }}
                 </div>
                 <div class="m-card-body">
@@ -198,21 +198,21 @@
             </div>
 
             <div class="table-wrap">
-            <el-table :data="memberCreditList" v-loading="memberLoading" size="small" style="width:100%">
+            <el-table :data="memberCreditList" v-loading="memberLoading" size="small" class="u-w-full">
 
               <!-- Member -->
               <el-table-column label="MEMBER" min-width="180">
                 <template #default="{ row }">
-                  <div style="display:flex;align-items:center;gap:10px">
+                  <div class="u-flex u-gap-2">
                     <el-avatar :size="36" :src="row.customer?.avatar_url">
                       {{ row.customer?.name?.[0]?.toUpperCase() }}
                     </el-avatar>
                     <div>
-                      <div style="display:flex;align-items:center;gap:6px">
-                        <span style="font-weight:600;font-size:13px">{{ row.customer?.name }}</span>
+                      <div class="u-flex u-gap-1">
+                        <span class="u-fw-semibold u-text-sm">{{ row.customer?.name }}</span>
                         <el-tag size="small" type="warning">Member</el-tag>
                       </div>
-                      <div style="font-size:11px;color:var(--color-success)">
+                      <div class="u-text-xs u-text-success">
                         {{ row.customer?.whatsapp }}
                       </div>
                     </div>
@@ -223,15 +223,15 @@
               <!-- Paket -->
               <el-table-column label="PAKET" width="140">
                 <template #default="{ row }">
-                  <div style="display:flex;align-items:center;gap:8px">
-                    <div class="pkg-icon-wrap" style="width:28px;height:28px">
-                      <img v-if="row.package?.icon_url" :src="getImageUrl(row.package?.icon_url)"
-                        style="width:28px;height:28px;border-radius:6px;object-fit:cover" />
-                      <div v-else class="pkg-icon-placeholder" style="width:28px;height:28px;font-size:12px">
+                  <div class="u-flex u-gap-2">
+                    <div class="pkg-icon-wrap img-28">
+                      <img class="img-28-cover" v-if="row.package?.icon_url" :src="getImageUrl(row.package?.icon_url)"
+                        />
+                      <div v-else class="pkg-icon-placeholder avatar-28">
                         <el-icon><Coin /></el-icon>
                       </div>
                     </div>
-                    <span style="font-size:12px;font-weight:500">{{ row.package?.name }}</span>
+                    <span class="pkg-meta">{{ row.package?.name }}</span>
                   </div>
                 </template>
               </el-table-column>
@@ -239,7 +239,7 @@
               <!-- Total Jam -->
               <el-table-column label="TOTAL JAM" width="100">
                 <template #default="{ row }">
-                  <span style="font-size:12px">{{ row.total_hours }} Jam</span>
+                  <span class="u-text-xs">{{ row.total_hours }} Jam</span>
                 </template>
               </el-table-column>
 
@@ -256,7 +256,7 @@
               <el-table-column label="% TERPAKAI" width="130">
                 <template #default="{ row }">
                   <div>
-                    <div style="font-size:11px;margin-bottom:4px">{{ row.percent_used }}%</div>
+                    <div class="u-text-xs u-mb-1">{{ row.percent_used }}%</div>
                     <el-progress
                       :percentage="row.percent_used"
                       :color="getProgressColor(row.percent_used)"
@@ -270,7 +270,7 @@
               <!-- Masa Berlaku -->
               <el-table-column label="MASA BERLAKU" width="160">
                 <template #default="{ row }">
-                  <div style="font-size:12px">{{ formatDate(row.expires_at) }}</div>
+                  <div class="u-text-xs">{{ formatDate(row.expires_at) }}</div>
                   <div :style="{ fontSize: '11px', color: row.days_left <= 3 ? 'var(--color-danger)' : 'var(--text-secondary)' }">
                     {{ row.is_expired ? 'Kadaluwarsa' : `(${row.days_left} hari lagi)` }}
                   </div>
@@ -281,13 +281,13 @@
               <el-table-column label="CABANG BERLAKU" min-width="160">
                 <template #default="{ row }">
                   <template v-if="row.package?.apply_to_all_stores">
-                    <span style="font-size:11px;color:var(--text-secondary)">Semua Cabang</span>
+                    <span class="u-text-xs u-text-secondary">Semua Cabang</span>
                   </template>
                   <template v-else>
-                    <el-tag
+                    <el-tag class="store-tag"
                       v-for="ps in row.package?.package_stores?.slice(0, 2)"
                       :key="ps.id" size="small"
-                      style="margin-right:4px;margin-bottom:2px"
+                     
                     >{{ ps.store?.name }}</el-tag>
                     <el-tag v-if="row.package?.package_stores?.length > 2" size="small" type="info">
                       +{{ row.package.package_stores.length - 2 }}
@@ -299,9 +299,9 @@
               <!-- Dibeli Pada -->
               <el-table-column label="DIBELI PADA" width="130">
                 <template #default="{ row }">
-                  <div style="font-size:11px">
+                  <div class="u-text-xs">
                     <div>{{ formatDate(row.purchased_at) }}</div>
-                    <div style="color:var(--text-secondary)">{{ formatTime(row.purchased_at) }} WIB</div>
+                    <div class="u-text-secondary">{{ formatTime(row.purchased_at) }} WIB</div>
                   </div>
                 </template>
               </el-table-column>
@@ -316,8 +316,8 @@
               </el-table-column>
             </el-table>
 
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
-              <span style="font-size:12px;color:var(--text-secondary)">
+            <div class="u-flex u-justify-between u-mt-3">
+              <span class="u-text-xs u-text-secondary">
                 Menampilkan {{ memberCreditList.length }} dari {{ memberTotal }} paket aktif
               </span>
               <TablePagination v-model:page="memberFilter.page" :page-size="memberFilter.per_page" :total="memberTotal" :sizes="false" @change="fetchMemberCredits" />
@@ -342,11 +342,11 @@
         <!-- Left: Form -->
         <el-form :model="pkgForm" :rules="pkgRules" ref="pkgFormRef" label-position="top">
           <!-- <el-form-item label="Icon / Photo">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div class="pkg-icon-wrap" style="width:72px;height:72px">
-                <img v-if="pkgIconPreview" :src="pkgIconPreview"
-                  style="width:72px;height:72px;border-radius:12px;object-fit:cover" />
-                <div v-else class="pkg-icon-placeholder" style="width:72px;height:72px">
+            <div class="u-flex u-gap-3">
+              <div class="pkg-icon-wrap img-72">
+                <img class="img-72-cover" v-if="pkgIconPreview" :src="pkgIconPreview"
+                  />
+                <div v-else class="pkg-icon-placeholder img-72">
                   <el-icon size="24"><Coin /></el-icon>
                 </div>
               </div>
@@ -354,7 +354,7 @@
                 <el-upload :auto-upload="false" :show-file-list="false" :on-change="onIconChange" accept="image/*">
                   <el-button plain><el-icon><UploadFilled /></el-icon> Upload Image</el-button>
                 </el-upload>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
+                <div class="u-text-xs u-text-muted u-mt-1">
                   Disarankan ukuran 512x512px (1:1)
                 </div>
               </div>
@@ -366,11 +366,11 @@
           </el-form-item>
 
           <el-form-item label="Total Jam *" prop="total_hours">
-            <el-input-number v-model="pkgForm.total_hours" :min="0.5" :step="0.5" style="width:100%" />
+            <el-input-number v-model="pkgForm.total_hours" :min="0.5" :step="0.5" class="u-w-full" />
           </el-form-item>
 
           <el-form-item label="Cabang yang Berlaku *">
-            <div style="margin-bottom:8px">
+            <div class="u-mb-2">
               <el-checkbox v-model="pkgForm.apply_to_all_stores" @change="(v) => { if (v) pkgForm.store_ids = [] }">
                 Semua Cabang
               </el-checkbox>
@@ -380,11 +380,11 @@
               v-model="pkgForm.store_ids"
               multiple
               placeholder="Pilih cabang"
-              style="width:100%"
+              class="u-w-full"
             >
               <el-option v-for="s in allStores" :key="s.id" :label="s.name" :value="s.id" />
             </el-select>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
+            <div class="u-text-xs u-text-muted u-mt-1">
               Paket hanya dapat digunakan di cabang yang dipilih
             </div>
           </el-form-item>
@@ -392,13 +392,13 @@
           <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
             <el-form-item label="Harga *" prop="price">
               <el-input-number
-                v-model="pkgForm.price" :min="0" :step="10000" style="width:100%"
+                v-model="pkgForm.price" :min="0" :step="10000" class="u-w-full"
                 :formatter="v => `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
                 :parser="v => v.replace(/Rp\s?|(\.*)/g, '')"
               />
             </el-form-item>
             <el-form-item label="Masa Berlaku *" prop="validity_days">
-              <el-input-number v-model="pkgForm.validity_days" :min="1" style="width:100%" />
+              <el-input-number v-model="pkgForm.validity_days" :min="1" class="u-w-full" />
             </el-form-item>
           </div>
 
@@ -414,20 +414,20 @@
 
         <!-- Right: Preview -->
         <div>
-          <h4 style="font-size:13px;font-weight:700;margin-bottom:12px">Preview Paket</h4>
+          <h4 class="u-text-sm u-fw-bold u-mb-3">Preview Paket</h4>
           <div class="package-preview">
-            <!-- <div class="pkg-icon-wrap" style="width:64px;height:64px;margin-bottom:12px">
-              <img v-if="pkgIconPreview" :src="pkgIconPreview"
-                style="width:64px;height:64px;border-radius:12px;object-fit:cover" />
-              <div v-else class="pkg-icon-placeholder" style="width:64px;height:64px">
+            <!-- <div class="pkg-icon-wrap img-64-spaced">
+              <img class="img-64-cover" v-if="pkgIconPreview" :src="pkgIconPreview"
+                />
+              <div v-else class="pkg-icon-placeholder img-64">
                 <el-icon size="20"><Coin /></el-icon>
               </div>
             </div> -->
-            <div style="font-weight:700;font-size:15px;margin-bottom:4px">
+            <div class="detail-title">
               {{ pkgForm.name || 'Nama Paket' }}
             </div>
-            <el-tag size="small" style="margin-bottom:10px">Play Credits Package</el-tag>
-            <p style="font-size:12px;color:var(--text-secondary);margin-bottom:14px">
+            <el-tag size="small" class="u-mb-2">Play Credits Package</el-tag>
+            <p class="u-text-xs u-text-secondary u-mb-3">
               {{ pkgForm.description || 'Deskripsi paket' }}
             </p>
             <div class="preview-row"><el-icon><Clock /></el-icon><span>Total Jam</span><span>{{ pkgForm.total_hours || 0 }} Jam</span></div>
@@ -436,13 +436,13 @@
               <span>Cabang</span>
               <span v-if="pkgForm.apply_to_all_stores">Semua Cabang</span>
               <span v-else-if="pkgForm.store_ids?.length">{{ pkgForm.store_ids.length }} Cabang</span>
-              <span v-else style="color:var(--text-muted)">-</span>
+              <span v-else class="u-text-muted">-</span>
             </div>
-            <div class="preview-row" style="color:var(--color-primary)">
+            <div class="preview-row u-text-action">
               <el-icon><Money /></el-icon><span>Harga</span><strong>{{ formatRp(pkgForm.price) }}</strong>
             </div>
             <div class="preview-row"><el-icon><Calendar /></el-icon><span>Masa Berlaku</span><span>{{ pkgForm.validity_days || 0 }} Hari</span></div>
-            <div class="note-box" style="margin-top:10px;font-size:11px">
+            <div class="note-box u-mt-2 u-text-xs">
               <el-icon><InfoFilled /></el-icon>
               Paket ini hanya dapat digunakan di cabang yang dipilih.
             </div>
@@ -479,7 +479,7 @@
             loading-text="Memuat daftar member..."
             placeholder="Pilih atau ketik nama member..."
             no-data-text="Tidak ada member ditemukan"
-            style="width:100%"
+            class="u-w-full"
           >
             <el-option
               v-for="c in customerOptions"
@@ -487,31 +487,31 @@
               :label="c.name"
               :value="c.id"
             >
-              <div style="display:flex;align-items:center;gap:10px">
-                <el-avatar :size="28" style="flex-shrink:0;font-size:11px">
+              <div class="u-flex u-gap-2">
+                <el-avatar class="tag-xs" :size="28">
                   {{ c.name?.[0]?.toUpperCase() }}
                 </el-avatar>
                 <div>
-                  <div style="font-size:13px;font-weight:600;line-height:1.3">{{ c.name }}</div>
-                  <div style="font-size:11px;color:var(--color-success);line-height:1.3">{{ c.whatsapp }}</div>
+                  <div class="pkg-name">{{ c.name }}</div>
+                  <div class="pkg-bonus">{{ c.whatsapp }}</div>
                 </div>
               </div>
             </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="Paket *" prop="package_id">
-          <el-select v-model="assignForm.package_id" placeholder="Pilih paket" style="width:100%"
+          <el-select v-model="assignForm.package_id" placeholder="Pilih paket" class="u-w-full"
             @change="onPackageSelect">
             <el-option v-for="p in activePackages" :key="p.id"
               :label="`${p.name} — ${formatRp(p.price)} (${p.validity_days} hari)`" :value="p.id" />
           </el-select>
         </el-form-item>
         <el-form-item label="Jumlah Pembayaran">
-          <div style="width:100%;height:32px;background:var(--bg-main);border:1px solid var(--border-color);border-radius:6px;padding:0 12px;display:flex;align-items:center;justify-content:space-between">
-            <span style="font-size:13px;font-weight:700;color:var(--color-primary)">
+          <div class="readonly-field">
+            <span class="u-text-sm u-fw-bold u-text-action">
               {{ assignForm.payment_amount ? formatRp(assignForm.payment_amount) : '—' }}
             </span>
-            <span style="font-size:11px;color:var(--text-muted)">Mengikuti harga paket</span>
+            <span class="u-text-xs u-text-muted">Mengikuti harga paket</span>
           </div>
         </el-form-item>
         <el-form-item label="Catatan">
@@ -528,18 +528,18 @@
          DRAWER: Edit Play Credits (slide from right)
     ════════════════════════════════════════════════════════ -->
     <el-drawer v-model="editCreditVisible" title="Edit Play Credits" direction="rtl" :size="isMobile ? '100%' : '380px'">
-      <div v-if="editingCredit" style="padding:0 4px">
+      <div class="drawer-body" v-if="editingCredit">
 
         <!-- Member Info -->
         <div class="drawer-section">
           <div class="section-label">Informasi Member</div>
-          <div style="display:flex;align-items:center;gap:12px">
+          <div class="u-flex u-gap-3">
             <el-avatar :size="44" :src="editingCredit.customer?.avatar_url">
               {{ editingCredit.customer?.name?.[0]?.toUpperCase() }}
             </el-avatar>
             <div>
-              <div style="font-weight:700">{{ editingCredit.customer?.name }}</div>
-              <div style="font-size:12px;color:var(--color-success)">{{ editingCredit.customer?.whatsapp }}</div>
+              <div class="u-fw-bold">{{ editingCredit.customer?.name }}</div>
+              <div class="u-text-xs u-text-success">{{ editingCredit.customer?.whatsapp }}</div>
             </div>
           </div>
         </div>
@@ -547,17 +547,17 @@
         <!-- Package Info -->
         <div class="drawer-section">
           <div class="section-label">Informasi Paket</div>
-          <div style="display:flex;align-items:center;gap:10px;background:var(--bg-main);border-radius:8px;padding:10px">
-            <div class="pkg-icon-wrap" style="width:36px;height:36px">
-              <img v-if="editingCredit.package?.icon_url" :src="getImageUrl(editingCredit.package?.icon_url)"
-                style="width:36px;height:36px;border-radius:8px;object-fit:cover" />
-              <div v-else class="pkg-icon-placeholder" style="width:36px;height:36px;font-size:12px">
+          <div class="member-chip">
+            <div class="pkg-icon-wrap img-36">
+              <img class="img-36-cover" v-if="editingCredit.package?.icon_url" :src="getImageUrl(editingCredit.package?.icon_url)"
+                />
+              <div v-else class="pkg-icon-placeholder avatar-36">
                 <el-icon><Coin /></el-icon>
               </div>
             </div>
             <div>
-              <div style="font-weight:600;font-size:13px">{{ editingCredit.package?.name }}</div>
-              <div style="font-size:11px;color:var(--text-secondary)">
+              <div class="u-fw-semibold u-text-sm">{{ editingCredit.package?.name }}</div>
+              <div class="u-text-xs u-text-secondary">
                 Dibeli {{ formatDate(editingCredit.purchased_at) }}, {{ formatTime(editingCredit.purchased_at) }} WIB
               </div>
             </div>
@@ -567,7 +567,7 @@
         <!-- Durasi Jam -->
         <div class="drawer-section">
           <div class="section-label">Durasi Jam</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div class="three-col">
             <div class="hour-stat">
               <div class="hour-value">{{ editingCredit.total_hours }} Jam</div>
               <div class="hour-label">Total Jam</div>
@@ -581,38 +581,38 @@
             <div class="hour-stat">
               <div class="hour-value">{{ editingCredit.percent_used }}%</div>
               <div class="hour-label">% Terpakai</div>
-              <el-progress :percentage="editingCredit.percent_used" :color="getProgressColor(editingCredit.percent_used)" :show-text="false" :stroke-width="4" style="margin-top:4px" />
+              <el-progress :percentage="editingCredit.percent_used" :color="getProgressColor(editingCredit.percent_used)" :show-text="false" :stroke-width="4" class="u-mt-1" />
             </div>
           </div>
         </div>
 
         <!-- Tambah / Kurangi Jam -->
         <div class="drawer-section">
-          <div class="section-label" style="display:flex;align-items:center;gap:6px">
+          <div class="section-label u-flex u-gap-1">
             Tambah / Kurangi Jam
             <el-tooltip content="Gunakan untuk koreksi jam jika ada kegagalan sistem" placement="top">
-              <el-icon style="color:var(--text-muted)"><QuestionFilled /></el-icon>
+              <el-icon class="u-text-muted"><QuestionFilled /></el-icon>
             </el-tooltip>
           </div>
-          <div style="display:flex;flex-direction:column;gap:10px">
+          <div class="stack">
             <div class="adjust-option" :class="{ active: adjustType === 'add' }" @click="adjustType = 'add'; adjustHours = 0">
               <el-radio v-model="adjustType" label="add">
-                <span style="font-weight:600">Tambah Jam</span>
+                <span class="u-fw-semibold">Tambah Jam</span>
               </el-radio>
-              <div style="font-size:11px;color:var(--text-secondary);padding-left:22px">Jam akan ditambahkan ke sisa paket.</div>
-              <div v-if="adjustType === 'add'" style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-left:22px">
-                <el-input-number v-model="adjustHours" :min="0" :step="0.5" style="width:120px" />
-                <span style="font-size:12px;color:var(--text-secondary)">Jam</span>
+              <div class="option-hint">Jam akan ditambahkan ke sisa paket.</div>
+              <div class="option-extra" v-if="adjustType === 'add'">
+                <el-input-number class="input-w120" v-model="adjustHours" :min="0" :step="0.5" />
+                <span class="u-text-xs u-text-secondary">Jam</span>
               </div>
             </div>
             <div class="adjust-option" :class="{ active: adjustType === 'subtract' }" @click="adjustType = 'subtract'; adjustHours = 0">
               <el-radio v-model="adjustType" label="subtract">
-                <span style="font-weight:600">Kurangi Jam</span>
+                <span class="u-fw-semibold">Kurangi Jam</span>
               </el-radio>
-              <div style="font-size:11px;color:var(--text-secondary);padding-left:22px">Jam akan dikurangi dari sisa paket.</div>
-              <div v-if="adjustType === 'subtract'" style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-left:22px">
-                <el-input-number v-model="adjustHours" :min="0" :max="editingCredit.remaining_hours" :step="0.5" style="width:120px" />
-                <span style="font-size:12px;color:var(--text-secondary)">Jam</span>
+              <div class="option-hint">Jam akan dikurangi dari sisa paket.</div>
+              <div class="option-extra" v-if="adjustType === 'subtract'">
+                <el-input-number class="input-w120" v-model="adjustHours" :min="0" :max="editingCredit.remaining_hours" :step="0.5" />
+                <span class="u-text-xs u-text-secondary">Jam</span>
               </div>
             </div>
           </div>
@@ -621,26 +621,26 @@
         <!-- Masa Berlaku -->
         <div class="drawer-section">
           <div class="section-label">Masa Berlaku</div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px">
-            <span style="color:var(--text-secondary)">Tanggal Berakhir Saat Ini</span>
+          <div class="usage-row">
+            <span class="u-text-secondary">Tanggal Berakhir Saat Ini</span>
             <span :style="{ color: editingCredit.days_left <= 3 ? 'var(--color-danger)' : 'var(--text-primary)' }">
               {{ formatDate(editingCredit.expires_at) }} ({{ editingCredit.days_left }} hari lagi)
             </span>
           </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <el-input-number v-model="extendDays" :min="0" style="flex:1" />
-            <span style="font-size:12px;color:var(--text-secondary)">Hari</span>
+          <div class="u-flex u-gap-2">
+            <el-input-number v-model="extendDays" :min="0" class="u-flex-1" />
+            <span class="u-text-xs u-text-secondary">Hari</span>
           </div>
-          <div v-if="extendDays > 0" style="font-size:12px;margin-top:8px">
-            <span style="color:var(--text-secondary)">Tanggal Berakhir Setelah Perubahan: </span>
-            <span style="color:var(--color-success);font-weight:600">{{ computedNewExpiry }}</span>
+          <div v-if="extendDays > 0" class="u-text-xs u-mt-2">
+            <span class="u-text-secondary">Tanggal Berakhir Setelah Perubahan: </span>
+            <span class="u-text-success u-fw-semibold">{{ computedNewExpiry }}</span>
           </div>
         </div>
 
         <!-- Cabang -->
         <div class="drawer-section">
           <div class="section-label">Cabang yang Berlaku</div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <div class="tag-list">
             <template v-if="editingCredit.package?.apply_to_all_stores">
               <el-tag>Semua Cabang</el-tag>
             </template>
@@ -659,9 +659,9 @@
         </div>
 
         <!-- Footer -->
-        <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-color)">
-          <el-button style="flex:1" @click="editCreditVisible = false">Batal</el-button>
-          <el-button type="primary" style="flex:1" :loading="adjustLoading" @click="handleAdjustCredit">
+        <div class="drawer-footer">
+          <el-button class="u-flex-1" @click="editCreditVisible = false">Batal</el-button>
+          <el-button type="primary" class="u-flex-1" :loading="adjustLoading" @click="handleAdjustCredit">
             <el-icon><Check /></el-icon> Simpan Perubahan
           </el-button>
         </div>
@@ -946,9 +946,9 @@ const formatRp = (v) => `Rp ${(v || 0).toLocaleString('id-ID')}`
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'
 const formatTime = (d) => d ? new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'
 const getProgressColor = (percent) => {
-  if (percent >= 60) return '#ef4444'
-  if (percent >= 30) return '#f59e0b'
-  return '#10b981'
+  if (percent >= 60) return 'var(--danger)'
+  if (percent >= 30) return 'var(--warning)'
+  return 'var(--success)'
 }
 const getHoursColor = (percent) => {
   if (percent >= 60) return 'var(--color-danger)'
@@ -1029,4 +1029,51 @@ onMounted(async () => {
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.img-72 { width: 72px; height: 72px; }
+.img-72-cover { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; }
+.img-64-spaced { width: 64px; height: 64px; margin-bottom: var(--space-3); }
+.img-64-cover { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; }
+.img-64 { width: 64px; height: 64px; }
+.img-44-cover { width: 44px; height: 44px; border-radius: var(--radius-lg); object-fit: cover; }
+.img-44 { width: 44px; height: 44px; }
+.img-40-cover { width: 40px; height: 40px; border-radius: var(--radius-lg); object-fit: cover; }
+.avatar-36 { width: 36px; height: 36px; font-size: var(--font-size-xs); }
+.img-36-cover { width: 36px; height: 36px; border-radius: var(--radius-lg); object-fit: cover; }
+.img-36 { width: 36px; height: 36px; }
+.avatar-28 { width: 28px; height: 28px; font-size: var(--font-size-xs); }
+.img-28-cover { width: 28px; height: 28px; border-radius: var(--radius-md); object-fit: cover; }
+.img-28 { width: 28px; height: 28px; }
+.filter-w150 { width: 150px; }
+.input-w120 { width: 120px; }
+.filter-search { width: 260px; }
+.filter-w200 { width: 200px; }
+.filter-w180 { width: 180px; }
+.filter-w140 { width: 140px; }
+.option-hint { font-size: var(--font-size-xs); color: var(--text-secondary); padding-left: 22px; }
+.option-extra { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); padding-left: 22px; }
+.readonly-field { width: 100%; height: 32px; background: var(--surface-page); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0 var(--space-3); display: flex; align-items: center; justify-content: space-between; }
+.drawer-body { padding: 0 var(--space-1); }
+.store-tag { margin-right: var(--space-1); margin-bottom: var(--space-1); }
+.detail-title { font-weight: 700; font-size: var(--font-size-base); margin-bottom: var(--space-1); }
+.detail-name { font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--space-1); }
+.detail-name-tight { font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--space-1); }
+.pkg-name { font-size: var(--font-size-sm); font-weight: 600; line-height: 1.3; }
+.pkg-meta { font-size: var(--font-size-xs); font-weight: 500; }
+.pkg-bonus { font-size: var(--font-size-xs); color: var(--success); line-height: 1.3; }
+.tag-xs { flex-shrink: 0; font-size: var(--font-size-xs); }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-2); }
+.usage-row { display: flex; justify-content: space-between; font-size: var(--font-size-xs); margin-bottom: var(--space-2); }
+.detail-head-tight { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-1); }
+.detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4); }
+.filter-row { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3); }
+.tag-list { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.row-gap-sm { display: flex; gap: var(--space-1); }
+.m-card-actions { display: flex; gap: var(--space-1); }
+.drawer-footer { display: flex; gap: var(--space-2); margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+.summary-row { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
+.stack { display: flex; flex-direction: column; gap: var(--space-2); }
+.member-chip { display: flex; align-items: center; gap: var(--space-2); background: var(--surface-page); border-radius: var(--radius-lg); padding: var(--space-2); }
+.m-card-avatar { background: var(--action); color: var(--text-on-action); font-weight: 700; font-size: var(--font-size-base); }
 </style>

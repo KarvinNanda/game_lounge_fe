@@ -18,18 +18,18 @@
     <!-- Table Card -->
     <el-card shadow="never" class="table-card">
       <FilterBar>
-        <el-input
+        <el-input class="filter-search"
           v-model="filters.search"
           placeholder="Cari username atau email..."
           prefix-icon="Search"
-          style="width:260px"
+         
           clearable
           @input="debouncedFetch"
         />
-        <el-select v-model="filters.role_id" placeholder="Semua Role" clearable style="width:150px" @change="applyFilters">
+        <el-select class="filter-role" v-model="filters.role_id" placeholder="Semua Role" clearable @change="applyFilters">
           <el-option v-for="r in roles" :key="r.id" :label="r.name" :value="r.id" />
         </el-select>
-        <el-select v-model="filters.store_id" placeholder="Semua Cabang" clearable style="width:160px" @change="applyFilters">
+        <el-select class="filter-store" v-model="filters.store_id" placeholder="Semua Cabang" clearable @change="applyFilters">
           <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
         </el-select>
         <template #actions>
@@ -41,16 +41,16 @@
 
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in staffList" :key="row.id">
-          <div class="m-card-icon" style="background:var(--color-primary);color:#fff;font-weight:700;font-size:14px">
+          <div class="m-card-icon m-card-avatar">
             {{ row.username?.[0]?.toUpperCase() }}
           </div>
           <div class="m-card-body">
-            <div class="m-card-title">{{ row.username }}<el-tag v-if="row.id === authStore.staff?.id" size="small" type="info" style="margin-left:6px;font-size:9px">You</el-tag></div>
+            <div class="m-card-title">{{ row.username }}<el-tag class="you-tag-sm" v-if="row.id === authStore.staff?.id" size="small" type="info">You</el-tag></div>
             <div class="m-card-meta">{{ row.email }} · {{ row.role?.name || '—' }}</div>
           </div>
           <div class="m-card-end">
             <el-tag :type="row.deleted_at ? 'danger' : 'success'" size="small">{{ row.deleted_at ? 'Nonaktif' : 'Aktif' }}</el-tag>
-            <div style="display:flex;gap:4px">
+            <div class="m-card-actions">
               <el-button v-if="authStore.isSystem" size="small" circle plain type="warning" @click="handleResetPassword(row)"><el-icon><Key /></el-icon></el-button>
               <el-button v-if="can('settings.staff_role')" size="small" circle plain @click="openDrawer(row)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('settings.staff_role')" size="small" circle plain type="danger" :disabled="row.id === authStore.staff?.id" @click="removeStaff(row)"><el-icon><Delete /></el-icon></el-button>
@@ -60,7 +60,7 @@
       </div>
 
       <div class="table-wrap">
-      <el-table :data="staffList" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada staff">
+      <el-table :data="staffList" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada staff">
         <!-- Staff -->
         <el-table-column label="Staff" min-width="220">
           <template #default="{ row }">
@@ -71,7 +71,7 @@
               <div>
                 <div class="cell-name">
                   {{ row.username }}
-                  <el-tag v-if="row.id === authStore.staff?.id" size="small" type="info" style="margin-left:6px">You</el-tag>
+                  <el-tag class="you-tag" v-if="row.id === authStore.staff?.id" size="small" type="info">You</el-tag>
                 </div>
                 <div class="cell-sub">{{ row.email }}</div>
               </div>
@@ -95,14 +95,14 @@
               <el-tag size="small" type="success" plain>Semua Cabang</el-tag>
             </template>
             <template v-else>
-              <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <div class="tag-list">
                 <el-tag v-for="ss in row.staff_stores?.slice(0, 2)" :key="ss.id" size="small" plain>
                   {{ ss.store?.name }}
                 </el-tag>
                 <el-tag v-if="row.staff_stores?.length > 2" size="small" type="info">
                   +{{ row.staff_stores.length - 2 }}
                 </el-tag>
-                <span v-if="!row.staff_stores?.length" style="font-size:12px;color:var(--text-muted)">—</span>
+                <span v-if="!row.staff_stores?.length" class="u-text-xs u-text-muted">—</span>
               </div>
             </template>
           </template>
@@ -111,7 +111,7 @@
         <!-- No HP -->
         <el-table-column label="No. HP" width="140" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
-            <span style="font-size:12px;color:var(--text-secondary)">{{ row.phone || '—' }}</span>
+            <span class="u-text-xs u-text-secondary">{{ row.phone || '—' }}</span>
           </template>
         </el-table-column>
 
@@ -197,9 +197,9 @@
           </template>
 
           <!-- Staff Info -->
-          <div class="drawer-section-title" style="margin-top:16px">Informasi Staff</div>
+          <div class="drawer-section-title u-mt-4">Informasi Staff</div>
           <el-form-item label="Role" prop="role_id">
-            <el-select v-model="form.role_id" placeholder="Pilih role" style="width:100%">
+            <el-select v-model="form.role_id" placeholder="Pilih role" class="u-w-full">
               <el-option v-for="r in roles" :key="r.id" :label="r.name" :value="r.id" />
             </el-select>
             <div class="field-hint">
@@ -215,7 +215,7 @@
                 :class="{ active: form.is_all_stores }"
                 @click="form.is_all_stores = true; form.store_ids = []"
               >
-                <el-icon style="color:var(--color-success)"><Shop /></el-icon>
+                <el-icon class="u-text-success"><Shop /></el-icon>
                 <div>
                   <div class="so-title">Semua Cabang</div>
                   <div class="so-desc">Akses ke seluruh cabang</div>
@@ -226,7 +226,7 @@
                 :class="{ active: !form.is_all_stores }"
                 @click="form.is_all_stores = false"
               >
-                <el-icon style="color:var(--color-info)"><Location /></el-icon>
+                <el-icon class="u-text-action"><Location /></el-icon>
                 <div>
                   <div class="so-title">Pilih Cabang</div>
                   <div class="so-desc">Batasi akses per cabang</div>
@@ -256,8 +256,8 @@
 
       <template #footer>
         <div class="drawer-footer">
-          <el-button @click="drawerVisible = false" style="flex:1">Batal</el-button>
-          <el-button type="primary" :loading="saving" @click="save" style="flex:1">
+          <el-button @click="drawerVisible = false" class="u-flex-1">Batal</el-button>
+          <el-button type="primary" :loading="saving" @click="save" class="u-flex-1">
             {{ form.id ? 'Simpan Perubahan' : 'Tambah Staff' }}
           </el-button>
         </div>
@@ -267,7 +267,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { h, ref, reactive, computed, onMounted } from 'vue'
 import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -454,14 +454,17 @@ const resetFilters = () => {
 
 const handleResetPassword = async (row) => {
   try {
+    // Built with h() so the username is rendered as text (it is user-controlled).
     await ElMessageBox.confirm(
-      `Reset password untuk <b>${row.username}</b>?<br><span style="font-size:12px;color:var(--text-secondary)">Password baru akan dikirimkan ke email staff.</span>`,
+      h('span', [
+        'Reset password untuk ', h('b', row.username), '?', h('br'),
+        h('span', { class: 'u-text-xs u-text-secondary' }, 'Password baru akan dikirimkan ke email staff.'),
+      ]),
       'Reset Password',
       {
         type: 'warning',
         confirmButtonText: 'Reset Password',
         cancelButtonText: 'Batal',
-        dangerouslyUseHTMLString: true,
       }
     )
     resettingPassword.value = true
@@ -487,10 +490,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.table-card { border-color:var(--border-color) !important; }
 
 .staff-cell { display:flex; align-items:center; gap:10px; }
-.staff-avatar { flex-shrink:0; background:var(--color-primary); color:#fff; font-weight:700; }
+.staff-avatar { flex-shrink:0; background:var(--action); color:var(--text-on-action); font-weight:700; }
 .cell-name { font-size:13px; font-weight:600; color:var(--text-primary); display:flex; align-items:center; }
 .cell-sub { font-size:12px; color:var(--text-secondary); margin-top:1px; }
 
@@ -551,4 +553,14 @@ onMounted(() => {
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.filter-search { width: 260px; }
+.filter-role { width: 150px; }
+.filter-store { width: 160px; }
+.m-card-avatar { background: var(--action); color: var(--text-on-action); font-weight: 700; font-size: var(--font-size-base); }
+.you-tag-sm { margin-left: var(--space-1); font-size: var(--font-size-xs); }
+.m-card-actions { display: flex; gap: var(--space-1); }
+.you-tag { margin-left: var(--space-1); }
+.tag-list { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 </style>

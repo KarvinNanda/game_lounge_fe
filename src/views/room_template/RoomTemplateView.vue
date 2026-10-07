@@ -20,11 +20,11 @@
     <!-- Table -->
     <el-card shadow="never" class="table-card">
       <FilterBar>
-        <el-input
+        <el-input class="filter-search"
           v-model="search"
           placeholder="Cari nama room..."
           prefix-icon="Search"
-          style="width:260px"
+         
           clearable
           @input="debouncedFetch"
         />
@@ -39,7 +39,7 @@
         <div class="m-card" v-for="row in templateList" :key="row.id">
           <div class="m-card-icon">
             <img v-if="row.image_url" :src="getImageUrl(row.image_url)" :alt="row.name" />
-            <el-icon v-else size="18" style="color:var(--text-muted)"><Picture /></el-icon>
+            <el-icon v-else size="18" class="u-text-muted"><Picture /></el-icon>
           </div>
           <div class="m-card-body">
             <div class="m-card-title">{{ row.name }}</div>
@@ -47,7 +47,7 @@
           </div>
           <div class="m-card-end">
             <el-tag :type="row.is_active ? 'success' : 'danger'" size="small">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</el-tag>
-            <div style="display:flex;gap:4px">
+            <div class="m-card-actions">
               <el-button v-if="can('rooms.edit')" size="small" circle plain @click="$router.push(`/room-template/${row.id}/edit`)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('rooms.delete')" size="small" circle plain type="danger" @click="deleteTemplate(row)"><el-icon><Delete /></el-icon></el-button>
             </div>
@@ -56,13 +56,13 @@
       </div>
 
       <div class="table-wrap">
-      <el-table :data="templateList" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada room template">
+      <el-table :data="templateList" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada room template">
         <el-table-column label="Room" min-width="240">
           <template #default="{ row }">
             <div class="room-cell">
               <div class="room-thumb">
                 <img v-if="row.image_url" :src="getImageUrl(row.image_url)" :alt="row.name" />
-                <el-icon v-else size="20" style="color:var(--text-muted)"><Picture /></el-icon>
+                <el-icon v-else size="20" class="u-text-muted"><Picture /></el-icon>
               </div>
               <div>
                 <div class="cell-name">{{ row.name }}</div>
@@ -74,9 +74,9 @@
 
         <el-table-column label="Kapasitas" width="130">
           <template #default="{ row }">
-            <div style="display:flex;align-items:center;gap:4px">
-              <el-icon style="color:var(--text-secondary)"><User /></el-icon>
-              <span style="font-size:13px">{{ row.capacity_min }}–{{ row.capacity_max }} orang</span>
+            <div class="u-flex u-gap-1">
+              <el-icon class="u-text-secondary"><User /></el-icon>
+              <span class="u-text-sm">{{ row.capacity_min }}–{{ row.capacity_max }} orang</span>
             </div>
           </template>
         </el-table-column>
@@ -95,7 +95,7 @@
               </el-tooltip>
               <span v-if="row.facilities.length > 5" class="facility-more">+{{ row.facilities.length - 5 }}</span>
             </div>
-            <span v-else style="font-size:12px;color:var(--text-muted)">—</span>
+            <span v-else class="u-text-xs u-text-muted">—</span>
           </template>
         </el-table-column>
 
@@ -229,7 +229,6 @@ onMounted(fetchTemplates)
 </script>
 
 <style scoped>
-.table-card { border-color:var(--border-color) !important; }
 
 .room-cell { display:flex; align-items:center; gap:12px; }
 .room-thumb {
@@ -276,4 +275,8 @@ onMounted(fetchTemplates)
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.filter-search { width: 260px; }
+.m-card-actions { display: flex; gap: var(--space-1); }
 </style>

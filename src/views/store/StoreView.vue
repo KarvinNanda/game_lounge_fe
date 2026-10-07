@@ -20,15 +20,15 @@
     <!-- Table -->
     <el-card shadow="never" class="table-card">
       <FilterBar>
-        <el-input
+        <el-input class="filter-search"
           v-model="search"
           placeholder="Cari nama store atau lokasi..."
           prefix-icon="Search"
-          style="width:260px"
+         
           clearable
           @input="debouncedFetch"
         />
-        <el-select v-model="statusFilter" placeholder="Semua Status" clearable style="width:140px" @change="applyFilters">
+        <el-select class="filter-status" v-model="statusFilter" placeholder="Semua Status" clearable @change="applyFilters">
           <el-option label="Aktif" value="active" />
           <el-option label="Nonaktif" value="inactive" />
           <el-option label="Draft" value="draft" />
@@ -44,7 +44,7 @@
         <div class="m-card" v-for="row in storeList" :key="row.id">
           <div class="m-card-icon">
             <img v-if="row.photo_url" :src="getImageUrl(row.photo_url)" :alt="row.name" />
-            <el-icon v-else size="18" style="color:var(--text-muted)"><Shop /></el-icon>
+            <el-icon v-else size="18" class="u-text-muted"><Shop /></el-icon>
           </div>
           <div class="m-card-body">
             <div class="m-card-title">{{ row.name }}</div>
@@ -54,7 +54,7 @@
             <el-tag :type="row.status === 'active' ? 'success' : row.status === 'draft' ? 'warning' : 'danger'" size="small">
               {{ row.status === 'active' ? 'Aktif' : row.status === 'draft' ? 'Draft' : 'Nonaktif' }}
             </el-tag>
-            <div style="display:flex;gap:4px">
+            <div class="m-card-actions">
               <el-button v-if="can('settings.branches')" size="small" circle plain @click="$router.push(`/store/${row.id}/edit`)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('settings.branches')" size="small" circle plain type="danger" @click="deleteStore(row)"><el-icon><Delete /></el-icon></el-button>
             </div>
@@ -63,18 +63,18 @@
       </div>
 
       <div class="table-wrap">
-      <el-table :data="storeList" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada store">
+      <el-table :data="storeList" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada store">
         <el-table-column label="Store" min-width="160">
           <template #default="{ row }">
             <div class="store-cell">
               <div class="store-thumb">
                 <img v-if="row.photo_url" :src="getImageUrl(row.photo_url)" :alt="row.name" />
-                <el-icon v-else size="20" style="color:var(--text-muted)"><Shop /></el-icon>
+                <el-icon v-else size="20" class="u-text-muted"><Shop /></el-icon>
               </div>
               <div>
                 <div class="cell-name">{{ row.name }}</div>
                 <div class="cell-addr" v-if="row.address">
-                  <el-icon style="font-size:10px;color:var(--text-muted)"><Location /></el-icon>
+                  <el-icon class="u-text-xs u-text-muted"><Location /></el-icon>
                   {{ row.description }}
                 </div>
               </div>
@@ -95,7 +95,7 @@
 
         <el-table-column label="Jumlah Ruangan" min-width="100">
           <template #default="{ row }">
-            <span style="font-size:13px;color:var(--text-secondary)">{{ row.room_count || 0 }} ruangan</span>
+            <span class="u-text-sm u-text-secondary">{{ row.room_count || 0 }} ruangan</span>
           </template>
         </el-table-column>
 
@@ -116,14 +116,14 @@
                   @change="handleToggleRoom(room)"
                 />
               </div>
-              <span v-if="!row.rooms?.length" style="font-size:12px;color:var(--text-muted)">—</span>
+              <span v-if="!row.rooms?.length" class="u-text-xs u-text-muted">—</span>
             </div>
           </template>
         </el-table-column>
 
         <el-table-column label="Alamat" min-width="130">
           <template #default="{ row }">
-            <span style="font-size:13px;color:var(--text-secondary)">{{ row.address }}</span>
+            <span class="u-text-sm u-text-secondary">{{ row.address }}</span>
           </template>
         </el-table-column>
 
@@ -155,7 +155,7 @@
                     :key="h.date"
                     class="holiday-row"
                   >
-                    <el-icon style="font-size:9px;color:var(--color-danger);flex-shrink:0"><Calendar /></el-icon>
+                    <el-icon class="holiday-dot"><Calendar /></el-icon>
                     <span class="holiday-date">{{ formatHolidayDate(h.date) }}</span>
                     <span class="holiday-time">{{ h.open_time }} – {{ h.close_time }}</span>
                   </div>
@@ -167,7 +167,7 @@
 
         <el-table-column label="Kontak" min-width="140" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
-            <span style="font-size:12px;color:var(--text-secondary)">{{ row.whatsapp || '—' }}</span>
+            <span class="u-text-xs u-text-secondary">{{ row.whatsapp || '—' }}</span>
           </template>
         </el-table-column>
 
@@ -211,11 +211,11 @@
     </el-card>
 
     <!-- Global Holidays Reference Card -->
-    <el-card shadow="never" class="global-holiday-card" style="margin-top:12px">
+    <el-card shadow="never" class="global-holiday-card u-mt-3">
       <div class="gh-header">
         <div>
           <div class="gh-title">
-            <el-icon style="color:var(--color-danger)"><Calendar /></el-icon>
+            <el-icon class="u-text-danger"><Calendar /></el-icon>
             Tanggal Merah Global
           </div>
           <div class="gh-desc">Berlaku untuk semua cabang. Kelola di <router-link to="/settings/global-holidays" class="gh-link">Settings → Tanggal Merah Global</router-link>.</div>
@@ -223,18 +223,18 @@
         <el-tag size="small" type="danger" plain>{{ globalHolidays.length }} hari libur</el-tag>
       </div>
 
-      <div v-if="globalHolidays.length === 0" style="text-align:center;padding:20px;font-size:12px;color:var(--text-muted)">
+      <div class="holiday-empty" v-if="globalHolidays.length === 0">
         Belum ada tanggal merah global yang dikonfigurasi.
       </div>
       <div v-else class="gh-scroll">
         <div class="gh-list">
           <div v-for="h in globalHolidays" :key="h.id" class="gh-item">
-            <div class="gh-dot"><el-icon style="color:var(--color-danger);font-size:10px"><Calendar /></el-icon></div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:12px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.name }}</div>
-              <div style="font-size:11px;color:var(--text-secondary)">{{ formatDate(h.date) }}</div>
+            <div class="gh-dot"><el-icon class="u-text-danger u-text-xs"><Calendar /></el-icon></div>
+            <div class="holiday-main">
+              <div class="holiday-title">{{ h.name }}</div>
+              <div class="u-text-xs u-text-secondary">{{ formatDate(h.date) }}</div>
             </div>
-            <div v-if="h.description" style="font-size:11px;color:var(--text-muted);max-width:160px;text-align:right;flex-shrink:0">{{ h.description }}</div>
+            <div class="holiday-meta" v-if="h.description">{{ h.description }}</div>
           </div>
         </div>
       </div>
@@ -388,7 +388,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.table-card { border-color:var(--border-color) !important; }
 
 .store-cell { display:flex; align-items:center; gap:12px; }
 .store-thumb {
@@ -420,7 +419,6 @@ onMounted(() => {
 .room-toggle-name { font-size:12px; color:var(--text-secondary); flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* Global Holiday Card */
-.global-holiday-card { border-color:var(--border-color) !important; }
 .gh-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:8px; }
 .gh-title  { display:flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:3px; }
 .gh-desc   { font-size:11px; color:var(--text-secondary); }
@@ -453,4 +451,14 @@ onMounted(() => {
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.filter-search { width: 260px; }
+.filter-status { width: 140px; }
+.m-card-actions { display: flex; gap: var(--space-1); }
+.holiday-dot { font-size: var(--font-size-xs); color: var(--danger); flex-shrink: 0; }
+.holiday-empty { text-align: center; padding: var(--space-5); font-size: var(--font-size-xs); color: var(--text-muted); }
+.holiday-main { flex: 1; min-width: 0; }
+.holiday-title { font-size: var(--font-size-xs); font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.holiday-meta { font-size: var(--font-size-xs); color: var(--text-muted); max-width: 160px; text-align: right; flex-shrink: 0; }
 </style>

@@ -12,11 +12,11 @@
     <!-- Table -->
     <el-card shadow="never" class="table-card">
       <FilterBar>
-        <el-input
+        <el-input class="filter-search"
           v-model="search"
           placeholder="Cari kategori..."
           prefix-icon="Search"
-          style="width:260px"
+         
           clearable
         />
         <template #actions>
@@ -25,12 +25,12 @@
       </FilterBar>
 
       <div v-if="isMobile" class="m-card-list">
-        <div class="m-card" v-for="row in filteredList" :key="row.id" style="justify-content:space-between">
+        <div class="m-card u-justify-between" v-for="row in filteredList" :key="row.id">
           <div class="m-card-body">
             <div class="m-card-title">{{ row.name }}</div>
             <div class="m-card-meta">{{ row.facility_count || 0 }} fasilitas</div>
           </div>
-          <div class="m-card-end" style="flex-direction:row;gap:6px">
+          <div class="m-card-end m-card-end-row">
             <el-button v-if="can('settings.branches')" size="small" plain @click="openDrawer(row)"><el-icon><Edit /></el-icon></el-button>
             <el-button v-if="can('settings.branches')" size="small" plain type="danger" :disabled="(row.facility_count || 0) > 0" @click="deleteCategory(row)"><el-icon><Delete /></el-icon></el-button>
           </div>
@@ -41,7 +41,7 @@
       <el-table
         :data="filteredList"
         v-loading="loading"
-        style="width:100%"
+        class="u-w-full"
         empty-text="Belum ada kategori fasilitas"
       >
         <el-table-column label="No" type="index" width="60" />
@@ -96,8 +96,8 @@
       </div>
       <template #footer>
         <div class="drawer-footer">
-          <el-button @click="drawerVisible = false" style="flex:1">Batal</el-button>
-          <el-button type="primary" :loading="saving" @click="save" style="flex:1">
+          <el-button @click="drawerVisible = false" class="u-flex-1">Batal</el-button>
+          <el-button type="primary" :loading="saving" @click="save" class="u-flex-1">
             {{ form.id ? 'Simpan Perubahan' : 'Tambah Kategori' }}
           </el-button>
         </div>
@@ -197,7 +197,6 @@ onMounted(fetchCategories)
 </script>
 
 <style scoped>
-.table-card { border-color: var(--border-color) !important; }
 .total-label { font-size: 13px; color: var(--text-muted); }
 
 .cell-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
@@ -232,4 +231,8 @@ onMounted(fetchCategories)
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.filter-search { width: 260px; }
+.m-card-end-row { flex-direction: row; gap: var(--space-1); }
 </style>

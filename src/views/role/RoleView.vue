@@ -15,11 +15,11 @@
     <!-- Table -->
     <el-card shadow="never" class="table-card">
       <FilterBar>
-        <el-input
+        <el-input class="filter-search"
           v-model="search"
           placeholder="Cari nama role..."
           prefix-icon="Search"
-          style="width:260px"
+         
           clearable
         />
         <template #actions>
@@ -31,7 +31,7 @@
 
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in filteredRoles" :key="row.id">
-          <div class="m-card-icon" style="background:rgba(124,58,237,0.15);color:var(--color-primary)">
+          <div class="m-card-icon m-card-icon-role">
             <el-icon size="18"><UserFilled /></el-icon>
           </div>
           <div class="m-card-body">
@@ -39,7 +39,7 @@
             <div class="m-card-meta">{{ row.permissions?.length || 0 }} permission · {{ row.staff_count || 0 }} staff</div>
           </div>
           <div class="m-card-end">
-            <div style="display:flex;gap:4px">
+            <div class="m-card-actions">
               <el-button v-if="can('settings.staff_role')" size="small" circle plain @click="openDrawer(row)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('settings.staff_role')" size="small" circle plain type="danger" :disabled="(row.staff_count || 0) > 0" @click="deleteRole(row)"><el-icon><Delete /></el-icon></el-button>
             </div>
@@ -48,7 +48,7 @@
       </div>
 
       <div class="table-wrap">
-      <el-table :data="filteredRoles" v-loading="loading" size="small" style="width:100%" empty-text="Belum ada role">
+      <el-table :data="filteredRoles" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada role">
         <el-table-column label="Role" min-width="200">
           <template #default="{ row }">
             <div>
@@ -73,7 +73,7 @@
                 +{{ row.permissions.length - 4 }} lainnya
               </el-tag>
             </div>
-            <span v-else style="font-size:12px;color:var(--text-muted)">Tidak ada permission</span>
+            <span v-else class="u-text-xs u-text-muted">Tidak ada permission</span>
           </template>
         </el-table-column>
 
@@ -126,13 +126,13 @@
           </el-form-item>
 
           <!-- Permissions -->
-          <div class="drawer-section-title" style="margin-top:20px">
+          <div class="drawer-section-title perm-section">
             Hak Akses
-            <el-checkbox
+            <el-checkbox class="perm-count"
               v-model="selectAll"
               :indeterminate="isIndeterminate"
               @change="toggleAll"
-              style="margin-left:auto;font-size:12px;font-weight:400"
+             
             >Pilih Semua</el-checkbox>
           </div>
 
@@ -171,8 +171,8 @@
 
       <template #footer>
         <div class="drawer-footer">
-          <el-button @click="drawerVisible = false" style="flex:1">Batal</el-button>
-          <el-button type="primary" :loading="saving" @click="save" style="flex:1">
+          <el-button @click="drawerVisible = false" class="u-flex-1">Batal</el-button>
+          <el-button type="primary" :loading="saving" @click="save" class="u-flex-1">
             {{ form.id ? 'Simpan Perubahan' : 'Tambah Role' }}
           </el-button>
         </div>
@@ -355,7 +355,6 @@ onMounted(fetchRoles)
 </script>
 
 <style scoped>
-.table-card { border-color:var(--border-color) !important; }
 
 .cell-name { font-size:13px; font-weight:600; color:var(--text-primary); }
 .cell-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
@@ -385,7 +384,8 @@ onMounted(fetchRoles)
 .perm-group-desc { font-size:11px; color:var(--text-secondary); margin:4px 0 8px 22px; }
 .perm-children { display:grid; grid-template-columns:1fr 1fr; gap:6px; padding-left:22px; }
 @media (max-width:639px) { .perm-children { grid-template-columns:1fr; } }
-.perm-item { font-size:12px !important; }
+/* The label sets its own size from this Element Plus variable; a plain font-size on the root never reached it. */
+.perm-item { --el-checkbox-font-size: var(--font-size-xs); }
 
 .drawer-footer { display:flex; gap:10px; padding:0 4px; }
 
@@ -408,4 +408,11 @@ onMounted(fetchRoles)
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.filter-search { width: 260px; }
+.m-card-icon-role { background: rgba(124,58,237,0.15); color: var(--action); }
+.m-card-actions { display: flex; gap: var(--space-1); }
+.perm-section { margin-top: var(--space-5); }
+.perm-count { margin-left: auto; font-size: var(--font-size-xs); font-weight: 400; }
 </style>

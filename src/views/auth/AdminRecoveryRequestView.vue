@@ -31,7 +31,7 @@
           <el-button
             type="primary"
             size="large"
-            style="width:100%"
+            class="u-w-full"
             :loading="loading"
             @click="handleSubmit"
           >
@@ -39,7 +39,7 @@
           </el-button>
         </el-form>
 
-        <div style="text-align:center;margin-top:16px">
+        <div class="back-link">
           <el-button text @click="$router.push('/login')">
             ← Kembali ke Login
           </el-button>
@@ -48,20 +48,20 @@
 
       <!-- State setelah submit (selalu tampil sukses, tidak bocorkan info) -->
       <template v-else>
-        <div style="text-align:center">
-          <el-icon size="56" style="color:var(--el-color-success)">
+        <div class="result">
+          <el-icon class="result-icon-ok" size="56">
             <CircleCheckFilled />
           </el-icon>
-          <h2 class="recovery-title" style="margin-top:16px">Cek Email Kamu</h2>
+          <h2 class="recovery-title u-mt-4">Cek Email Kamu</h2>
           <p class="recovery-desc">
             Jika email terdaftar sebagai akun admin, link reset password akan dikirim
             dalam beberapa menit. Link berlaku selama <strong>15 menit</strong>.
           </p>
-          <p style="font-size:12px;color:var(--text-muted);margin-top:8px">
+          <p class="u-text-xs u-text-muted u-mt-2">
             Tidak menerima email? Cek folder Spam atau coba lagi.
           </p>
           <el-button
-            style="margin-top:16px"
+            class="u-mt-4"
             @click="submitted = false; form.email = ''"
           >
             Coba Lagi
@@ -142,4 +142,9 @@ const handleSubmit = async () => {
   line-height: 1.6;
   margin: 0 0 24px;
 }
+
+/* C3: former inline styles */
+.back-link { text-align: center; margin-top: var(--space-4); }
+.result { text-align: center; }
+.result-icon-ok { color: var(--success); }
 </style>

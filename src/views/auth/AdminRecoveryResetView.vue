@@ -4,21 +4,21 @@
 
       <!-- Logo -->
       <div class="recovery-logo">
-        <img src="@/assets/logo.png" alt="Quantum" style="height:40px" />
+        <img class="brand-logo" src="@/assets/logo.png" alt="Quantum" />
       </div>
 
       <!-- Loading state: sedang validasi token -->
-      <div v-if="validating" style="text-align:center;padding:20px 0">
+      <div class="state-box" v-if="validating">
         <el-icon size="32" class="is-loading"><Loading /></el-icon>
-        <p style="color:var(--text-secondary);margin-top:12px">Memvalidasi link...</p>
+        <p class="u-text-secondary u-mt-3">Memvalidasi link...</p>
       </div>
 
       <!-- Token tidak valid / expired -->
-      <div v-else-if="tokenError" style="text-align:center">
-        <el-icon size="56" style="color:var(--el-color-danger)">
+      <div class="result" v-else-if="tokenError">
+        <el-icon class="result-icon-bad" size="56">
           <CircleCloseFilled />
         </el-icon>
-        <h2 class="recovery-title" style="margin-top:16px">Link Tidak Valid</h2>
+        <h2 class="recovery-title u-mt-4">Link Tidak Valid</h2>
         <p class="recovery-desc">
           Link reset password sudah kadaluwarsa atau sudah pernah digunakan.
           Silakan request link baru.
@@ -80,7 +80,7 @@
           <el-button
             type="primary"
             size="large"
-            style="width:100%"
+            class="u-w-full"
             :loading="loading"
             @click="handleReset"
           >
@@ -92,15 +92,15 @@
 
       <!-- Reset berhasil -->
       <template v-else>
-        <div style="text-align:center">
-          <el-icon size="56" style="color:var(--el-color-success)">
+        <div class="result">
+          <el-icon class="result-icon-ok" size="56">
             <CircleCheckFilled />
           </el-icon>
-          <h2 class="recovery-title" style="margin-top:16px">Password Berhasil Diperbarui</h2>
+          <h2 class="recovery-title u-mt-4">Password Berhasil Diperbarui</h2>
           <p class="recovery-desc">
             Password baru kamu sudah aktif. Silakan login dengan password baru.
           </p>
-          <el-button type="primary" size="large" style="width:100%;margin-top:8px"
+          <el-button type="primary" size="large" class="u-w-full u-mt-2"
             @click="$router.push('/login')">
             Login Sekarang
           </el-button>
@@ -181,4 +181,11 @@ const handleReset = async () => {
 .recovery-logo  { text-align: center; margin-bottom: 28px; }
 .recovery-title { font-size: 20px; font-weight: 700; text-align: center; margin: 0 0 10px; }
 .recovery-desc  { font-size: 13px; color: var(--text-secondary); text-align: center; line-height: 1.6; margin: 0 0 24px; }
+
+/* C3: former inline styles */
+.brand-logo { height: 40px; }
+.state-box { text-align: center; padding: var(--space-5) 0; }
+.result { text-align: center; }
+.result-icon-bad { color: var(--danger); }
+.result-icon-ok { color: var(--success); }
 </style>

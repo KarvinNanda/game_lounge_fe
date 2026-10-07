@@ -15,8 +15,9 @@
 .ui-filter-bar__fields { flex: 1 1 auto; min-width: 0; }
 @media (max-width: 639px) {
   .ui-filter-bar, .ui-filter-bar__fields { flex-direction: column; align-items: stretch; }
-  /* Views still set inline widths (style="width:260px"); only !important beats
-     an inline style. Removing those inline widths is sub-project C. */
-  :slotted(.el-input), :slotted(.el-select), :slotted(.el-date-editor) { width: 100% !important; }
+  /* Fields carry fixed widths from the views' scoped classes; on phones every
+     field stretches. !important beats those view classes. Date pickers render
+     no scoped root, so :slotted never reaches them; :deep does. */
+  :slotted(.el-input), :slotted(.el-select), .ui-filter-bar__fields :deep(.el-date-editor) { width: 100% !important; }
 }
 </style>

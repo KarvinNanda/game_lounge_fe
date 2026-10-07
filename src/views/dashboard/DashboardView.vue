@@ -47,7 +47,7 @@
         <el-option label="Play Credits" value="play_credits" />
       </el-select>
 
-      <el-date-picker
+      <el-date-picker class="filter-daterange"
         v-if="filters.period === 'custom'"
         v-model="customRange"
         type="daterange"
@@ -57,12 +57,12 @@
         start-placeholder="Dari"
         end-placeholder="Sampai"
         size="small"
-        style="width:230px"
+       
         @change="onCustomRangeChange"
       />
 
       <div class="date-badge" v-if="summary">
-        <el-icon style="font-size:11px"><Calendar /></el-icon>
+        <el-icon class="u-text-xs"><Calendar /></el-icon>
         {{ formatDateShort(summary.date_from) }} – {{ formatDateShort(summary.date_to) }}
       </div>
     </FilterBar>
@@ -77,22 +77,22 @@
       <el-card shadow="never" class="trend-card">
         <div class="card-header-row">
           <span class="card-title">Sales Trend</span>
-          <el-select v-model="filters.granularity" size="small" style="width:100px" @change="loadTrend">
+          <el-select class="trend-granularity" v-model="filters.granularity" size="small" @change="loadTrend">
             <el-option label="Daily"   value="daily" />
             <el-option label="Weekly"  value="weekly" />
             <el-option label="Monthly" value="monthly" />
           </el-select>
         </div>
         <div v-if="trendData.length === 0 && !loading" class="trend-empty">
-          <el-icon size="32" style="color:var(--color-primary);opacity:.35"><TrendCharts /></el-icon>
+          <el-icon class="chart-empty-icon" size="32"><TrendCharts /></el-icon>
           <div>Belum ada data trend untuk periode ini</div>
         </div>
-        <div v-else ref="trendChartRef" class="trend-chart" style="width:100%;height:220px" />
+        <div v-else ref="trendChartRef" class="trend-chart" />
       </el-card>
 
       <!-- Revenue by Type -->
       <el-card shadow="never" class="type-card">
-        <div class="card-header-row" style="margin-bottom:10px">
+        <div class="card-header-row u-mb-2">
           <span class="card-title">Revenue by Type</span>
         </div>
         <div class="donut-wrap">
@@ -122,7 +122,7 @@
 
       <!-- Revenue by Branch -->
       <el-card shadow="never" class="rev-card">
-        <div class="card-header-row" style="margin-bottom:8px">
+        <div class="card-header-row u-mb-2">
           <span class="card-title">Revenue by Branch</span>
         </div>
         <div v-if="!summary?.revenue_by_branch?.length" class="empty-rev">Belum ada data</div>
@@ -148,7 +148,7 @@
 
       <!-- Revenue by Room Type -->
       <el-card shadow="never" class="rev-card">
-        <div class="card-header-row" style="margin-bottom:8px">
+        <div class="card-header-row u-mb-2">
           <span class="card-title">Revenue by Room Type</span>
         </div>
         <div v-if="!summary?.revenue_by_room_type?.length" class="empty-rev">Belum ada data</div>
@@ -196,13 +196,13 @@
     ════════════════════════════════════════════════════════ -->
     <el-drawer v-model="showTransactionModal" title="Detail Penjualan" direction="rtl" :size="isMobile ? '100%' : '860px'">
       <div class="tx-toolbar">
-        <el-select v-model="txFilter" size="small" style="width:150px"
+        <el-select class="tx-filter" v-model="txFilter" size="small"
           @change="() => { txPage = 1; loadTransactions() }">
           <el-option label="All Type"     value="all" />
           <el-option label="Booking"      value="booking" />
           <el-option label="Play Credits" value="play_credits" />
         </el-select>
-        <div style="margin-left:auto;font-size:12px;font-weight:600;color:var(--text-secondary)">
+        <div class="tx-count">
           {{ txTotal }} transaksi
         </div>
       </div>
@@ -210,8 +210,8 @@
       <el-table :data="transactions" v-loading="txLoading" size="small">
         <el-table-column label="Tanggal" width="110">
           <template #default="{ row }">
-            <div style="font-size:12px;font-weight:700">{{ formatDate(row.date) }}</div>
-            <div style="font-size:11px;color:var(--text-secondary)">{{ row.time }}</div>
+            <div class="u-text-xs u-fw-bold">{{ formatDate(row.date) }}</div>
+            <div class="u-text-xs u-text-secondary">{{ row.time }}</div>
           </template>
         </el-table-column>
         <el-table-column label="Tipe" width="110">
@@ -223,22 +223,22 @@
         </el-table-column>
         <el-table-column label="Customer" min-width="140">
           <template #default="{ row }">
-            <span style="font-size:12px;font-weight:700">{{ row.customer_name }}</span>
+            <span class="u-text-xs u-fw-bold">{{ row.customer_name }}</span>
           </template>
         </el-table-column>
         <el-table-column label="Keterangan" min-width="160">
           <template #default="{ row }">
-            <span style="font-size:12px;color:var(--text-secondary)">{{ row.description }}</span>
+            <span class="u-text-xs u-text-secondary">{{ row.description }}</span>
           </template>
         </el-table-column>
         <el-table-column label="Cabang" min-width="120">
           <template #default="{ row }">
-            <span style="font-size:12px;font-weight:600">{{ row.store_name }}</span>
+            <span class="u-text-xs u-fw-semibold">{{ row.store_name }}</span>
           </template>
         </el-table-column>
         <el-table-column label="Jumlah" width="130">
           <template #default="{ row }">
-            <span style="font-weight:800;color:var(--color-primary)">{{ formatRp(row.amount) }}</span>
+            <span class="tx-amount">{{ formatRp(row.amount) }}</span>
           </template>
         </el-table-column>
         <el-table-column label="Status" width="90">
@@ -248,7 +248,7 @@
         </el-table-column>
       </el-table>
 
-      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+      <div class="pager-row">
         <TablePagination v-model:page="txPage" :page-size="20" :total="txTotal" :sizes="false" @change="loadTransactions" />
       </div>
 
@@ -447,6 +447,9 @@ const renderTrendChart = () => {
   }
 
   const tc = ctColor()
+  // Series colours from tokens, validated as a 3-colour categorical palette
+  // (CVD and 3:1 contrast on white): total, booking, play credits.
+  const [cTotal, cBooking, cCredits] = ['--blue-500', '--violet', '--success'].map(cssVar)
   const gc = gridColor()
   const labels     = trendData.value.map(d => d.label)
   const totalRev   = trendData.value.map(d => d.total_revenue)
@@ -488,7 +491,7 @@ const renderTrendChart = () => {
     series: [
       {
         name: 'Total', type: 'line', data: totalRev, smooth: true,
-        itemStyle: { color: '#0282DE' }, lineStyle: { color: '#0282DE', width: 2.5 },
+        itemStyle: { color: cTotal }, lineStyle: { color: cTotal, width: 2.5 },
         areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [
           { offset: 0, color: 'rgba(2,130,222,0.18)' },
           { offset: 1, color: 'rgba(2,130,222,0.01)' },
@@ -496,11 +499,11 @@ const renderTrendChart = () => {
       },
       {
         name: 'Booking', type: 'line', data: bookingRev, smooth: true,
-        itemStyle: { color: '#19B9EE' }, lineStyle: { color: '#19B9EE', width: 2 },
+        itemStyle: { color: cBooking }, lineStyle: { color: cBooking, width: 2 },
       },
       {
         name: 'Play Credits', type: 'line', data: creditsRev, smooth: true,
-        itemStyle: { color: '#10B981' }, lineStyle: { color: '#10B981', width: 2 },
+        itemStyle: { color: cCredits }, lineStyle: { color: cCredits, width: 2 },
       },
     ],
     grid: { left: 56, right: 16, top: 36, bottom: 28 },
@@ -516,7 +519,7 @@ const renderDonutChart = () => {
   const data = (summary.value?.revenue_by_type || []).map(t => ({ name: t.label, value: t.revenue }))
   donutChart.setOption({
     tooltip: { trigger: 'item', formatter: (p) => `${p.name}: ${formatRp(p.value)} (${p.percent}%)` },
-    color: ['#0282DE', '#10B981'],
+    color: ['--blue-500', '--success'].map(cssVar),
     series: [{
       type: 'pie', radius: ['52%', '80%'], data,
       label: { show: false },
@@ -700,18 +703,18 @@ onUnmounted(() => {
   background: rgba(255,255,255,0.18);
   border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: #fff; flex-shrink: 0;
+  color: var(--text-on-action); flex-shrink: 0;
 }
-.detail-cta-title { font-size: 13px; font-weight: 800; color: #fff; }
+.detail-cta-title { font-size: 13px; font-weight: 800; color: var(--text-on-action); }
 .detail-cta-sub   { font-size: 11px; color: rgba(255,255,255,0.78); font-weight: 600; margin-top: 1px; }
 .cta-btn {
-  background: rgba(255,255,255,0.18) !important;
-  color: #fff !important;
-  border-color: rgba(255,255,255,0.3) !important;
-  font-weight: 700 !important;
-}
-.cta-btn:hover {
-  background: rgba(255,255,255,0.28) !important;
+  --el-button-bg-color: rgba(255,255,255,0.18);
+  --el-button-text-color: var(--text-on-action);
+  --el-button-border-color: rgba(255,255,255,0.3);
+  --el-button-hover-bg-color: rgba(255,255,255,0.28);
+  --el-button-hover-text-color: var(--text-on-action);
+  --el-button-hover-border-color: rgba(255,255,255,0.3);
+  --el-button-font-weight: 700;
 }
 
 /* ── Trend empty state ───────────────────────────────── */
@@ -736,4 +739,18 @@ onUnmounted(() => {
   .donut-legend { width: 100%; }
   .tx-toolbar { flex-wrap: wrap; }
 }
+
+/* C3: former inline styles */
+/* el-date-picker renders no scoped root: reach it from the page (beats .el-date-editor width). */
+.sales-page :deep(.filter-daterange) { width: 230px; }
+.trend-granularity { width: 100px; }
+.chart-empty-icon { color: var(--action); opacity: 0.35; }
+.tx-filter { width: 150px; }
+.tx-count { margin-left: auto; font-size: var(--font-size-xs); font-weight: 600; color: var(--text-secondary); }
+.tx-amount { font-weight: 800; color: var(--action); }
+.pager-row { display: flex; justify-content: flex-end; margin-top: var(--space-3); }
+/* The page's gap spaces the blocks; the shared components' own bottom margins would double it. */
+.sales-page > :deep(.ui-page-header),
+.sales-page > :deep(.ui-filter-bar),
+.sales-page > :deep(.ui-stat-strip) { margin-bottom: 0; }
 </style>
