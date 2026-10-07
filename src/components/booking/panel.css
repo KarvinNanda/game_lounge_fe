@@ -1,0 +1,35 @@
+/* Shared by the booking right-hand panels (detail, event detail,
+   event form, new booking). Loaded scoped by each panel. */
+.right-panel {
+  width: 426px; min-width: 426px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px; padding: 16px;
+  overflow-y: auto; display: flex; flex-direction: column;
+  gap: 0;
+}
+.panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+.info-section-title {
+  font-size: 10px; font-weight: 800; letter-spacing: 1.8px;
+  text-transform: uppercase; color: var(--text-muted);
+  margin: 14px 0 8px;
+}
+.info-grid { display: flex; flex-direction: column; }
+.info-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12.5px; padding: 7px 0;
+  border-bottom: 1px solid var(--border-color);
+  gap: 8px;
+}
+.info-row > span:first-child {
+  color: var(--text-secondary);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.info-row > span:last-child,
+.info-row > strong { color: var(--text-primary); font-weight: 600; text-align: right; }
