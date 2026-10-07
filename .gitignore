@@ -32,7 +32,6 @@ lerna-debug.log*
 
 # ── Testing ───────────────────────────────
 # Unit test files — run locally only, not committed to repo
-tests/
 coverage/
 __screenshots__/
 /cypress/videos/
