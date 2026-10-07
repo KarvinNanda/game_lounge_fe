@@ -1,44 +1,41 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Settings → Tanggal Merah Global</div>
-        <h1 class="page-title">Tanggal Merah Global</h1>
-        <p class="page-desc">Kelola hari libur nasional yang berlaku di semua cabang.</p>
-      </div>
-      <el-button v-if="can('settings.branches')" type="primary" @click="openDrawer()">
-        <el-icon><Plus /></el-icon> Tambah Tanggal Merah
-      </el-button>
-    </div>
+    <PageHeader breadcrumb="Settings → Tanggal Merah Global" title="Tanggal Merah Global" description="Kelola hari libur nasional yang berlaku di semua cabang.">
+      <template #actions>
+        <el-button v-if="can('settings.branches')" type="primary" @click="openDrawer()">
+          <el-icon><Plus /></el-icon> Tambah Tanggal Merah
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Table Card -->
     <el-card shadow="never" class="table-card">
-      <div class="table-toolbar">
-        <div style="display:flex;gap:10px">
-          <el-input
-            v-model="search"
-            placeholder="Cari nama hari libur..."
-            prefix-icon="Search"
-            style="width:260px"
-            clearable
-            @input="debouncedFetch"
-          />
-          <el-date-picker
-            v-model="yearFilter"
-            type="year"
-            format="YYYY"
-            value-format="YYYY"
-            placeholder="Filter tahun"
-            :style="{ width: '130px' }"
-            clearable
-            @change="fetchHolidays"
-          />
-        </div>
-        <el-button plain @click="resetFilters">
-          <el-icon><RefreshRight /></el-icon> Reset
-        </el-button>
-      </div>
+      <FilterBar>
+        <el-input
+          v-model="search"
+          placeholder="Cari nama hari libur..."
+          prefix-icon="Search"
+          style="width:260px"
+          clearable
+          @input="debouncedFetch"
+        />
+        <el-date-picker
+          v-model="yearFilter"
+          type="year"
+          format="YYYY"
+          value-format="YYYY"
+          placeholder="Filter tahun"
+          :style="{ width: '130px' }"
+          clearable
+          @change="fetchHolidays"
+        />
+        <template #actions>
+          <el-button plain @click="resetFilters">
+            <el-icon><RefreshRight /></el-icon> Reset
+          </el-button>
+        </template>
+      </FilterBar>
 
       <!-- Mobile card list -->
       <div v-if="isMobile" class="m-card-list">
@@ -126,14 +123,11 @@
 
         <div class="table-footer">
           <span class="footer-info">Menampilkan {{ holidays.length }} dari {{ total }} data</span>
-          <el-pagination
-            v-model:current-page="page"
+          <TablePagination
+            v-model:page="page"
             v-model:page-size="perPage"
             :total="total"
-            :page-sizes="[10, 20, 50]"
-            layout="sizes, prev, pager, next"
-            @size-change="fetchHolidays"
-            @current-change="fetchHolidays"
+            @change="fetchHolidays"
           />
         </div>
       </div>
@@ -213,6 +207,9 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
 import {
   getGlobalHolidays,
   createGlobalHoliday,
@@ -340,13 +337,7 @@ onMounted(fetchHolidays)
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; gap:12px; }
-.breadcrumb  { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
-.page-title  { font-size:18px; font-weight:700; color:var(--text-primary); }
-.page-desc   { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-
 .table-card { border-color:var(--border-color) !important; }
-.table-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
 
 .holiday-name-cell { display:flex; align-items:center; gap:10px; }
 .hday-icon {
@@ -366,7 +357,6 @@ onMounted(fetchHolidays)
 /* Responsive */
 @media (max-width:639px) { .table-wrap { display:none; } }
 @media (min-width:640px) { .m-card-list { display:none; } }
-@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; } .table-toolbar .el-input { width:100% !important; } }
 
 /* Mobile card list */
 .m-card-list { display:flex; flex-direction:column; gap:8px; }

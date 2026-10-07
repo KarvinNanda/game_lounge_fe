@@ -1,13 +1,7 @@
 <template>
   <div>
     <!-- ── Header ── -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Settings › Template Notifikasi</div>
-        <h1 class="page-title">Template Notifikasi</h1>
-        <p class="page-desc">Atur kata-kata pesan Email & WhatsApp yang dikirim ke customer.</p>
-      </div>
-    </div>
+    <PageHeader breadcrumb="Settings › Template Notifikasi" title="Template Notifikasi" description="Atur kata-kata pesan Email & WhatsApp yang dikirim ke customer." />
 
     <!-- ── Info box ── -->
     <div class="info-banner">
@@ -54,10 +48,9 @@
       </div>
 
       <!-- Empty -->
-      <div v-if="!loading && templates.length === 0" class="empty-state">
-        <el-icon size="36" style="color:var(--text-muted);opacity:.4"><Bell /></el-icon>
-        <div style="margin-top:10px;font-size:13px;color:var(--text-muted)">Belum ada template notifikasi</div>
-      </div>
+      <EmptyState v-if="!loading && templates.length === 0" title="Belum ada template notifikasi">
+        <template #icon><el-icon size="36"><Bell /></el-icon></template>
+      </EmptyState>
     </div>
 
     <!-- ════════════════════════════════════════════════════════
@@ -231,6 +224,8 @@ import { ElMessage } from 'element-plus'
 import { notifyError } from '@/utils/notify'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { getTemplates, updateTemplate, previewTemplate } from '@/api/notification_template/notificationTemplateApi'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const { isMobile, isTablet } = useBreakpoint()
 
@@ -393,10 +388,6 @@ onMounted(fetchTemplates)
 
 <style scoped>
 /* ── Page ────────────────────────────────────────────── */
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
-.breadcrumb  { font-size:11px; color:var(--text-muted); margin-bottom:3px; }
-.page-title  { font-size:22px; font-weight:800; color:var(--text-primary); }
-.page-desc   { font-size:13px; color:var(--text-secondary); margin-top:4px; }
 
 /* ── Info banner ─────────────────────────────────────── */
 .info-banner {
@@ -454,13 +445,6 @@ onMounted(fetchTemplates)
   border-color:var(--color-primary);
   color:var(--color-primary);
   background:rgba(2,130,222,0.06);
-}
-
-.empty-state {
-  grid-column: 1 / -1;
-  text-align:center; padding:48px 20px;
-  background:var(--bg-card); border:1px dashed var(--border-color);
-  border-radius:12px; display:flex; flex-direction:column; align-items:center;
 }
 
 /* ── Editor Drawer ───────────────────────────────────── */
@@ -548,7 +532,6 @@ onMounted(fetchTemplates)
   .template-grid { grid-template-columns: 1fr; }
 }
 @media (max-width:639px) {
-  .page-title { font-size:18px; }
   .template-card { padding:12px 14px; gap:10px; }
   .card-icon { width:40px; height:40px; border-radius:10px; }
   .card-name { font-size:13px; }

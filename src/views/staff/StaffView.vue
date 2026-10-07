@@ -1,53 +1,43 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Settings → Staff</div>
-        <h1 class="page-title">Staff</h1>
-        <p class="page-desc">Kelola akun staff yang dapat mengakses sistem.</p>
-      </div>
-      <el-button v-if="can('settings.staff_role')" type="primary" @click="openDrawer()">
-        <el-icon><Plus /></el-icon> Tambah Staff
-      </el-button>
-    </div>
+    <PageHeader breadcrumb="Settings → Staff" title="Staff" description="Kelola akun staff yang dapat mengakses sistem.">
+      <template #actions>
+        <el-button v-if="can('settings.staff_role')" type="primary" @click="openDrawer()">
+          <el-icon><Plus /></el-icon> Tambah Staff
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-item">
-        <div class="stat-num">{{ stats.total }}</div>
-        <div class="stat-lbl">Total Staff</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-info)">{{ roles.length }}</div>
-        <div class="stat-lbl">Role Tersedia</div>
-      </div>
-    </div>
+    <StatStrip :items="[
+      { label: 'Total Staff', value: stats.total },
+      { label: 'Role Tersedia', value: roles.length, tone: 'info' },
+    ]" />
 
     <!-- Table Card -->
     <el-card shadow="never" class="table-card">
-      <div class="table-toolbar">
-        <div style="display:flex;gap:10px">
-          <el-input
-            v-model="filters.search"
-            placeholder="Cari username atau email..."
-            prefix-icon="Search"
-            style="width:260px"
-            clearable
-            @input="debouncedFetch"
-          />
-          <el-select v-model="filters.role_id" placeholder="Semua Role" clearable style="width:150px" @change="fetchStaffs">
-            <el-option v-for="r in roles" :key="r.id" :label="r.name" :value="r.id" />
-          </el-select>
-          <el-select v-model="filters.store_id" placeholder="Semua Cabang" clearable style="width:160px" @change="fetchStaffs">
-            <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
-          </el-select>
-        </div>
-        <el-button plain @click="resetFilters">
-          <el-icon><RefreshRight /></el-icon> Reset
-        </el-button>
-      </div>
+      <FilterBar>
+        <el-input
+          v-model="filters.search"
+          placeholder="Cari username atau email..."
+          prefix-icon="Search"
+          style="width:260px"
+          clearable
+          @input="debouncedFetch"
+        />
+        <el-select v-model="filters.role_id" placeholder="Semua Role" clearable style="width:150px" @change="fetchStaffs">
+          <el-option v-for="r in roles" :key="r.id" :label="r.name" :value="r.id" />
+        </el-select>
+        <el-select v-model="filters.store_id" placeholder="Semua Cabang" clearable style="width:160px" @change="fetchStaffs">
+          <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
+        </el-select>
+        <template #actions>
+          <el-button plain @click="resetFilters">
+            <el-icon><RefreshRight /></el-icon> Reset
+          </el-button>
+        </template>
+      </FilterBar>
 
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in staffList" :key="row.id">
@@ -164,14 +154,11 @@
 
       <div class="table-footer">
         <span class="footer-info">Menampilkan {{ staffList.length }} dari {{ pagination.total }} data</span>
-        <el-pagination
-          v-model:current-page="pagination.page"
+        <TablePagination
+          v-model:page="pagination.page"
           v-model:page-size="pagination.per_page"
           :total="pagination.total"
-          :page-sizes="[10, 20, 50]"
-          layout="sizes, prev, pager, next"
-          @size-change="fetchStaffs"
-          @current-change="fetchStaffs"
+          @change="fetchStaffs"
         />
       </div>
       </div>
@@ -288,6 +275,10 @@ import { notifyError } from '@/utils/notify'
 import { useAuthStore } from '@/stores/authStore'
 import { getStaffs, createStaff, updateStaff, deleteStaff as apiDelete, resetStaffPassword } from '@/api/staff/staffApi'
 import AuditTrail from '@/components/AuditTrail.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import StatStrip from '@/components/ui/StatStrip.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
 import { getRoles } from '@/api/role/roleApi'
 import { getStores } from '@/api/store/storeApi'
 
@@ -490,23 +481,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
-.page-title { font-size:18px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-
-.stats-row {
-  display:flex; align-items:center;
-  background:var(--bg-card); border:1px solid var(--border-color);
-  border-radius:8px; padding:10px 16px; margin-bottom:12px;
-}
-.stat-item { text-align:center; flex:1; }
-.stat-num { font-size:18px; font-weight:700; color:var(--text-primary); }
-.stat-lbl { font-size:11px; color:var(--text-secondary); margin-top:1px; }
-.stat-divider { width:1px; height:28px; background:var(--border-color); margin:0 4px; }
-
 .table-card { border-color:var(--border-color) !important; }
-.table-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 
 .staff-cell { display:flex; align-items:center; gap:10px; }
 .staff-avatar { flex-shrink:0; background:var(--color-primary); color:#fff; font-weight:700; }
@@ -554,8 +529,6 @@ onMounted(() => {
 /* Responsive */
 @media (max-width:639px) { .table-wrap { display:none; } }
 @media (min-width:640px) { .m-card-list { display:none; } }
-@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
-@media (max-width:639px) { .stats-row { flex-wrap:wrap; } .stat-item { min-width:calc(50% - 1px); } }
 /* Mobile card list */
 .m-card-list { display:flex; flex-direction:column; gap:8px; }
 .m-card {

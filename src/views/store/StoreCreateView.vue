@@ -1,13 +1,11 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Store → Stores → {{ isEdit ? 'Edit Store' : 'Buat Store Baru' }}</div>
-        <h1 class="page-title">{{ isEdit ? 'Edit Store' : 'Buat Store Baru' }}</h1>
-        <p class="page-desc">Lengkapi informasi cabang secara bertahap.</p>
-      </div>
-    </div>
+    <PageHeader
+      :breadcrumb="`Store → Stores → ${isEdit ? 'Edit Store' : 'Buat Store Baru'}`"
+      :title="isEdit ? 'Edit Store' : 'Buat Store Baru'"
+      description="Lengkapi informasi cabang secara bertahap."
+    />
 
     <!-- Steps -->
     <el-card shadow="never" class="steps-card" style="margin-bottom:20px">
@@ -377,6 +375,7 @@ import { notifyError } from '@/utils/notify'
 import { createStore, updateStore, getStoreById, toggleStoreRoom } from '@/api/store/storeApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
+import PageHeader from '@/components/ui/PageHeader.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -545,11 +544,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px; }
-.breadcrumb { font-size:12px; color:var(--text-muted); margin-bottom:4px; }
-.page-title { font-size:22px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:13px; color:var(--text-secondary); margin-top:4px; }
-
 .step-header { display:flex; gap:14px; align-items:flex-start; }
 .step-title { font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
 .step-desc { font-size:12px; color:var(--text-secondary); }

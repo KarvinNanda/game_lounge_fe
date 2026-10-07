@@ -331,7 +331,7 @@ import { createBooking, getAvailableCredits, calculatePrice } from '@/api/bookin
 import { getCustomers } from '@/api/customer/customerApi'
 import api from '@/api/index'
 import { notifyError } from '@/utils/notify'
-import { formatRp, formatDateDisplay } from '@/utils/format'
+import { formatRp, formatDateDisplay, formatDate } from '@/utils/format'
 
 const props = defineProps({
   // { storeId, roomId, roomName, date, startTime, endTime } of the clicked slot

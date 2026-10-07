@@ -1,76 +1,58 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Store → Facilities</div>
-        <h1 class="page-title">Facilities</h1>
-        <p class="page-desc">Kelola daftar fasilitas yang tersedia di setiap store.</p>
-      </div>
-      <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/facility/create')">
-        <el-icon><Plus /></el-icon> Tambah Fasilitas
-      </el-button>
-    </div>
+    <PageHeader breadcrumb="Store → Facilities" title="Facilities" description="Kelola daftar fasilitas yang tersedia di setiap store.">
+      <template #actions>
+        <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/facility/create')">
+          <el-icon><Plus /></el-icon> Tambah Fasilitas
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Stats Row -->
-    <div class="stats-row">
-      <div class="stat-item">
-        <div class="stat-num">{{ stats.total }}</div>
-        <div class="stat-lbl">Total</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-success)">{{ stats.active }}</div>
-        <div class="stat-lbl">Aktif</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-danger)">{{ stats.inactive }}</div>
-        <div class="stat-lbl">Nonaktif</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-primary)">{{ stats.total_categories }}</div>
-        <div class="stat-lbl">Kategori</div>
-      </div>
-    </div>
+    <StatStrip :items="[
+      { label: 'Total', value: stats.total },
+      { label: 'Aktif', value: stats.active, tone: 'success' },
+      { label: 'Nonaktif', value: stats.inactive, tone: 'danger' },
+      { label: 'Kategori', value: stats.total_categories, tone: 'info' },
+    ]" />
 
     <!-- Table -->
     <el-card shadow="never" class="table-card">
-      <div class="table-toolbar">
-        <div style="display:flex;gap:10px">
-          <el-input
-            v-model="filters.search"
-            placeholder="Cari nama fasilitas..."
-            prefix-icon="Search"
-            style="width:240px"
-            clearable
-            @input="debouncedFetch"
-          />
-          <el-select
-            v-model="filters.category_id"
-            placeholder="Semua Kategori"
-            clearable
-            style="width:160px"
-            @change="fetchFacilities"
-          >
-            <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
-          </el-select>
-          <el-select
-            v-model="filters.status"
-            placeholder="Semua Status"
-            clearable
-            style="width:140px"
-            @change="fetchFacilities"
-          >
-            <el-option label="Aktif" value="active" />
-            <el-option label="Nonaktif" value="inactive" />
-          </el-select>
-        </div>
-        <el-button plain @click="resetFilters">
-          <el-icon><RefreshRight /></el-icon> Reset
-        </el-button>
-      </div>
+      <FilterBar>
+        <el-input
+          v-model="filters.search"
+          placeholder="Cari nama fasilitas..."
+          prefix-icon="Search"
+          style="width:240px"
+          clearable
+          @input="debouncedFetch"
+        />
+        <el-select
+          v-model="filters.category_id"
+          placeholder="Semua Kategori"
+          clearable
+          style="width:160px"
+          @change="fetchFacilities"
+        >
+          <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
+        </el-select>
+        <el-select
+          v-model="filters.status"
+          placeholder="Semua Status"
+          clearable
+          style="width:140px"
+          @change="fetchFacilities"
+        >
+          <el-option label="Aktif" value="active" />
+          <el-option label="Nonaktif" value="inactive" />
+        </el-select>
+        <template #actions>
+          <el-button plain @click="resetFilters">
+            <el-icon><RefreshRight /></el-icon> Reset
+          </el-button>
+        </template>
+      </FilterBar>
 
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in facilityList" :key="row.id">
@@ -159,14 +141,11 @@
 
       <div class="table-footer">
         <span class="footer-info">Menampilkan {{ facilityList.length }} dari {{ pagination.total }} data</span>
-        <el-pagination
-          v-model:current-page="pagination.page"
+        <TablePagination
+          v-model:page="pagination.page"
           v-model:page-size="pagination.per_page"
           :total="pagination.total"
-          :page-sizes="[10, 20, 50]"
-          layout="sizes, prev, pager, next"
-          @size-change="fetchFacilities"
-          @current-change="fetchFacilities"
+          @change="fetchFacilities"
         />
       </div>
       </div>
@@ -182,6 +161,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
 import { getFacilities, deleteFacility as apiDelete, updateFacility, getFacilityCategories } from '@/api/facility/facilityApi'
 import { getImageUrl } from '@/utils/imageHelper'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import StatStrip from '@/components/ui/StatStrip.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
 
 const { can } = usePermission()
 const { isMobile, isTablet } = useBreakpoint()
@@ -264,40 +247,10 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-.breadcrumb { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
-.page-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
-.page-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-
 /* Stats */
-.stats-row {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 10px 16px;
-  margin-bottom: 12px;
-}
-.stat-item { text-align: center; flex: 1; }
-.stat-num { font-size: 18px; font-weight: 700; color: var(--text-primary); }
-.stat-lbl { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
-.stat-divider { width: 1px; height: 28px; background: var(--border-color); margin: 0 4px; }
 
 /* Table */
 .table-card { border-color: var(--border-color) !important; }
-.table-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
 
 .facility-cell { display: flex; align-items: center; gap: 12px; }
 .facility-icon {
@@ -327,8 +280,6 @@ onMounted(() => {
 /* Responsive */
 @media (max-width:639px) { .table-wrap { display:none; } }
 @media (min-width:640px) { .m-card-list { display:none; } }
-@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
-@media (max-width:639px) { .stats-row { flex-wrap:wrap; } .stat-item { min-width:calc(50% - 1px); } }
 /* Mobile card list */
 .m-card-list { display:flex; flex-direction:column; gap:8px; }
 .m-card {

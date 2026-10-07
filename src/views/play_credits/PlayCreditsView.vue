@@ -1,12 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Dashboard > Play Credits</div>
-        <h1 class="page-title">Play Credits</h1>
-      </div>
-    </div>
+    <PageHeader breadcrumb="Dashboard > Play Credits" title="Play Credits" />
 
     <!-- 2 Tabs -->
     <el-tabs v-model="activeTab" type="card" @tab-change="onTabChange">
@@ -133,8 +128,7 @@
               <span style="font-size:12px;color:var(--text-secondary)">
                 Showing {{ packageList.length }} to {{ pkgTotal }} packages
               </span>
-              <el-pagination v-model:current-page="pkgFilter.page" :total="pkgTotal"
-                layout="prev, pager, next" @change="fetchPackages" />
+              <TablePagination v-model:page="pkgFilter.page" :page-size="pkgFilter.per_page" :total="pkgTotal" :sizes="false" @change="fetchPackages" />
             </div>
             </div>
           </el-card>
@@ -326,8 +320,7 @@
               <span style="font-size:12px;color:var(--text-secondary)">
                 Menampilkan {{ memberCreditList.length }} dari {{ memberTotal }} paket aktif
               </span>
-              <el-pagination v-model:current-page="memberFilter.page" :total="memberTotal"
-                layout="prev, pager, next" @change="fetchMemberCredits" />
+              <TablePagination v-model:page="memberFilter.page" :page-size="memberFilter.per_page" :total="memberTotal" :sizes="false" @change="fetchMemberCredits" />
             </div>
             </div>
           </el-card>
@@ -693,6 +686,8 @@ import {
 import { getStores } from '@/api/store/storeApi'
 import { getImageUrl } from '@/utils/imageHelper'
 import { getCustomers } from '@/api/customer/customerApi'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
 
 const { can } = usePermission()
 const { isMobile, isTablet } = useBreakpoint()
@@ -962,10 +957,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
-.page-title { font-size:18px; font-weight:700; color:var(--text-primary); }
-
 .pkg-icon-wrap { position:relative; flex-shrink:0; }
 .pkg-icon-placeholder {
   background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(124,58,237,0.1));

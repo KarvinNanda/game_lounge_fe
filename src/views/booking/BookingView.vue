@@ -2,13 +2,8 @@
   <div class="booking-page">
 
     <!-- ── Header ──────────────────────────────────────────── -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Dashboard > Bookings</div>
-        <h1 class="page-title">Booking Dashboard</h1>
-        <p class="page-desc">Kelola jadwal dan booking ruangan</p>
-      </div>
-      <div style="display:flex;gap:10px;align-items:center">
+    <PageHeader breadcrumb="Dashboard > Bookings" title="Booking Dashboard" description="Kelola jadwal dan booking ruangan">
+      <template #actions>
         <el-dropdown v-if="can('bookings.create')" @command="handleNewBookingCommand" trigger="click">
           <el-button type="primary">
             <el-icon><Plus /></el-icon>
@@ -38,8 +33,8 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- ── New Booking Mode Banner ──────────────────────────── -->
     <div v-if="isNewBookingMode && !isNewBookingForm" class="new-booking-banner">
@@ -135,6 +130,7 @@ import EventBookingPanel from '@/components/booking/EventBookingPanel.vue'
 import NewBookingPanel from '@/components/booking/NewBookingPanel.vue'
 import { useBookingDashboard } from '@/composables/useBookingDashboard'
 import { useAllowedStores } from '@/composables/useAllowedStores'
+import PageHeader from '@/components/ui/PageHeader.vue'
 
 const { can } = usePermission()
 
@@ -272,10 +268,6 @@ onMounted(async () => {
 .booking-page { display:flex; flex-direction:column; min-height:0; }
 
 /* ── Header ──────────────────────────────────────────── */
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
-.breadcrumb  { font-size:11px; color:var(--text-muted); font-weight:500; margin-bottom:3px; letter-spacing:0.3px; }
-.page-title  { font-size:20px; font-weight:800; color:var(--text-primary); letter-spacing:-0.3px; }
-.page-desc   { font-size:12px; color:var(--text-secondary); font-weight:500; margin-top:3px; }
 
 /* ── Banner ──────────────────────────────────────────── */
 .new-booking-banner {
@@ -285,8 +277,6 @@ onMounted(async () => {
   font-size: 13px; font-weight: 700; margin-bottom: 10px;
   letter-spacing: 0.2px;
 }
-
-
 
 /* ── Main layout ─────────────────────────────────────── */
 .main-area {
@@ -300,7 +290,6 @@ onMounted(async () => {
 .slide-enter-active, .slide-leave-active { transition: all 0.22s ease; }
 .slide-enter-from, .slide-leave-to { opacity: 0; transform: translateX(20px); }
 
-
 /* Room chip */
 
 /* Info section */
@@ -313,13 +302,11 @@ onMounted(async () => {
 
 /* Price breakdown */
 
-
 /* Credits section */
 
 /* Payment option cards */
 
 /* Confirm modal rows */
-
 
 /* ── Event Booking ───────────────────────────────────────── */
 

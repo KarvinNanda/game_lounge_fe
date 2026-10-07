@@ -1,62 +1,44 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Store → Stores</div>
-        <h1 class="page-title">Stores</h1>
-        <p class="page-desc">Kelola semua cabang Quantum Gaming.</p>
-      </div>
-      <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/store/create')">
-        <el-icon><Plus /></el-icon> Buat Store Baru
-      </el-button>
-    </div>
+    <PageHeader breadcrumb="Store → Stores" title="Stores" description="Kelola semua cabang Quantum Gaming.">
+      <template #actions>
+        <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/store/create')">
+          <el-icon><Plus /></el-icon> Buat Store Baru
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-item">
-        <div class="stat-num">{{ stats.total }}</div>
-        <div class="stat-lbl">Total Store</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-success)">{{ stats.active }}</div>
-        <div class="stat-lbl">Aktif</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-danger)">{{ stats.inactive }}</div>
-        <div class="stat-lbl">Nonaktif</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-info)">{{ stats.total_rooms }}</div>
-        <div class="stat-lbl">Total Ruangan</div>
-      </div>
-    </div>
+    <StatStrip :items="[
+      { label: 'Total Store', value: stats.total },
+      { label: 'Aktif', value: stats.active, tone: 'success' },
+      { label: 'Nonaktif', value: stats.inactive, tone: 'danger' },
+      { label: 'Total Ruangan', value: stats.total_rooms, tone: 'info' },
+    ]" />
 
     <!-- Table -->
     <el-card shadow="never" class="table-card">
-      <div class="table-toolbar">
-        <div style="display:flex;gap:10px">
-          <el-input
-            v-model="search"
-            placeholder="Cari nama store atau lokasi..."
-            prefix-icon="Search"
-            style="width:260px"
-            clearable
-            @input="debouncedFetch"
-          />
-          <el-select v-model="statusFilter" placeholder="Semua Status" clearable style="width:140px" @change="fetchStores">
-            <el-option label="Aktif" value="active" />
-            <el-option label="Nonaktif" value="inactive" />
-            <el-option label="Draft" value="draft" />
-          </el-select>
-        </div>
-        <el-button plain @click="resetFilters">
-          <el-icon><RefreshRight /></el-icon> Reset
-        </el-button>
-      </div>
+      <FilterBar>
+        <el-input
+          v-model="search"
+          placeholder="Cari nama store atau lokasi..."
+          prefix-icon="Search"
+          style="width:260px"
+          clearable
+          @input="debouncedFetch"
+        />
+        <el-select v-model="statusFilter" placeholder="Semua Status" clearable style="width:140px" @change="fetchStores">
+          <el-option label="Aktif" value="active" />
+          <el-option label="Nonaktif" value="inactive" />
+          <el-option label="Draft" value="draft" />
+        </el-select>
+        <template #actions>
+          <el-button plain @click="resetFilters">
+            <el-icon><RefreshRight /></el-icon> Reset
+          </el-button>
+        </template>
+      </FilterBar>
 
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in storeList" :key="row.id">
@@ -218,14 +200,11 @@
 
       <div class="table-footer">
         <span class="footer-info">Menampilkan {{ storeList.length }} dari {{ total }} data</span>
-        <el-pagination
-          v-model:current-page="page"
+        <TablePagination
+          v-model:page="page"
           v-model:page-size="perPage"
           :total="total"
-          :page-sizes="[10, 20, 50]"
-          layout="sizes, prev, pager, next"
-          @size-change="fetchStores"
-          @current-change="fetchStores"
+          @change="fetchStores"
         />
       </div>
       </div>
@@ -271,6 +250,10 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
 import { getStores, deleteStore as apiDelete, updateStore, updateStoreRoom, getGlobalHolidays } from '@/api/store/storeApi'
 import { getImageUrl } from '@/utils/imageHelper'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import StatStrip from '@/components/ui/StatStrip.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
 
 const { can } = usePermission()
 const { isMobile, isTablet } = useBreakpoint()
@@ -399,23 +382,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
-.page-title { font-size:18px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-
-.stats-row {
-  display:flex; align-items:center;
-  background:var(--bg-card); border:1px solid var(--border-color);
-  border-radius:8px; padding:10px 16px; margin-bottom:12px;
-}
-.stat-item { text-align:center; flex:1; }
-.stat-num { font-size:18px; font-weight:700; color:var(--text-primary); }
-.stat-lbl { font-size:11px; color:var(--text-secondary); margin-top:1px; }
-.stat-divider { width:1px; height:28px; background:var(--border-color); margin:0 4px; }
-
 .table-card { border-color:var(--border-color) !important; }
-.table-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 
 .store-cell { display:flex; align-items:center; gap:12px; }
 .store-thumb {
@@ -464,8 +431,6 @@ onMounted(() => {
 /* Responsive */
 @media (max-width:639px) { .table-wrap { display:none; } }
 @media (min-width:640px) { .m-card-list { display:none; } }
-@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
-@media (max-width:639px) { .stats-row { flex-wrap:wrap; } .stat-item { min-width:calc(50% - 1px); } }
 /* Mobile card list */
 .m-card-list { display:flex; flex-direction:column; gap:8px; }
 .m-card {

@@ -1,28 +1,20 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Settings → Roles</div>
-        <h1 class="page-title">Roles</h1>
-        <p class="page-desc">Kelola role dan hak akses untuk setiap jabatan staff.</p>
-      </div>
-      <el-button v-if="can('settings.staff_role')" type="primary" @click="openDrawer()">
-        <el-icon><Plus /></el-icon> Tambah Role
-      </el-button>
-    </div>
+    <PageHeader breadcrumb="Settings → Roles" title="Roles" description="Kelola role dan hak akses untuk setiap jabatan staff.">
+      <template #actions>
+        <el-button v-if="can('settings.staff_role')" type="primary" @click="openDrawer()">
+          <el-icon><Plus /></el-icon> Tambah Role
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-item">
-        <div class="stat-num">{{ roleList.length }}</div>
-        <div class="stat-lbl">Total Role</div>
-      </div>
-    </div>
+    <StatStrip :items="[{ label: 'Total Role', value: roleList.length }]" />
 
     <!-- Table -->
     <el-card shadow="never" class="table-card">
-      <div class="table-toolbar">
+      <FilterBar>
         <el-input
           v-model="search"
           placeholder="Cari nama role..."
@@ -30,10 +22,12 @@
           style="width:260px"
           clearable
         />
-        <el-button plain @click="search = ''">
-          <el-icon><RefreshRight /></el-icon> Reset
-        </el-button>
-      </div>
+        <template #actions>
+          <el-button plain @click="search = ''">
+            <el-icon><RefreshRight /></el-icon> Reset
+          </el-button>
+        </template>
+      </FilterBar>
 
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in filteredRoles" :key="row.id">
@@ -193,6 +187,9 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import StatStrip from '@/components/ui/StatStrip.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
 import { getRoles, createRole, updateRole, deleteRole as apiDelete } from '@/api/role/roleApi'
 import AuditTrail from '@/components/AuditTrail.vue'
 
@@ -358,23 +355,7 @@ onMounted(fetchRoles)
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
-.page-title { font-size:18px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-
-.stats-row {
-  display:flex; align-items:center;
-  background:var(--bg-card); border:1px solid var(--border-color);
-  border-radius:8px; padding:10px 16px; margin-bottom:12px;
-}
-.stat-item { text-align:center; flex:1; }
-.stat-num { font-size:18px; font-weight:700; color:var(--text-primary); }
-.stat-lbl { font-size:11px; color:var(--text-secondary); margin-top:1px; }
-.stat-divider { width:1px; height:28px; background:var(--border-color); margin:0 4px; }
-
 .table-card { border-color:var(--border-color) !important; }
-.table-toolbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
 
 .cell-name { font-size:13px; font-weight:600; color:var(--text-primary); }
 .cell-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
@@ -411,7 +392,6 @@ onMounted(fetchRoles)
 /* Responsive */
 @media (max-width:639px) { .table-wrap { display:none; } }
 @media (min-width:640px) { .m-card-list { display:none; } }
-@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
 /* Mobile card list */
 .m-card-list { display:flex; flex-direction:column; gap:8px; }
 .m-card {
