@@ -9,18 +9,8 @@ const filesUnder = (dir) =>
   })
 const ALL = [...filesUnder('src/views'), ...filesUnder('src/components')].filter((p) => p.endsWith('.vue'))
 
-// Widened group by group (plan Tasks 3–6); at the end it equals ALL.
-const G1 = ['BookingGrid', 'BookingFilterBar', 'BookingDetailPanel', 'EventDetailPanel', 'EventBookingPanel',
-  'NewBookingPanel', 'BookingConfirmDialog', 'BookingSuccessDialog'].map((n) => `src/components/booking/${n}.vue`)
-  .concat('src/views/booking/BookingView.vue')
-const G2 = ['facility/FacilityView', 'facility/FacilityCategoryView', 'facility/FacilityFormView', 'role/RoleView',
-  'room_template/RoomTemplateView', 'room_template/RoomTemplateFormView', 'pricing/PricingView', 'profile/ProfileView',
-  'settings/NotificationTemplatesView', 'settings/BannerManagementView', 'settings/GlobalHolidayView', 'staff/StaffView',
-  'store/StoreView', 'auth/AdminRecoveryRequestView', 'auth/AdminRecoveryResetView'].map((n) => `src/views/${n}.vue`)
-const G3 = ['dashboard/DashboardView', 'fnb/FnBView', 'customer/CustomerView'].map((n) => `src/views/${n}.vue`)
-const G4 = ['store/StoreCreateView', 'promotion/PromotionView', 'pricing/PricingEditView', 'play_credits/PlayCreditsView']
-  .map((n) => `src/views/${n}.vue`)
-const DONE = ALL   // G1–G4 converted group by group; G5 widened the guard to every file
+// C3 converted the files group by group (G1–G4, see git history); the guard now covers every file.
+const DONE = ALL
 
 const template = (src) => src.split(/<script|<style/)[0]
 const styles = (src) => [...src.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n')
