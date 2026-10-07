@@ -19,7 +19,7 @@
       </div>
 
       <!-- Filters -->
-      <div class="filter-bar">
+      <FilterBar>
         <el-input
           v-model="filters.search"
           placeholder="Search customer name or WhatsApp..."
@@ -36,8 +36,10 @@
           <el-option label="Laki-laki" value="male" />
           <el-option label="Perempuan" value="female" />
         </el-select>
-        <el-button plain @click="resetFilters"><el-icon><RefreshRight /></el-icon> Reset</el-button>
-      </div>
+        <template #actions>
+          <el-button plain @click="resetFilters"><el-icon><RefreshRight /></el-icon> Reset</el-button>
+        </template>
+      </FilterBar>
 
       <!-- Mobile Card List -->
       <div v-if="isMobile" class="m-card-list">
@@ -171,12 +173,10 @@
         <span style="font-size:12px;color:var(--text-secondary)">
           Showing {{ (filters.page - 1) * filters.per_page + 1 }}–{{ Math.min(filters.page * filters.per_page, total) }} of {{ total }} customers
         </span>
-        <el-pagination
-          v-model:current-page="filters.page"
+        <TablePagination
+          v-model:page="filters.page"
           v-model:page-size="filters.per_page"
           :total="total"
-          :page-sizes="[10, 20, 50]"
-          layout="sizes, prev, pager, next"
           @change="fetchCustomers"
         />
       </div>
@@ -517,6 +517,8 @@ import {
 } from '@/api/customer/customerApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 import { safeOpen, normalizeWhatsApp } from '@/utils/security'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
 
 const { can } = usePermission()
 const { isMobile } = useBreakpoint()
@@ -783,13 +785,6 @@ onMounted(async () => {
 .page-title { font-size: 17px; font-weight: 700; margin: 0; color: var(--text-primary); }
 .page-desc { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
 
-.filter-bar {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
 .table-wrapper {
   flex: 1;
   overflow-y: auto;
@@ -946,8 +941,6 @@ onMounted(async () => {
   .list-panel { overflow:visible; }
   .detail-panel { display:none; } /* replaced by drawer on mobile */
   .table-wrap { display:none; }
-  .filter-bar { flex-direction:column; }
-  .filter-bar .el-input, .filter-bar .el-select { width:100% !important; }
 }
 @media (min-width:640px) { .m-card-list { display:none; } }
 /* Mobile card list */

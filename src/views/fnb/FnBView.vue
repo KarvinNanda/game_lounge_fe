@@ -2,13 +2,7 @@
   <div class="fnb-view">
 
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Dashboard > FnB</div>
-        <h1 class="page-title">Food &amp; Beverage</h1>
-        <p class="page-subtitle">Kelola menu FnB dan pantau pesanan dari customer</p>
-      </div>
-    </div>
+    <PageHeader breadcrumb="Dashboard > FnB" title="Food & Beverage" description="Kelola menu FnB dan pantau pesanan dari customer" />
 
     <!-- Tabs -->
     <el-tabs v-model="activeTab" class="fnb-tabs">
@@ -17,27 +11,27 @@
       <el-tab-pane label="🍔 Menu" name="menu">
 
         <!-- Toolbar -->
-        <div class="toolbar">
-          <div class="toolbar-left">
-            <el-select v-model="selectedCategory" placeholder="Semua Kategori"
-              clearable style="width:200px" @change="fetchItems">
-              <el-option label="Semua Kategori" value="" />
-              <el-option v-for="cat in categories" :key="cat.id"
-                :label="cat.name" :value="cat.id" />
-            </el-select>
-          </div>
-          <div v-if="canEdit" class="toolbar-right">
-            <el-button @click="handleSyncMoka" :loading="syncLoading" type="info" plain>
-              🔄 Sync dari Moka
-            </el-button>
-            <el-button @click="openCategoryDialog" plain>
-              + Kategori Baru
-            </el-button>
-            <el-button @click="openItemDialog()" type="primary">
-              + Tambah Item
-            </el-button>
-          </div>
-        </div>
+        <FilterBar>
+          <el-select v-model="selectedCategory" placeholder="Semua Kategori"
+            clearable style="width:200px" @change="fetchItems">
+            <el-option label="Semua Kategori" value="" />
+            <el-option v-for="cat in categories" :key="cat.id"
+              :label="cat.name" :value="cat.id" />
+          </el-select>
+          <template #actions>
+            <template v-if="canEdit">
+              <el-button @click="handleSyncMoka" :loading="syncLoading" type="info" plain>
+                🔄 Sync dari Moka
+              </el-button>
+              <el-button @click="openCategoryDialog" plain>
+                + Kategori Baru
+              </el-button>
+              <el-button @click="openItemDialog()" type="primary">
+                + Tambah Item
+              </el-button>
+            </template>
+          </template>
+        </FilterBar>
 
         <!-- Category pills -->
         <div class="category-pills">
@@ -117,33 +111,32 @@
         </template>
 
         <!-- Filter orders -->
-        <div class="toolbar">
-          <div class="toolbar-left">
-            <el-alert v-if="noAccess" type="warning" :closable="false" show-icon
-              title="Tidak ada cabang aktif yang bisa Anda akses. Hubungi admin." />
-            <el-select v-else v-model="orderFilter.store_id" :placeholder="canPickAll ? 'Semua Cabang' : 'Pilih Cabang'"
-              :clearable="canPickAll" style="width:180px" @change="fetchOrders">
-              <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
-            </el-select>
-            <el-select v-model="orderFilter.status" placeholder="Semua Status"
-              clearable style="width:160px" @change="fetchOrders">
-              <el-option label="Menunggu"   value="pending" />
-              <el-option label="Disiapkan"  value="preparing" />
-              <el-option label="Diantar"    value="delivered" />
-              <el-option label="Dibatalkan" value="cancelled" />
-            </el-select>
-          </div>
-          <el-button @click="fetchOrders" plain>
-            <el-icon><Refresh /></el-icon> Refresh
-          </el-button>
-        </div>
+        <FilterBar>
+          <el-alert v-if="noAccess" type="warning" :closable="false" show-icon
+            title="Tidak ada cabang aktif yang bisa Anda akses. Hubungi admin." />
+          <el-select v-else v-model="orderFilter.store_id" :placeholder="canPickAll ? 'Semua Cabang' : 'Pilih Cabang'"
+            :clearable="canPickAll" style="width:180px" @change="fetchOrders">
+            <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
+          </el-select>
+          <el-select v-model="orderFilter.status" placeholder="Semua Status"
+            clearable style="width:160px" @change="fetchOrders">
+            <el-option label="Menunggu"   value="pending" />
+            <el-option label="Disiapkan"  value="preparing" />
+            <el-option label="Diantar"    value="delivered" />
+            <el-option label="Dibatalkan" value="cancelled" />
+          </el-select>
+          <template #actions>
+            <el-button @click="fetchOrders" plain>
+              <el-icon><Refresh /></el-icon> Refresh
+            </el-button>
+          </template>
+        </FilterBar>
 
         <!-- Orders grid -->
         <div v-loading="loadingOrders" class="orders-grid">
-          <div v-if="!orders.length && !loadingOrders" class="empty-state">
-            <el-icon size="40" style="color:var(--text-muted)"><Food /></el-icon>
-            <p style="margin-top:8px;color:var(--text-secondary)">Tidak ada pesanan FnB</p>
-          </div>
+          <EmptyState v-if="!orders.length && !loadingOrders" title="Tidak ada pesanan FnB">
+            <template #icon><el-icon size="40"><Food /></el-icon></template>
+          </EmptyState>
 
           <el-card v-for="order in orders" :key="order.id" class="order-card" shadow="hover">
             <div class="order-header">
@@ -286,6 +279,9 @@ import { notifyError } from '@/utils/notify'
 import api from '@/api/index'
 import { usePermission } from '@/composables/usePermission'
 import { useAllowedStores } from '@/composables/useAllowedStores'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 // Backend: reading needs orders_fnb.view (route guard); every write
 // (category/item CRUD, Moka sync, order status) needs orders_fnb.edit.
@@ -492,21 +488,7 @@ onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval) })
 </script>
 
 <style scoped>
-.page-header   { margin-bottom: 20px }
-.breadcrumb    { font-size: 12px; color: var(--text-muted); margin-bottom: 4px }
-.page-title    { font-size: 22px; font-weight: 700 }
-.page-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 4px }
-
 /* Toolbar */
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.toolbar-left, .toolbar-right { display: flex; gap: 8px; align-items: center; }
 
 /* Category pills */
 .category-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
@@ -541,11 +523,6 @@ onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval) })
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 16px;
   min-height: 120px;
-}
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 60px 0;
 }
 .order-card { border-radius: 12px !important; }
 .order-header {

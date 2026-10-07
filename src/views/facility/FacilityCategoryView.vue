@@ -1,20 +1,17 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Store → Facility Category</div>
-        <h1 class="page-title">Facility Category</h1>
-        <p class="page-desc">Kelola kategori untuk pengelompokan fasilitas.</p>
-      </div>
-      <el-button v-if="can('settings.branches')" type="primary" @click="openDrawer()">
-        <el-icon><Plus /></el-icon> Tambah Kategori
-      </el-button>
-    </div>
+    <PageHeader breadcrumb="Store → Facility Category" title="Facility Category" description="Kelola kategori untuk pengelompokan fasilitas.">
+      <template #actions>
+        <el-button v-if="can('settings.branches')" type="primary" @click="openDrawer()">
+          <el-icon><Plus /></el-icon> Tambah Kategori
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Table -->
     <el-card shadow="never" class="table-card">
-      <div class="table-toolbar">
+      <FilterBar>
         <el-input
           v-model="search"
           placeholder="Cari kategori..."
@@ -22,8 +19,10 @@
           style="width:260px"
           clearable
         />
-        <span class="total-label">{{ filteredList.length }} kategori</span>
-      </div>
+        <template #actions>
+          <span class="total-label">{{ filteredList.length }} kategori</span>
+        </template>
+      </FilterBar>
 
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in filteredList" :key="row.id" style="justify-content:space-between">
@@ -113,6 +112,8 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
 import {
   getFacilityCategories,
   createFacilityCategory,
@@ -196,23 +197,7 @@ onMounted(fetchCategories)
 </script>
 
 <style scoped>
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
-}
-.breadcrumb { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
-.page-title { font-size: 18px; font-weight: 700; color: var(--text-primary); }
-.page-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
-
 .table-card { border-color: var(--border-color) !important; }
-.table-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
 .total-label { font-size: 13px; color: var(--text-muted); }
 
 .cell-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
@@ -231,7 +216,6 @@ onMounted(fetchCategories)
 /* Responsive */
 @media (max-width:639px) { .table-wrap { display:none; } }
 @media (min-width:640px) { .m-card-list { display:none; } }
-@media (max-width:639px) { .table-toolbar { flex-direction:column; align-items:stretch; gap:8px; } .table-toolbar .el-input, .table-toolbar .el-select { width:100% !important; } }
 /* Mobile card list */
 .m-card-list { display:flex; flex-direction:column; gap:8px; }
 .m-card {

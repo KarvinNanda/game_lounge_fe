@@ -6,16 +6,13 @@
     </el-button>
 
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Pricing → {{ storeName }}</div>
-        <h1 class="page-title">Edit Pricing – {{ storeName }}</h1>
-        <p class="page-desc">Atur harga bermain untuk cabang ini.</p>
-      </div>
-      <el-button v-if="can('pricing.edit')" type="primary" :loading="saving" @click="handleSaveAll">
-        <el-icon><Check /></el-icon> Simpan & Publish
-      </el-button>
-    </div>
+    <PageHeader :breadcrumb="`Pricing → ${storeName}`" :title="`Edit Pricing – ${storeName}`" description="Atur harga bermain untuk cabang ini.">
+      <template #actions>
+        <el-button v-if="can('pricing.edit')" type="primary" :loading="saving" @click="handleSaveAll">
+          <el-icon><Check /></el-icon> Simpan & Publish
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Info Bar -->
     <el-card shadow="never" style="margin-bottom:10px">
@@ -568,6 +565,7 @@ import {
 } from '@/api/pricing/pricingApi'
 import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 import { getEventPrice, upsertEventPrice } from '@/api/booking/eventBookingApi'
+import PageHeader from '@/components/ui/PageHeader.vue'
 
 const { can } = usePermission()
 const { isMobile } = useBreakpoint()
@@ -921,11 +919,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; }
-.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
-.page-title { font-size:17px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-
 /* Info bar */
 .info-bar { display:flex; gap:0; flex-wrap:wrap; }
 .info-bar-item { display:flex; flex-direction:column; flex:1; padding:0 12px; }

@@ -2,28 +2,25 @@
   <div class="sales-page">
 
     <!-- ── Header ──────────────────────────────────────────── -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Dashboard</div>
-        <h1 class="page-title">Dashboard</h1>
-        <p class="page-desc">Laporan pendapatan &amp; transaksi penjualan</p>
-      </div>
-      <el-dropdown @command="handleExport">
-        <el-button size="small">
-          <el-icon><Download /></el-icon> Export
-          <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-        </el-button>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item command="excel"><el-icon><DocumentChecked /></el-icon> Export ke Excel</el-dropdown-item>
-            <el-dropdown-item command="pdf"><el-icon><Document /></el-icon> Export ke PDF</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
-    </div>
+    <PageHeader breadcrumb="Dashboard" title="Dashboard" description="Laporan pendapatan & transaksi penjualan">
+      <template #actions>
+        <el-dropdown @command="handleExport">
+          <el-button size="small">
+            <el-icon><Download /></el-icon> Export
+            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+          </el-button>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="excel"><el-icon><DocumentChecked /></el-icon> Export ke Excel</el-dropdown-item>
+              <el-dropdown-item command="pdf"><el-icon><Document /></el-icon> Export ke PDF</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </template>
+    </PageHeader>
 
     <!-- ── Filter Bar ─────────────────────────────────────── -->
-    <div class="filter-bar">
+    <FilterBar>
       <div class="period-buttons">
         <el-button
           v-for="p in periods" :key="p.value"
@@ -68,25 +65,10 @@
         <el-icon style="font-size:11px"><Calendar /></el-icon>
         {{ formatDateShort(summary.date_from) }} – {{ formatDateShort(summary.date_to) }}
       </div>
-    </div>
+    </FilterBar>
 
     <!-- ── Stats Row (5 cards) ──────────────────────────────── -->
-    <div v-loading="loading" class="stats-grid">
-      <div class="stat-card" v-for="stat in statCards" :key="stat.key">
-        <div class="stat-icon-box" :style="{ background: stat.iconBg }">
-          <el-icon size="16" :style="{ color: stat.iconColor }"><component :is="stat.icon" /></el-icon>
-        </div>
-        <div class="stat-body">
-          <div class="stat-label">{{ stat.label }}</div>
-          <div class="stat-value">{{ stat.value }}</div>
-          <div v-if="stat.change !== null && stat.change !== undefined"
-            class="stat-change" :class="stat.change >= 0 ? 'pos' : 'neg'">
-            <el-icon size="10"><component :is="stat.change >= 0 ? 'ArrowUp' : 'ArrowDown'" /></el-icon>
-            {{ Math.abs(stat.change) }}% vs {{ prevPeriodLabel }}
-          </div>
-        </div>
-      </div>
-    </div>
+    <StatStrip v-loading="loading" :items="statItems" />
 
     <!-- ── Charts: Trend (left) + Revenue by Type (right) ─── -->
     <div class="charts-top">
@@ -267,8 +249,7 @@
       </el-table>
 
       <div style="display:flex;justify-content:flex-end;margin-top:12px">
-        <el-pagination v-model:current-page="txPage" :total="txTotal"
-          layout="prev, pager, next" :page-size="20" @change="loadTransactions" />
+        <TablePagination v-model:page="txPage" :page-size="20" :total="txTotal" :sizes="false" @change="loadTransactions" />
       </div>
 
       <template #footer>
@@ -304,6 +285,10 @@ import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 import { getSalesSummary, getSalesTrend, getTransactions } from '@/api/sales/salesApi'
 import { useAllowedStores } from '@/composables/useAllowedStores'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import StatStrip from '@/components/ui/StatStrip.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
 
 // ── Breakpoint ────────────────────────────────────────────────
 const { isMobile } = useBreakpoint()
@@ -353,15 +338,17 @@ const prevPeriodLabel = computed(() => ({
   this_month: 'bulan lalu',
 }[filters.period] || 'sebelumnya'))
 
-const statCards = computed(() => {
+const statItems = computed(() => {
   const s = summary.value?.stats
   if (!s) return []
+  const hint = (change) =>
+    change === null || change === undefined ? '' : `${change >= 0 ? '↑' : '↓'} ${Math.abs(change)}% vs ${prevPeriodLabel.value}`
   return [
-    { key: 'total_revenue',   label: 'Total Revenue',         icon: 'Wallet',       iconBg: 'rgba(2,130,222,0.12)',   iconColor: 'var(--color-primary)',       value: formatRp(s.total_revenue),       change: s.total_revenue_change },
-    { key: 'booking_revenue', label: 'Booking Revenue',       icon: 'Calendar',     iconBg: 'rgba(25,185,238,0.12)',  iconColor: 'var(--color-primary-light)', value: formatRp(s.booking_revenue),     change: s.booking_revenue_change },
-    { key: 'credits_revenue', label: 'Play Credits Revenue',  icon: 'Coin',         iconBg: 'rgba(16,185,129,0.12)', iconColor: 'var(--color-success)',       value: formatRp(s.credits_revenue),     change: s.credits_revenue_change },
-    { key: 'total_tx',        label: 'Total Transaksi',       icon: 'ShoppingCart', iconBg: 'rgba(245,158,11,0.12)', iconColor: 'var(--color-warning)',       value: String(s.total_transactions ?? 0), change: s.transactions_change },
-    { key: 'avg',             label: 'Rata-rata / Transaksi', icon: 'TrendCharts',  iconBg: 'rgba(239,68,68,0.12)',  iconColor: 'var(--color-danger)',        value: formatRp(s.avg_per_transaction), change: s.avg_change },
+    { label: 'Total Revenue',         value: formatRp(s.total_revenue),          hint: hint(s.total_revenue_change) },
+    { label: 'Booking Revenue',       value: formatRp(s.booking_revenue),        hint: hint(s.booking_revenue_change) },
+    { label: 'Play Credits Revenue',  value: formatRp(s.credits_revenue),        hint: hint(s.credits_revenue_change) },
+    { label: 'Total Transaksi',       value: String(s.total_transactions ?? 0),  hint: hint(s.transactions_change) },
+    { label: 'Rata-rata / Transaksi', value: formatRp(s.avg_per_transaction),    hint: hint(s.avg_change) },
   ]
 })
 
@@ -628,19 +615,8 @@ onUnmounted(() => {
 }
 
 /* ── Header ──────────────────────────────────────────── */
-.page-header {
-  display: flex; justify-content: space-between; align-items: flex-start;
-  flex-shrink: 0;
-}
-.breadcrumb { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 3px; letter-spacing: 0.3px; }
-.page-title  { font-size: 20px; font-weight: 800; color: var(--text-primary); letter-spacing: -0.3px; line-height: 1.2; }
-.page-desc   { font-size: 12px; color: var(--text-secondary); font-weight: 500; margin-top: 2px; }
 
 /* ── Filter Bar ──────────────────────────────────────── */
-.filter-bar {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  flex-shrink: 0;
-}
 .period-buttons { display: flex; gap: 3px; }
 .date-badge {
   display: flex; align-items: center; gap: 5px;
@@ -650,34 +626,6 @@ onUnmounted(() => {
 }
 
 /* ── Stats Grid ──────────────────────────────────────── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  flex-shrink: 0;
-}
-.stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 10px;
-  padding: 12px;
-  display: flex; align-items: flex-start; gap: 10px;
-  transition: box-shadow 0.2s, transform 0.15s;
-}
-.stat-card:hover { box-shadow: 0 4px 14px rgba(2,130,222,0.13); transform: translateY(-1px); }
-.stat-icon-box {
-  width: 36px; height: 36px; border-radius: 9px;
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-}
-.stat-body  { flex: 1; min-width: 0; }
-.stat-label { font-size: 10.5px; color: var(--text-secondary); font-weight: 700; margin-bottom: 2px; }
-.stat-value { font-size: 16px; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
-.stat-change {
-  font-size: 10.5px; font-weight: 700; margin-top: 3px;
-  display: flex; align-items: center; gap: 2px;
-}
-.pos { color: var(--color-success); }
-.neg { color: var(--color-danger); }
 
 /* ── Charts Top Row ──────────────────────────────────── */
 .charts-top {
@@ -786,14 +734,10 @@ onUnmounted(() => {
 
 /* ── Responsive ──────────────────────────────────────── */
 @media (max-width:1023px) {
-  .stats-grid { grid-template-columns: repeat(3, 1fr); }
   .charts-top { grid-template-columns: 1fr; }
   .charts-bottom { grid-template-columns: 1fr; }
 }
 @media (max-width:639px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .stats-grid .stat-card:last-child { grid-column: 1 / -1; }
-  .filter-bar { flex-direction: column; align-items: stretch; }
   .period-buttons { overflow-x: auto; padding-bottom: 2px; white-space: nowrap; }
   .donut-wrap { flex-direction: column; align-items: center; }
   .donut-chart { width: 120px; height: 120px; }

@@ -1,13 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Settings → Profil</div>
-        <h1 class="page-title">Profil Saya</h1>
-        <p class="page-desc">Informasi akun yang sedang login.</p>
-      </div>
-    </div>
+    <PageHeader breadcrumb="Settings → Profil" title="Profil Saya" description="Informasi akun yang sedang login." />
 
     <div class="profile-layout">
       <!-- Left: Identity Card -->
@@ -147,6 +141,7 @@ import { notifyError } from '@/utils/notify'
 import { useAuthStore } from '@/stores/authStore'
 import { useAllowedStores } from '@/composables/useAllowedStores'
 import { updateStaff } from '@/api/staff/staffApi'
+import PageHeader from '@/components/ui/PageHeader.vue'
 
 const authStore = useAuthStore()
 const staff = computed(() => authStore.staff)
@@ -206,11 +201,6 @@ const changePassword = async () => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
-.page-title { font-size:18px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-
 .profile-layout { display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:start; }
 .left-col { display:flex; flex-direction:column; gap:16px; }
 .right-col { display:flex; flex-direction:column; gap:16px; }

@@ -1,19 +1,17 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Settings → Kelola Banner</div>
-        <h1 class="page-title">Kelola Banner</h1>
-        <p class="page-desc">
-          Banner slider yang tampil di halaman home customer.
-          Drag untuk mengubah urutan, atau gunakan tombol panah.
-        </p>
-      </div>
-      <el-button type="primary" @click="openForm(null)">
-        <el-icon><Plus /></el-icon> Tambah Banner
-      </el-button>
-    </div>
+    <PageHeader
+      breadcrumb="Settings → Kelola Banner"
+      title="Kelola Banner"
+      description="Banner slider yang tampil di halaman home customer. Drag untuk mengubah urutan, atau gunakan tombol panah."
+    >
+      <template #actions>
+        <el-button type="primary" @click="openForm(null)">
+          <el-icon><Plus /></el-icon> Tambah Banner
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Info -->
     <div class="info-box" style="margin-bottom:16px">
@@ -225,6 +223,7 @@ import {
   deleteBanner, toggleBanner, reorderBanners
 } from '@/api/banner/bannerApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
+import PageHeader from '@/components/ui/PageHeader.vue'
 
 // ── State ─────────────────────────────────────────────────────
 const loading     = ref(false)
@@ -356,11 +355,6 @@ onMounted(fetchBanners)
 </script>
 
 <style scoped>
-.page-header { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px }
-.breadcrumb  { font-size:12px;color:var(--text-muted);margin-bottom:4px }
-.page-title  { font-size:22px;font-weight:700 }
-.page-desc   { font-size:13px;color:var(--text-secondary);margin-top:4px }
-
 .info-box {
   background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);
   border-radius:8px;padding:10px 14px;font-size:13px;color:var(--action);

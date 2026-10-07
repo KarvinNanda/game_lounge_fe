@@ -33,6 +33,10 @@ export default defineConfig([
     rules: {
       // Empty catch blocks are intentional throughout this codebase (silent error handling).
       'no-empty': ['error', { allowEmptyCatch: true }],
+      // A template name with no matching import or prop crashes only at
+      // render time (962cae9: formatDate in NewBookingPanel). Lint is the only
+      // check CI runs, so catch it here.
+      'vue/no-undef-properties': 'error',
     },
   },
 ])

@@ -1,13 +1,11 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Store → Facilities → {{ isEdit ? 'Edit' : 'Tambah' }}</div>
-        <h1 class="page-title">{{ isEdit ? 'Edit Fasilitas' : 'Tambah Fasilitas' }}</h1>
-        <p class="page-desc">{{ isEdit ? 'Perbarui informasi fasilitas.' : 'Tambah fasilitas baru yang tersedia di store.' }}</p>
-      </div>
-    </div>
+    <PageHeader
+      :breadcrumb="`Store → Facilities → ${isEdit ? 'Edit' : 'Tambah'}`"
+      :title="isEdit ? 'Edit Fasilitas' : 'Tambah Fasilitas'"
+      :description="isEdit ? 'Perbarui informasi fasilitas.' : 'Tambah fasilitas baru yang tersedia di store.'"
+    />
 
     <div class="form-layout">
       <!-- Left: Fields -->
@@ -126,6 +124,7 @@ import { ElMessage } from 'element-plus'
 import { notifyError } from '@/utils/notify'
 import { createFacility, updateFacility, getFacilityById, getFacilityCategories } from '@/api/facility/facilityApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
+import PageHeader from '@/components/ui/PageHeader.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -235,11 +234,6 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px; }
-.breadcrumb { font-size:12px; color:var(--text-muted); margin-bottom:4px; }
-.page-title { font-size:22px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:13px; color:var(--text-secondary); margin-top:4px; }
-
 .form-layout { display:grid; grid-template-columns:1fr 320px; gap:16px; }
 @media (max-width:639px) { .form-layout { grid-template-columns:1fr; } }
 .form-card { border-color:var(--border-color) !important; }

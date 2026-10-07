@@ -1,64 +1,25 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Dashboard > Promotion</div>
-        <h1 class="page-title">Promotion / Voucher</h1>
-        <p class="page-desc">Kelola voucher promo dan kirim ke customer (member only)</p>
-      </div>
-      <el-button v-if="can('promotion.create')" type="primary" @click="openForm(null)">
-        <el-icon><Plus /></el-icon> Buat Voucher Baru
-      </el-button>
-    </div>
+    <PageHeader breadcrumb="Dashboard > Promotion" title="Promotion / Voucher" description="Kelola voucher promo dan kirim ke customer (member only)">
+      <template #actions>
+        <el-button v-if="can('promotion.create')" type="primary" @click="openForm(null)">
+          <el-icon><Plus /></el-icon> Buat Voucher Baru
+        </el-button>
+      </template>
+    </PageHeader>
 
     <!-- Stats Cards -->
-    <div class="stats-grid">
-      <el-card shadow="never" class="stat-card">
-        <div class="stat-icon" style="background:rgba(124,58,237,0.15)">
-          <el-icon size="20" style="color:var(--color-primary)"><Ticket /></el-icon>
-        </div>
-        <div>
-          <div class="stat-value">{{ stats.total_voucher || 0 }}</div>
-          <div class="stat-label">Total Voucher</div>
-          <div class="stat-sub">Semua voucher</div>
-        </div>
-      </el-card>
-      <el-card shadow="never" class="stat-card">
-        <div class="stat-icon" style="background:rgba(59,130,246,0.15)">
-          <el-icon size="20" style="color:var(--color-info)"><Promotion /></el-icon>
-        </div>
-        <div>
-          <div class="stat-value">{{ stats.total_sent || 0 }}</div>
-          <div class="stat-label">Total Terkirim</div>
-          <div class="stat-sub">Voucher terkirim</div>
-        </div>
-      </el-card>
-      <el-card shadow="never" class="stat-card">
-        <div class="stat-icon" style="background:rgba(16,185,129,0.15)">
-          <el-icon size="20" style="color:var(--color-success)"><CircleCheck /></el-icon>
-        </div>
-        <div>
-          <div class="stat-value">{{ stats.total_used || 0 }}</div>
-          <div class="stat-label">Total Digunakan</div>
-          <div class="stat-sub">Voucher digunakan</div>
-        </div>
-      </el-card>
-      <el-card shadow="never" class="stat-card">
-        <div class="stat-icon" style="background:rgba(245,158,11,0.15)">
-          <el-icon size="20" style="color:var(--color-warning)"><Money /></el-icon>
-        </div>
-        <div>
-          <div class="stat-value" style="font-size:18px">{{ formatRp(stats.total_discount || 0) }}</div>
-          <div class="stat-label">Total Diskon</div>
-          <div class="stat-sub">Dari semua voucher</div>
-        </div>
-      </el-card>
-    </div>
+    <StatStrip :items="[
+      { label: 'Total Voucher',   value: stats.total_voucher || 0, hint: 'Semua voucher' },
+      { label: 'Total Terkirim',  value: stats.total_sent || 0,    hint: 'Voucher terkirim' },
+      { label: 'Total Digunakan', value: stats.total_used || 0,    hint: 'Voucher digunakan' },
+      { label: 'Total Diskon',    value: formatRp(stats.total_discount || 0), hint: 'Dari semua voucher' },
+    ]" />
 
     <!-- Filter -->
     <el-card shadow="never" style="margin-top:16px">
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <FilterBar>
         <el-input v-model="filters.search" placeholder="Cari nama atau kode voucher..."
           prefix-icon="Search" style="width:260px" clearable @input="debounceSearch" />
         <el-select v-model="filters.status" placeholder="Semua Status" clearable style="width:140px" @change="fetchVouchers">
@@ -71,8 +32,10 @@
           <el-option label="Play Credits" value="play_credits" />
           <el-option label="Keduanya" value="both" />
         </el-select>
-        <el-button plain @click="resetFilters"><el-icon><RefreshRight /></el-icon> Reset</el-button>
-      </div>
+        <template #actions>
+          <el-button plain @click="resetFilters"><el-icon><RefreshRight /></el-icon> Reset</el-button>
+        </template>
+      </FilterBar>
     </el-card>
 
     <!-- Table -->
@@ -220,14 +183,11 @@
         <span style="font-size:12px;color:var(--text-secondary)">
           Menampilkan {{ voucherList.length }} dari {{ total }} data
         </span>
-        <el-pagination
-          v-model:current-page="filters.page"
+        <TablePagination
+          v-model:page="filters.page"
           v-model:page-size="filters.per_page"
           :total="total"
-          :page-sizes="[10, 20, 50]"
-          layout="sizes, prev, pager, next"
-          @size-change="fetchVouchers"
-          @current-change="fetchVouchers"
+          @change="fetchVouchers"
         />
       </div>
       </div>
@@ -580,6 +540,10 @@ import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
 import AuditTrail from '@/components/AuditTrail.vue'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import StatStrip from '@/components/ui/StatStrip.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
 import {
   getVouchers, getVoucherById, generateCode,
   createVoucher, updateVoucher, deleteVoucher,
@@ -834,23 +798,8 @@ onMounted(async () => {
 
 <style scoped>
 /* ── Header ──────────────────────────────────────────── */
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px; }
-.breadcrumb  { font-size:11px; color:var(--text-muted); font-weight:500; margin-bottom:3px; letter-spacing:0.3px; }
-.page-title  { font-size:20px; font-weight:800; color:var(--text-primary); letter-spacing:-0.3px; }
-.page-desc   { font-size:12px; color:var(--text-secondary); font-weight:500; margin-top:3px; }
 
 /* ── Stats ───────────────────────────────────────────── */
-.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:0; }
-.stat-card :deep(.el-card__body) {
-  display:flex; align-items:center; gap:14px; padding:16px 18px !important;
-}
-.stat-icon {
-  width:44px; height:44px; border-radius:11px;
-  display:flex; align-items:center; justify-content:center; flex-shrink:0;
-}
-.stat-value { font-size:24px; font-weight:800; color:var(--text-primary); line-height:1.15; }
-.stat-label { font-size:12px; font-weight:700; color:var(--text-primary); margin-top:3px; }
-.stat-sub   { font-size:11px; font-weight:500; color:var(--text-secondary); margin-top:1px; }
 
 /* ── Code badge (table) ──────────────────────────────── */
 .code-badge {
@@ -964,7 +913,6 @@ onMounted(async () => {
 /* Responsive */
 @media (max-width:639px) { .table-wrap { display:none; } }
 @media (min-width:640px) { .m-card-list { display:none; } }
-@media (max-width:639px) { .stats-grid { grid-template-columns:1fr 1fr !important; } }
 /* Mobile card list */
 .m-card-list { display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
 .m-card {

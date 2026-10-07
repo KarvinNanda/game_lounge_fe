@@ -1,16 +1,14 @@
 <template>
   <div>
     <!-- Header -->
-    <div class="page-header">
-      <div>
-        <div class="breadcrumb">Pricing → Panel</div>
-        <h1 class="page-title">Pricing Panel</h1>
-        <p class="page-desc">Kelola harga bermain untuk setiap cabang. Perubahan harga akan otomatis tersinkron ke website booking.</p>
-      </div>
-    </div>
+    <PageHeader
+      breadcrumb="Pricing → Panel"
+      title="Pricing Panel"
+      description="Kelola harga bermain untuk setiap cabang. Perubahan harga akan otomatis tersinkron ke website booking."
+    />
 
     <!-- Filter -->
-    <div style="display:flex;gap:12px;margin-bottom:20px">
+    <FilterBar>
       <el-input
         v-model="search"
         placeholder="Cari cabang..."
@@ -23,25 +21,14 @@
         <el-option label="Sudah Setup" value="has_pricing" />
         <el-option label="Belum Setup" value="no_pricing" />
       </el-select>
-    </div>
+    </FilterBar>
 
     <!-- Stats -->
-    <div class="stats-row">
-      <div class="stat-item">
-        <div class="stat-num">{{ pricingList.length }}</div>
-        <div class="stat-lbl">Total Cabang</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-success)">{{ pricingList.filter(i => i.has_pricing).length }}</div>
-        <div class="stat-lbl">Sudah Setup</div>
-      </div>
-      <div class="stat-divider" />
-      <div class="stat-item">
-        <div class="stat-num" style="color:var(--color-warning)">{{ pricingList.filter(i => !i.has_pricing).length }}</div>
-        <div class="stat-lbl">Belum Setup</div>
-      </div>
-    </div>
+    <StatStrip :items="[
+      { label: 'Total Cabang', value: pricingList.length },
+      { label: 'Sudah Setup', value: pricingList.filter(i => i.has_pricing).length, tone: 'success' },
+      { label: 'Belum Setup', value: pricingList.filter(i => !i.has_pricing).length, tone: 'warning' },
+    ]" />
 
     <!-- Store Cards Grid -->
     <div v-loading="loading" class="pricing-grid">
@@ -110,20 +97,13 @@
     </div>
 
     <!-- Empty State -->
-    <div v-if="!loading && filteredList.length === 0" class="empty-state">
-      <el-icon size="48" style="color:var(--text-muted)"><Money /></el-icon>
-      <p>Tidak ada data pricing ditemukan</p>
-    </div>
+    <EmptyState v-if="!loading && filteredList.length === 0" title="Tidak ada data pricing ditemukan">
+      <template #icon><el-icon size="48"><Money /></el-icon></template>
+    </EmptyState>
 
     <!-- Pagination -->
     <div v-if="total > perPage" style="display:flex;justify-content:flex-end;margin-top:20px">
-      <el-pagination
-        v-model:current-page="page"
-        :page-size="perPage"
-        :total="total"
-        layout="prev, pager, next"
-        @current-change="fetchPricings"
-      />
+      <TablePagination v-model:page="page" :page-size="perPage" :total="total" :sizes="false" @change="fetchPricings" />
     </div>
 
     <!-- Info Box -->
@@ -140,6 +120,11 @@ import { useRouter } from 'vue-router'
 import { usePermission } from '@/composables/usePermission'
 import { getPricings } from '@/api/pricing/pricingApi'
 import { getImageUrl } from '@/utils/imageHelper'
+import PageHeader from '@/components/ui/PageHeader.vue'
+import StatStrip from '@/components/ui/StatStrip.vue'
+import FilterBar from '@/components/ui/FilterBar.vue'
+import TablePagination from '@/components/ui/TablePagination.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const { can } = usePermission()
 
@@ -198,21 +183,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
-.breadcrumb { font-size:11px; color:var(--text-muted); margin-bottom:2px; }
-.page-title { font-size:18px; font-weight:700; color:var(--text-primary); }
-.page-desc { font-size:12px; color:var(--text-secondary); margin-top:2px; }
-
 /* Stats */
-.stats-row {
-  display:flex; align-items:center;
-  background:var(--bg-card); border:1px solid var(--border-color);
-  border-radius:8px; padding:10px 16px; margin-bottom:12px;
-}
-.stat-item { text-align:center; flex:1; }
-.stat-num { font-size:18px; font-weight:700; color:var(--text-primary); }
-.stat-lbl { font-size:11px; color:var(--text-secondary); margin-top:1px; }
-.stat-divider { width:1px; height:28px; background:var(--border-color); margin:0 4px; }
 
 /* Grid */
 .pricing-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
@@ -252,8 +223,6 @@ onMounted(() => {
 .no-pricing-hint { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--color-warning); margin-top:6px; }
 
 /* Empty */
-.empty-state { text-align:center; padding:60px 0; color:var(--text-secondary); }
-.empty-state p { margin:12px 0 20px; font-size:14px; }
 
 /* Info */
 .info-box {
