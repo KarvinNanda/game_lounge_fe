@@ -21,12 +21,12 @@
             <div class="capacity-row">
               <div class="capacity-field">
                 <label class="cap-label">Min</label>
-                <el-input-number v-model="form.capacity_min" :min="1" :max="form.capacity_max" style="width:100%" controls-position="right" />
+                <el-input-number v-model="form.capacity_min" :min="1" :max="form.capacity_max" class="u-w-full" controls-position="right" />
               </div>
               <div class="capacity-sep">—</div>
               <div class="capacity-field">
                 <label class="cap-label">Max</label>
-                <el-input-number v-model="form.capacity_max" :min="form.capacity_min" style="width:100%" controls-position="right" />
+                <el-input-number v-model="form.capacity_max" :min="form.capacity_min" class="u-w-full" controls-position="right" />
               </div>
               <span class="cap-unit">orang</span>
             </div>
@@ -46,14 +46,14 @@
           <el-form-item label="Status">
             <div class="status-toggle">
               <div class="status-option" :class="{ active: form.is_active }" @click="form.is_active = true">
-                <el-icon style="color:var(--color-success)"><CircleCheck /></el-icon>
+                <el-icon class="u-text-success"><CircleCheck /></el-icon>
                 <div>
                   <div class="status-option-title">Aktif</div>
                   <div class="status-option-desc">Dapat digunakan di store</div>
                 </div>
               </div>
               <div class="status-option" :class="{ active: !form.is_active }" @click="form.is_active = false">
-                <el-icon style="color:var(--color-danger)"><CircleClose /></el-icon>
+                <el-icon class="u-text-danger"><CircleClose /></el-icon>
                 <div>
                   <div class="status-option-title">Nonaktif</div>
                   <div class="status-option-desc">Disembunyikan dari store</div>
@@ -64,12 +64,12 @@
         </el-form>
 
         <!-- Image Upload -->
-        <div class="form-section-title" style="margin-top:24px">Foto Room</div>
+        <div class="form-section-title form-section-gap">Foto Room</div>
         <div class="image-upload-area" :class="{ 'has-image': imagePreview }" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
-          <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" style="display:none" @change="onFileChange" />
+          <input class="file-input-hidden" ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="onFileChange" />
           <template v-if="!imagePreview">
             <div class="upload-placeholder">
-              <el-icon size="36" style="color:var(--color-primary)"><UploadFilled /></el-icon>
+              <el-icon size="36" class="u-text-action"><UploadFilled /></el-icon>
               <p class="upload-title">Klik atau drag & drop foto</p>
               <p class="upload-hint">JPG, PNG, WEBP · Maks. 2MB · Rekomendasi 1280×720 px</p>
             </div>
@@ -104,7 +104,7 @@
             prefix-icon="Search"
             size="small"
             clearable
-            style="margin-bottom:12px"
+            class="u-mb-3"
           />
 
           <div class="facility-list" v-loading="facilitiesLoading">
@@ -122,14 +122,14 @@
               />
               <div class="fac-icon-wrap">
                 <img v-if="f.icon_url" :src="getImageUrl(f.icon_url)" :alt="f.name" class="fac-icon" />
-                <el-icon v-else size="14" style="color:var(--text-muted)"><Picture /></el-icon>
+                <el-icon v-else size="14" class="u-text-muted"><Picture /></el-icon>
               </div>
               <span class="fac-name">{{ f.name }}</span>
               <el-tag v-if="f.category?.name" size="small" type="info" plain class="fac-cat">{{ f.category.name }}</el-tag>
             </div>
 
             <div v-if="filteredFacilities.length === 0 && !facilitiesLoading" class="empty-facilities">
-              <el-icon size="24" style="color:var(--text-muted)"><Box /></el-icon>
+              <el-icon size="24" class="u-text-muted"><Box /></el-icon>
               <p>{{ facilitySearch ? 'Fasilitas tidak ditemukan' : 'Belum ada fasilitas' }}</p>
               <router-link to="/facility/create" class="link-add-facility">+ Tambah Fasilitas</router-link>
             </div>
@@ -143,7 +143,7 @@
             <div class="preview-img-wrap">
               <img v-if="imagePreview" :src="imagePreview" class="preview-img" />
               <div v-else class="preview-img-placeholder">
-                <el-icon size="24" style="color:var(--text-muted)"><Picture /></el-icon>
+                <el-icon size="24" class="u-text-muted"><Picture /></el-icon>
               </div>
             </div>
             <div class="preview-info">
@@ -314,7 +314,6 @@ onMounted(async () => {
 <style scoped>
 .form-layout { display:grid; grid-template-columns:1fr 340px; gap:16px; }
 @media (max-width:639px) { .form-layout { grid-template-columns:1fr; } }
-.form-card { border-color:var(--border-color) !important; }
 .right-col { display:flex; flex-direction:column; gap:16px; }
 
 .form-section-title {
@@ -410,4 +409,8 @@ onMounted(async () => {
   margin-top:16px; padding:16px;
   background:var(--bg-card); border:1px solid var(--border-color); border-radius:10px;
 }
+
+/* C3: former inline styles */
+.form-section-gap { margin-top: var(--space-6); }
+.file-input-hidden { display: none; }
 </style>

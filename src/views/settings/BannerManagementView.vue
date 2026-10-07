@@ -14,7 +14,7 @@
     </PageHeader>
 
     <!-- Info -->
-    <div class="info-box" style="margin-bottom:16px">
+    <div class="info-box u-mb-4">
       <el-icon><InfoFilled /></el-icon>
       <span>
         Banner yang aktif akan tampil sebagai slider di halaman home customer.
@@ -24,7 +24,7 @@
 
     <!-- List Banner -->
     <div v-loading="loading">
-      <div v-if="!banners.length" style="text-align:center;padding:40px;color:var(--text-secondary)">
+      <div class="banner-empty" v-if="!banners.length">
         Belum ada banner.<template v-if="can('settings.branches')"> Klik "Tambah Banner" untuk mulai.</template>
       </div>
 
@@ -37,10 +37,10 @@
         >
           <!-- Thumbnail -->
           <div class="banner-thumb">
-            <img
+            <img class="banner-img"
               :src="getImageUrl(banner.image_url)"
               :alt="banner.title"
-              style="width:100%;height:100%;object-fit:cover;border-radius:6px"
+             
               @error="e => e.target.src = '/placeholder-banner.png'"
             />
             <div v-if="!banner.is_active" class="inactive-overlay">Nonaktif</div>
@@ -53,7 +53,7 @@
             <div class="banner-desc">
               {{ banner.description?.slice(0, 80) }}{{ banner.description?.length > 80 ? '...' : '' }}
             </div>
-            <div style="display:flex;gap:8px;margin-top:8px">
+            <div class="banner-tags">
               <el-tag :type="banner.is_active ? 'success' : 'danger'" size="small">
                 {{ banner.is_active ? 'Aktif' : 'Nonaktif' }}
               </el-tag>
@@ -114,16 +114,16 @@
       direction="rtl"
       size="520px"
     >
-      <el-form :model="form" ref="formRef" label-position="top" style="padding:0 4px">
+      <el-form class="drawer-body" :model="form" ref="formRef" label-position="top">
 
         <!-- Upload gambar banner -->
         <el-form-item label="Gambar Banner (untuk slider) *" prop="image_url"
           :rules="[{ required: true, message: 'Gambar banner wajib diupload' }]">
           <div class="upload-area">
-            <img
+            <img class="preview-img-lg"
               v-if="form.image_url"
               :src="getImageUrl(form.image_url)"
-              style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-bottom:8px"
+             
             />
             <el-upload
               action="#"
@@ -136,7 +136,7 @@
                 {{ form.image_url ? 'Ganti Gambar Banner' : 'Upload Gambar Banner' }}
               </el-button>
             </el-upload>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
+            <div class="u-text-xs u-text-muted u-mt-1">
               Ukuran ideal: 1200×400px. Format: JPG, PNG, WebP
             </div>
           </div>
@@ -145,10 +145,10 @@
         <!-- Upload gambar detail (opsional) -->
         <!-- <el-form-item label="Gambar Detail (opsional — untuk halaman detail banner)">
           <div class="upload-area">
-            <img
+            <img class="preview-img-sm"
               v-if="form.detail_image_url"
               :src="getImageUrl(form.detail_image_url)"
-              style="width:100%;max-height:120px;object-fit:cover;border-radius:8px;margin-bottom:8px"
+             
             />
             <el-upload
               action="#"
@@ -161,7 +161,7 @@
                 {{ form.detail_image_url ? 'Ganti Gambar Detail' : 'Upload Gambar Detail' }}
               </el-button>
             </el-upload>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
+            <div class="u-text-xs u-text-muted u-mt-1">
               Kosongkan jika ingin pakai gambar banner yang sama
             </div>
           </div>
@@ -186,25 +186,25 @@
             :rows="6"
             placeholder="Tulis informasi detail yang muncul ketika customer klik banner ini.&#10;Contoh: fasilitas, syarat, harga lengkap, dll."
           />
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">
+          <div class="u-text-xs u-text-muted u-mt-1">
             Tampil di halaman detail ketika customer mengklik banner
           </div>
         </el-form-item>
 
         <!-- Status -->
         <el-form-item label="Status">
-          <div style="display:flex;align-items:center;gap:10px">
+          <div class="u-flex u-gap-2">
             <el-switch v-model="form.is_active" />
-            <span style="font-size:13px">{{ form.is_active ? 'Aktif (tampil di home customer)' : 'Nonaktif (tersembunyi)' }}</span>
+            <span class="u-text-sm">{{ form.is_active ? 'Aktif (tampil di home customer)' : 'Nonaktif (tersembunyi)' }}</span>
           </div>
         </el-form-item>
 
       </el-form>
 
       <template #footer>
-        <div style="display:flex;gap:10px">
-          <el-button style="flex:1" @click="formVisible = false">Batal</el-button>
-          <el-button type="primary" style="flex:1" :loading="saving" @click="handleSave">
+        <div class="drawer-actions">
+          <el-button class="u-flex-1" @click="formVisible = false">Batal</el-button>
+          <el-button type="primary" class="u-flex-1" :loading="saving" @click="handleSave">
             {{ editingItem ? 'Simpan Perubahan' : 'Buat Banner' }}
           </el-button>
         </div>
@@ -398,4 +398,13 @@ onMounted(fetchBanners)
 }
 
 .upload-area { width:100% }
+
+/* C3: former inline styles */
+.banner-empty { text-align: center; padding: calc(var(--space-5) * 2); color: var(--text-secondary); }
+.banner-img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md); }
+.banner-tags { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+.drawer-body { padding: 0 var(--space-1); }
+.preview-img-lg { width: 100%; max-height: 160px; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: var(--space-2); }
+.preview-img-sm { width: 100%; max-height: 120px; object-fit: cover; border-radius: var(--radius-lg); margin-bottom: var(--space-2); }
+.drawer-actions { display: flex; gap: var(--space-2); }
 </style>

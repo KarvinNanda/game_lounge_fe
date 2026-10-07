@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Back -->
-    <el-button text @click="$router.push('/pricing')" style="padding:0;margin-bottom:8px">
+    <el-button class="flush-list" text @click="$router.push('/pricing')">
       <el-icon><ArrowLeft /></el-icon> Kembali ke Pricing Panel
     </el-button>
 
@@ -15,7 +15,7 @@
     </PageHeader>
 
     <!-- Info Bar -->
-    <el-card shadow="never" style="margin-bottom:10px">
+    <el-card shadow="never" class="u-mb-2">
       <div class="info-bar">
         <div class="info-bar-item">
           <span class="ib-label">CABANG</span>
@@ -24,7 +24,7 @@
         <div class="ib-divider" />
         <div class="info-bar-item">
           <span class="ib-label">STATUS PRICING</span>
-          <el-tag type="success" size="small" style="margin-top:2px">Aktif</el-tag>
+          <el-tag type="success" size="small" class="u-mt-1">Aktif</el-tag>
         </div>
         <div class="ib-divider" />
         <div class="info-bar-item">
@@ -34,7 +34,7 @@
         <div class="ib-divider" />
         <div class="info-bar-item">
           <span class="ib-label">TERAPLIKASI DI</span>
-          <span class="ib-value" style="font-size:11px">Website Booking, Booking Admin & Walk-in</span>
+          <span class="ib-value u-text-xs">Website Booking, Booking Admin & Walk-in</span>
         </div>
       </div>
     </el-card>
@@ -44,10 +44,10 @@
 
       <!-- ───────────────── Tab: Ringkasan ───────────────── -->
       <el-tab-pane label="Ringkasan" name="ringkasan">
-        <div class="tab-grid" style="margin-top:16px">
+        <div class="tab-grid u-mt-4">
           <div>
             <!-- HH Prices Summary -->
-            <el-card shadow="never" style="margin-bottom:16px">
+            <el-card shadow="never" class="u-mb-4">
               <div class="section-header">
                 <div>
                   <div class="sh-title">1. Harga Happy Hour <span class="sh-sub">(Per Jam)</span></div>
@@ -57,18 +57,18 @@
                   <el-icon><Edit /></el-icon> Edit
                 </el-button>
               </div>
-              <el-table :data="happyHourPriceRows" size="small" style="margin-top:12px">
+              <el-table :data="happyHourPriceRows" size="small" class="u-mt-3">
                 <el-table-column label="Tipe Ruangan" min-width="180">
                   <template #default="{ row }">
-                    <span style="font-weight:500;font-size:13px">{{ row.room_template?.name }}</span>
+                    <span class="cell-text">{{ row.room_template?.name }}</span>
                   </template>
                 </el-table-column>
                 <el-table-column label="Harga / Jam" min-width="150">
                   <template #default="{ row }">
-                    <span v-if="row.price_per_hour > 0" style="font-weight:600;color:var(--color-primary-light)">
+                    <span v-if="row.price_per_hour > 0" class="u-fw-semibold u-text-action">
                       Rp {{ formatPrice(row.price_per_hour) }}
                     </span>
-                    <span v-else style="font-size:12px;color:var(--text-muted)">Belum diatur</span>
+                    <span v-else class="u-text-xs u-text-muted">Belum diatur</span>
                   </template>
                 </el-table-column>
               </el-table>
@@ -85,15 +85,15 @@
                   <el-icon><Edit /></el-icon> Edit Semua
                 </el-button>
               </div>
-              <el-table :data="packageEditRows" size="small" style="margin-top:12px">
+              <el-table :data="packageEditRows" size="small" class="u-mt-3">
                 <el-table-column label="Tipe Ruangan" min-width="160" fixed>
                   <template #default="{ row }">
-                    <span style="font-weight:500;font-size:13px">{{ row.name }}</span>
+                    <span class="cell-text">{{ row.name }}</span>
                   </template>
                 </el-table-column>
                 <el-table-column v-for="dur in standardDurations" :key="dur" :label="`${dur} Jam`" width="110">
                   <template #default="{ row }">
-                    <span style="font-size:12px">{{ getPackagePrice(row.id, dur) }}</span>
+                    <span class="u-text-xs">{{ getPackagePrice(row.id, dur) }}</span>
                   </template>
                 </el-table-column>
               </el-table>
@@ -103,24 +103,24 @@
           <!-- Right Sidebar -->
           <div>
             <!-- HH Schedules -->
-            <!-- <el-card shadow="never" style="margin-bottom:14px">
-              <div class="sh-title" style="margin-bottom:12px">
+            <!-- <el-card shadow="never" class="u-mb-3">
+              <div class="sh-title u-mb-3">
                 Jadwal Happy Hour <span class="sh-sub">(Weekday Only)</span>
               </div>
-              <div v-if="happyHourSchedules.length === 0" style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+              <div v-if="happyHourSchedules.length === 0" class="u-text-xs u-text-muted u-mb-2">
                 Belum ada jadwal
               </div>
               <div v-for="s in happyHourSchedules" :key="s.id" class="schedule-row">
-                <el-icon style="color:var(--color-primary)"><Clock /></el-icon>
+                <el-icon class="u-text-action"><Clock /></el-icon>
                 <span>{{ s.start_time }} – {{ s.end_time }}</span>
-                <el-button v-if="can('pricing.edit')" size="small" circle plain type="danger" style="margin-left:auto" @click="removeSchedule(s.id)">
+                <el-button class="push-right" v-if="can('pricing.edit')" size="small" circle plain type="danger" @click="removeSchedule(s.id)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
               </div>
-              <el-button v-if="can('pricing.edit')" style="width:100%;margin-top:8px" plain size="small" @click="showAddSchedule = true">
+              <el-button v-if="can('pricing.edit')" class="u-w-full u-mt-2" plain size="small" @click="showAddSchedule = true">
                 <el-icon><Plus /></el-icon> Tambah Rentang
               </el-button>
-              <div class="note-box" style="margin-top:10px">
+              <div class="note-box u-mt-2">
                 <el-icon><WarningFilled /></el-icon>
                 Happy Hour hanya dihitung per jam, tidak berlaku untuk paket 3/5/8/10 jam.
               </div>
@@ -128,15 +128,15 @@
 
             <!-- Rules Summary -->
             <el-card shadow="never">
-              <div class="sh-title" style="margin-bottom:12px">3. Rule Pricing</div>
+              <div class="sh-title u-mb-3">3. Rule Pricing</div>
               <div v-for="rule in rulesSummary" :key="rule.title" class="rule-item">
-                <el-icon style="color:var(--color-success);flex-shrink:0"><CircleCheck /></el-icon>
+                <el-icon class="ok-icon"><CircleCheck /></el-icon>
                 <div>
-                  <div style="font-size:12px;font-weight:600;color:var(--text-primary)">{{ rule.title }}</div>
-                  <div style="font-size:11px;color:var(--text-secondary);margin-top:2px">{{ rule.desc }}</div>
+                  <div class="label-xs">{{ rule.title }}</div>
+                  <div class="u-text-xs u-text-secondary u-mt-1">{{ rule.desc }}</div>
                 </div>
               </div>
-              <el-button style="width:100%;margin-top:12px" plain size="small" @click="activeTab = 'preview'">
+              <el-button class="u-w-full u-mt-3" plain size="small" @click="activeTab = 'preview'">
                 <el-icon><View /></el-icon> Lihat Simulator Harga
               </el-button>
             </el-card>
@@ -146,45 +146,45 @@
 
       <!-- ───────────────── Tab: Happy Hour ───────────────── -->
       <el-tab-pane label="Happy Hour" name="happy_hour">
-        <div class="tab-grid" style="margin-top:16px">
+        <div class="tab-grid u-mt-4">
           <div>
-            <el-card shadow="never" style="margin-bottom:16px">
-              <div class="sh-title" style="margin-bottom:4px">Jadwal Happy Hour</div>
-              <div class="sh-desc" style="margin-bottom:16px">Hanya berlaku untuk Weekday (Senin–Kamis).</div>
+            <el-card shadow="never" class="u-mb-4">
+              <div class="sh-title u-mb-1">Jadwal Happy Hour</div>
+              <div class="sh-desc u-mb-4">Hanya berlaku untuk Weekday (Senin–Kamis).</div>
 
-              <div v-if="happyHourSchedules.length === 0" style="font-size:12px;color:var(--text-muted);margin-bottom:12px;padding:12px;background:var(--bg-main);border-radius:8px;text-align:center">
+              <div class="empty-note" v-if="happyHourSchedules.length === 0">
                 Belum ada jadwal Happy Hour
               </div>
               <div v-for="s in happyHourSchedules" :key="s.id" class="schedule-row-lg">
-                <el-icon style="color:var(--color-primary)"><Clock /></el-icon>
-                <span style="font-weight:600;font-size:14px">{{ s.start_time }} – {{ s.end_time }}</span>
-                <el-button v-if="can('pricing.edit')" size="small" type="danger" plain circle @click="removeSchedule(s.id)" style="margin-left:auto">
+                <el-icon class="u-text-action"><Clock /></el-icon>
+                <span class="card-title">{{ s.start_time }} – {{ s.end_time }}</span>
+                <el-button class="push-right" v-if="can('pricing.edit')" size="small" type="danger" plain circle @click="removeSchedule(s.id)">
                   <el-icon><Delete /></el-icon>
                 </el-button>
               </div>
 
-              <el-button v-if="can('pricing.edit')" style="width:100%;margin-top:10px" @click="showAddSchedule = true">
+              <el-button v-if="can('pricing.edit')" class="u-w-full u-mt-2" @click="showAddSchedule = true">
                 <el-icon><Plus /></el-icon> Tambah Rentang Waktu
               </el-button>
             </el-card>
 
             <el-card shadow="never">
-              <div class="sh-title" style="margin-bottom:4px">Harga Happy Hour (Per Jam)</div>
-              <div class="sh-desc" style="margin-bottom:16px">Harga per jam untuk setiap tipe ruangan saat Happy Hour.</div>
+              <div class="sh-title u-mb-1">Harga Happy Hour (Per Jam)</div>
+              <div class="sh-desc u-mb-4">Harga per jam untuk setiap tipe ruangan saat Happy Hour.</div>
 
               <el-table :data="happyHourPriceRows">
                 <el-table-column label="Tipe Ruangan" min-width="180">
                   <template #default="{ row }">
-                    <span style="font-weight:500">{{ row.room_template?.name }}</span>
+                    <span class="fw-medium">{{ row.room_template?.name }}</span>
                   </template>
                 </el-table-column>
                 <el-table-column label="Harga per Jam" min-width="200">
                   <template #default="{ row }">
-                    <el-input-number
+                    <el-input-number class="input-date"
                       v-model="row.price_per_hour"
                       :min="0"
                       :step="5000"
-                      style="width:180px"
+                     
                       :formatter="v => `Rp ${String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`"
                       :parser="v => v.replace(/Rp\s?|\./g, '')"
                     />
@@ -192,19 +192,19 @@
                 </el-table-column>
               </el-table>
 
-              <el-button type="primary" style="margin-top:14px" :loading="savingHH" @click="saveHappyHourPrices(true)">
+              <el-button type="primary" class="u-mt-3" :loading="savingHH" @click="saveHappyHourPrices(true)">
                 <el-icon><Check /></el-icon> Simpan Harga Happy Hour
               </el-button>
             </el-card>
           </div>
 
           <el-card shadow="never">
-            <div class="sh-title" style="margin-bottom:12px">Catatan</div>
+            <div class="sh-title u-mb-3">Catatan</div>
             <div class="note-box">
               <el-icon><WarningFilled /></el-icon>
               Happy Hour hanya dihitung per jam dan tidak berlaku untuk paket (3, 5, 8, 10 jam).
             </div>
-            <div style="margin-top:12px;font-size:12px;color:var(--text-secondary);line-height:1.7">
+            <div class="rules-note">
               <div>• Berlaku Weekday saja (Senin–Kamis)</div>
               <div>• Jika booking melewati jam HH, sistem otomatis split</div>
               <div>• Harga HH selalu per jam, bukan paket</div>
@@ -215,9 +215,9 @@
 
       <!-- ───────────────── Tab: Paket Normal ───────────────── -->
       <el-tab-pane label="Paket Normal" name="paket">
-        <div style="margin-top:16px">
+        <div class="u-mt-4">
           <el-card shadow="never">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+            <div class="card-head">
               <div>
                 <div class="sh-title">Harga Paket Normal</div>
                 <div class="sh-desc">Berlaku jam Normal Weekday dan seluruh jam Weekend & Tanggal Merah.</div>
@@ -230,7 +230,7 @@
             <el-table :data="packageEditRows">
               <el-table-column label="Tipe Ruangan" min-width="160" fixed>
                 <template #default="{ row }">
-                  <span style="font-weight:500;font-size:13px">{{ row.name }}</span>
+                  <span class="cell-text">{{ row.name }}</span>
                 </template>
               </el-table-column>
               <el-table-column
@@ -240,12 +240,12 @@
                 width="140"
               >
                 <template #default="{ row }">
-                  <el-input-number
+                  <el-input-number class="input-price"
                     v-model="row.prices[dur]"
                     :min="0"
                     :step="5000"
                     size="small"
-                    style="width:120px"
+                   
                     :formatter="v => String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
                     :parser="v => v.replace(/\./g, '')"
                   />
@@ -253,7 +253,7 @@
               </el-table-column>
             </el-table>
 
-            <el-button type="primary" style="margin-top:14px" :loading="savingPackages" @click="savePackagePrices(true)">
+            <el-button type="primary" class="u-mt-3" :loading="savingPackages" @click="savePackagePrices(true)">
               <el-icon><Check /></el-icon> Simpan Semua Harga Paket
             </el-button>
           </el-card>
@@ -262,8 +262,8 @@
 
       <!-- ───────────────── Tab: Flash Sale ───────────────── -->
       <el-tab-pane label="Flash Sale" name="flash_sale">
-        <div style="margin-top:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div class="u-mt-4">
+          <div class="u-flex u-justify-between u-mb-3">
             <div>
               <div class="sh-title">Flash Sale</div>
               <div class="sh-desc">Potongan harga nominal untuk ruangan tertentu pada jam & tanggal tertentu.</div>
@@ -278,24 +278,24 @@
               <el-table-column label="Nama" min-width="160" prop="name" />
               <el-table-column label="Ruangan" width="160">
                 <template #default="{ row }">
-                  <span style="font-size:12px">{{ row.room_template?.name || '—' }}</span>
+                  <span class="u-text-xs">{{ row.room_template?.name || '—' }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="Harga / Jam" width="140">
                 <template #default="{ row }">
-                  <span style="color:var(--color-primary-light);font-weight:600">
+                  <span class="u-text-action u-fw-semibold">
                     Rp {{ formatPrice(row.price_per_hour) }}
                   </span>
                 </template>
               </el-table-column>
               <el-table-column label="Tanggal" width="200">
                 <template #default="{ row }">
-                  <span style="font-size:12px">{{ formatDate(row.date_from) }} – {{ formatDate(row.date_to) }}</span>
+                  <span class="u-text-xs">{{ formatDate(row.date_from) }} – {{ formatDate(row.date_to) }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="Jam" width="130">
                 <template #default="{ row }">
-                  <span style="font-size:12px">{{ row.time_from }} – {{ row.time_to }}</span>
+                  <span class="u-text-xs">{{ row.time_from }} – {{ row.time_to }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="Status" width="100">
@@ -307,7 +307,7 @@
               </el-table-column>
               <el-table-column label="Aksi" width="100" align="right" fixed="right">
                 <template #default="{ row }">
-                  <div style="display:flex;gap:4px;justify-content:flex-end">
+                  <div class="row-actions">
                     <el-tooltip v-if="can('pricing.edit')" content="Edit" placement="top">
                       <el-button size="small" circle plain @click="openFlashSaleForm(row)">
                         <el-icon><Edit /></el-icon>
@@ -328,9 +328,9 @@
 
       <!-- ───────────────── Tab: Preview / Simulator ───────────────── -->
       <el-tab-pane label="Simulator Harga" name="preview">
-        <div class="tab-grid" style="margin-top:16px">
+        <div class="tab-grid u-mt-4">
           <el-card shadow="never">
-            <div class="sh-title" style="margin-bottom:16px">Simulator Harga Booking</div>
+            <div class="sh-title u-mb-4">Simulator Harga Booking</div>
             <el-form :model="calcForm" label-position="top">
               <el-form-item label="Tanggal Booking">
                 <el-date-picker
@@ -338,52 +338,52 @@
                   type="date"
                   format="dddd, DD MMM YYYY"
                   value-format="YYYY-MM-DD"
-                  style="width:100%"
+                  class="u-w-full"
                 />
               </el-form-item>
               <el-form-item label="Tipe Ruangan">
-                <el-select v-model="calcForm.room_template_id" style="width:100%" placeholder="Pilih tipe ruangan">
+                <el-select v-model="calcForm.room_template_id" class="u-w-full" placeholder="Pilih tipe ruangan">
                   <el-option v-for="t in roomTemplates" :key="t.id" :label="t.name" :value="t.id" />
                 </el-select>
               </el-form-item>
               <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
                 <el-form-item label="Jam Mulai">
-                  <el-time-picker v-model="calcForm.start_time" format="HH:mm" value-format="HH:mm" style="width:100%" />
+                  <el-time-picker v-model="calcForm.start_time" format="HH:mm" value-format="HH:mm" class="u-w-full" />
                 </el-form-item>
                 <el-form-item label="Jam Selesai">
-                  <el-time-picker v-model="calcForm.end_time" format="HH:mm" value-format="HH:mm" style="width:100%" />
+                  <el-time-picker v-model="calcForm.end_time" format="HH:mm" value-format="HH:mm" class="u-w-full" />
                 </el-form-item>
               </div>
-              <el-button type="primary" style="width:100%" :loading="calculating" @click="runCalculation">
+              <el-button type="primary" class="u-w-full" :loading="calculating" @click="runCalculation">
                 <el-icon><Odometer /></el-icon> Hitung Sekarang
               </el-button>
             </el-form>
 
             <!-- Result -->
             <template v-if="calcResult">
-              <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-color)">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+              <div class="section-divider">
+                <div class="u-flex u-justify-between u-mb-3">
                   <div class="sh-title">Hasil Perhitungan</div>
                   <el-tag type="info">{{ calcResult.total_hours }} Jam Total</el-tag>
                 </div>
 
                 <div v-for="(item, i) in calcResult.breakdown" :key="i" class="breakdown-row">
-                  <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-                    <span style="font-size:13px;font-weight:600;color:var(--text-primary)">{{ item.time_range }}</span>
+                  <div class="split-row-spaced">
+                    <span class="label-sm">{{ item.time_range }}</span>
                     <el-tag :type="item.type === 'Happy Hour' ? 'warning' : 'info'" size="small">{{ item.type }}</el-tag>
                   </div>
-                  <div style="display:flex;justify-content:space-between">
-                    <span style="font-size:12px;color:var(--text-secondary)">{{ item.description }}</span>
-                    <span style="font-weight:600;color:var(--text-primary)">Rp {{ formatPrice(item.amount) }}</span>
+                  <div class="split-row">
+                    <span class="u-text-xs u-text-secondary">{{ item.description }}</span>
+                    <span class="value-strong">Rp {{ formatPrice(item.amount) }}</span>
                   </div>
                 </div>
 
-                <!-- <div v-if="calcResult.has_flash_sale" class="breakdown-row" style="border-color:var(--color-danger)">
-                  <div style="display:flex;justify-content:space-between">
-                    <span style="font-size:13px;color:var(--color-danger);font-weight:600">
+                <!-- <div v-if="calcResult.has_flash_sale" class="breakdown-row input-invalid">
+                  <div class="split-row">
+                    <span class="u-text-sm u-text-danger u-fw-semibold">
                       Flash Sale: {{ calcResult.flash_sale_name }}
                     </span>
-                    <span style="color:var(--color-danger);font-weight:600">
+                    <span class="u-text-danger u-fw-semibold">
                       – Rp {{ formatPrice(calcResult.flash_discount) }}
                     </span>
                   </div>
@@ -391,17 +391,17 @@
 
                 <div class="total-row">
                   <span>TOTAL</span>
-                  <span style="color:var(--color-primary-light)">Rp {{ formatPrice(calcResult.final_price) }}</span>
+                  <span class="u-text-action">Rp {{ formatPrice(calcResult.final_price) }}</span>
                 </div>
-                <p style="font-size:11px;color:var(--color-success);margin-top:6px">
-                  ✓ Perhitungan sudah sesuai aturan yang aktif.
+                <p class="u-text-xs u-text-success u-mt-1">
+                  <el-icon aria-hidden="true"><Check /></el-icon> Perhitungan sudah sesuai aturan yang aktif.
                 </p>
               </div>
             </template>
           </el-card>
 
           <el-card shadow="never">
-            <div class="sh-title" style="margin-bottom:12px">Catatan Penting</div>
+            <div class="sh-title u-mb-3">Catatan Penting</div>
             <ul class="notes-list">
               <li>Happy Hour hanya berlaku di Weekday (Senin–Kamis).</li>
               <li>Weekend & Tanggal Merah selalu menggunakan paket normal.</li>
@@ -415,31 +415,31 @@
 
       <!-- ───────────────── Tab: Harga Event ───────────────── -->
       <el-tab-pane label="Harga Event" name="event_price">
-        <div style="margin-top:16px;max-width:700px">
+        <div class="calc-card">
           <el-card shadow="never">
             <template #header>
-              <div style="display:flex;align-items:center;gap:8px">
-                <el-icon style="color:#D97706"><Star /></el-icon>
-                <span style="font-weight:700">Harga Event Booking</span>
+              <div class="u-flex u-gap-2">
+                <el-icon class="event-star"><Star /></el-icon>
+                <span class="u-fw-bold">Harga Event Booking</span>
               </div>
             </template>
 
-            <div class="note-box" style="margin-bottom:16px">
+            <div class="note-box u-mb-4">
               <el-icon><InfoFilled /></el-icon>
-              <span style="font-size:12px">
+              <span class="u-text-xs">
                 Harga untuk booking 1 gedung penuh (event). Kalkulasi proporsional:
                 <strong>(Harga per hari ÷ 24) × durasi jam = total harga event</strong>.
                 Contoh: Rp 1.000.000/hari, event 6 jam = Rp 250.000.
               </span>
             </div>
 
-            <div style="display:flex;align-items:flex-end;gap:12px;max-width:400px">
-              <el-form-item label="Harga per Hari (Rp)" style="flex:1;margin:0">
+            <div class="calc-row">
+              <el-form-item class="grow-flush" label="Harga per Hari (Rp)">
                 <el-input-number
                   v-model="eventPrice"
                   :min="0"
                   :step="100000"
-                  style="width:100%"
+                  class="u-w-full"
                   :formatter="v => `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
                   :parser="v => Number(v.replace(/[^0-9]/g, ''))"
                 />
@@ -459,10 +459,10 @@
       <el-form :model="scheduleForm" label-position="top">
         <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
           <el-form-item label="Jam Mulai">
-            <el-time-picker v-model="scheduleForm.start_time" format="HH:mm" value-format="HH:mm" style="width:100%" />
+            <el-time-picker v-model="scheduleForm.start_time" format="HH:mm" value-format="HH:mm" class="u-w-full" />
           </el-form-item>
           <el-form-item label="Jam Selesai">
-            <el-time-picker v-model="scheduleForm.end_time" format="HH:mm" value-format="HH:mm" style="width:100%" />
+            <el-time-picker v-model="scheduleForm.end_time" format="HH:mm" value-format="HH:mm" class="u-w-full" />
           </el-form-item>
         </div>
       </el-form>
@@ -476,7 +476,7 @@
     <el-drawer v-model="showAddCustom" title="Tambah Durasi Custom" direction="rtl" :size="isMobile ? '100%' : '340px'">
       <el-form label-position="top">
         <el-form-item label="Durasi (jam)">
-          <el-input-number v-model="customDuration" :min="1" :max="24" style="width:100%" />
+          <el-input-number v-model="customDuration" :min="1" :max="24" class="u-w-full" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -497,7 +497,7 @@
           <el-input v-model="fsForm.name" placeholder="Contoh: Flash Sale Siang VIP Room" />
         </el-form-item>
         <el-form-item label="Tipe Ruangan">
-          <el-select v-model="fsRoomTemplateId" style="width:100%" placeholder="Pilih tipe ruangan">
+          <el-select v-model="fsRoomTemplateId" class="u-w-full" placeholder="Pilih tipe ruangan">
             <el-option v-for="t in roomTemplates" :key="t.id" :label="t.name" :value="t.id" />
           </el-select>
         </el-form-item>
@@ -506,25 +506,25 @@
             v-model="fsForm.price_per_hour"
             :min="0"
             :step="5000"
-            style="width:100%"
+            class="u-w-full"
             :formatter="v => `Rp ${String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.')}`"
             :parser="v => v.replace(/Rp\s?|\./g, '')"
           />
         </el-form-item>
         <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
           <el-form-item label="Tanggal Mulai">
-            <el-date-picker v-model="fsForm.date_from" type="date" value-format="YYYY-MM-DD" style="width:100%" />
+            <el-date-picker v-model="fsForm.date_from" type="date" value-format="YYYY-MM-DD" class="u-w-full" />
           </el-form-item>
           <el-form-item label="Tanggal Selesai">
-            <el-date-picker v-model="fsForm.date_to" type="date" value-format="YYYY-MM-DD" style="width:100%" />
+            <el-date-picker v-model="fsForm.date_to" type="date" value-format="YYYY-MM-DD" class="u-w-full" />
           </el-form-item>
         </div>
         <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
           <el-form-item label="Jam Mulai">
-            <el-time-picker v-model="fsForm.time_from" format="HH:mm" value-format="HH:mm" style="width:100%" />
+            <el-time-picker v-model="fsForm.time_from" format="HH:mm" value-format="HH:mm" class="u-w-full" />
           </el-form-item>
           <el-form-item label="Jam Selesai">
-            <el-time-picker v-model="fsForm.time_to" format="HH:mm" value-format="HH:mm" style="width:100%" />
+            <el-time-picker v-model="fsForm.time_to" format="HH:mm" value-format="HH:mm" class="u-w-full" />
           </el-form-item>
         </div>
         <el-form-item label="Status">
@@ -949,7 +949,7 @@ onMounted(async () => {
 .priority-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
 .priority-num {
   width:22px; height:22px; border-radius:50%;
-  background:var(--color-primary); color:#fff;
+  background:var(--color-primary); color:var(--text-on-action);
   display:flex; align-items:center; justify-content:center;
   font-size:11px; font-weight:700; flex-shrink:0;
 }
@@ -977,4 +977,29 @@ onMounted(async () => {
   border-radius:6px; padding:8px 10px; font-size:12px; color:var(--warning);
   display:flex; align-items:flex-start; gap:6px;
 }
+
+/* C3: former inline styles */
+.input-invalid { border-color: var(--danger); }
+.event-star { color: var(--warning); }
+.ok-icon { color: var(--success); flex-shrink: 0; }
+.calc-row { display: flex; align-items: flex-end; gap: var(--space-3); max-width: 400px; }
+.row-actions { display: flex; gap: var(--space-1); justify-content: flex-end; }
+.split-row { display: flex; justify-content: space-between; }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4); }
+.split-row-spaced { display: flex; justify-content: space-between; margin-bottom: var(--space-1); }
+.grow-flush { flex: 1; margin: 0; }
+.empty-note { font-size: var(--font-size-xs); color: var(--text-muted); margin-bottom: var(--space-3); padding: var(--space-3); background: var(--surface-page); border-radius: var(--radius-lg); text-align: center; }
+.label-xs { font-size: var(--font-size-xs); font-weight: 600; color: var(--text-primary); }
+.label-sm { font-size: var(--font-size-sm); font-weight: 600; color: var(--text-primary); }
+.fw-medium { font-weight: 500; }
+.cell-text { font-weight: 500; font-size: var(--font-size-sm); }
+.value-strong { font-weight: 600; color: var(--text-primary); }
+.card-title { font-weight: 600; font-size: var(--font-size-base); }
+.push-right { margin-left: auto; }
+.rules-note { margin-top: var(--space-3); font-size: var(--font-size-xs); color: var(--text-secondary); line-height: 1.7; }
+.calc-card { margin-top: var(--space-4); max-width: 700px; }
+.section-divider { margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+.flush-list { padding: 0; margin-bottom: var(--space-2); }
+.input-price { width: 120px; }
+.input-date { width: 180px; }
 </style>

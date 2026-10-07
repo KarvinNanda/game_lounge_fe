@@ -2,29 +2,29 @@
   <!-- Detail Booking Panel -->
   <div class="right-panel">
     <div class="panel-header">
-      <span style="font-size:13px;font-weight:700;letter-spacing:0.5px">DETAIL BOOKING</span>
+      <span class="panel-title">DETAIL BOOKING</span>
       <el-button circle text @click="emit('close')"><el-icon><Close /></el-icon></el-button>
     </div>
 
     <!-- Status badge -->
-    <el-tag :type="getStatusTagType(booking.status)" style="margin-bottom:14px">
+    <el-tag :type="getStatusTagType(booking.status)" class="u-mb-3">
       {{ booking.status?.toUpperCase() }}
     </el-tag>
 
     <!-- Customer info -->
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:12px;background:var(--bg-main);border-radius:8px">
-      <el-avatar :size="42" style="background:linear-gradient(135deg,#0282DE,#0262b0);font-weight:700">
+    <div class="customer-card">
+      <el-avatar class="customer-avatar" :size="42">
         {{ booking.customer_name?.[0]?.toUpperCase() }}
       </el-avatar>
       <div>
-        <div style="font-weight:700;font-size:14px">{{ booking.customer_name }}</div>
+        <div class="customer-name">{{ booking.customer_name }}</div>
         <el-tag v-if="booking.customer?.type" size="small"
           :type="booking.customer?.type === 'member' ? 'warning' : 'info'"
-          style="margin-top:2px">
+          class="u-mt-1">
           {{ booking.customer?.type === 'member' ? 'Member' : 'Regular' }}
         </el-tag>
-        <div v-if="booking.customer_whatsapp" style="font-size:11px;color:var(--text-secondary);margin-top:2px">
-          📱 {{ booking.customer_whatsapp }}
+        <div v-if="booking.customer_whatsapp" class="u-text-xs u-text-secondary u-mt-1">
+          <el-icon aria-hidden="true"><Iphone /></el-icon> {{ booking.customer_whatsapp }}
         </div>
       </div>
     </div>
@@ -34,7 +34,7 @@
     <div class="info-grid">
       <div class="info-row">
         <span>Booking ID</span>
-        <strong style="font-family:monospace;color:var(--color-primary)">{{ booking.booking_code }}</strong>
+        <strong class="booking-code">{{ booking.booking_code }}</strong>
       </div>
       <div class="info-row">
         <span>Room</span>
@@ -50,18 +50,21 @@
       </div>
       <div class="info-row">
         <span>Total Harga</span>
-        <strong style="color:var(--color-primary)">{{ formatRp(booking.total_price) }}</strong>
+        <strong class="u-text-action">{{ formatRp(booking.total_price) }}</strong>
       </div>
       <div class="info-row">
         <span>Payment</span>
-        <span>{{ booking.payment_method === 'play_credits' ? '🎮 Play Credits' : '💵 Cash' }}</span>
+        <span>
+          <el-icon aria-hidden="true"><component :is="booking.payment_method === 'play_credits' ? 'Coin' : 'Money'" /></el-icon>
+          {{ booking.payment_method === 'play_credits' ? 'Play Credits' : 'Cash' }}
+        </span>
       </div>
     </div>
 
     <!-- Cancel reason (if cancelled) -->
-    <div v-if="booking.status === 'cancelled'"
-         style="margin-top:12px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;padding:10px;font-size:12px;color:var(--color-danger)">
-      <div style="font-weight:700;margin-bottom:4px">Alasan Pembatalan</div>
+    <div class="cancel-note" v-if="booking.status === 'cancelled'"
+        >
+      <div class="u-fw-bold u-mb-1">Alasan Pembatalan</div>
       {{ booking.cancel_reason || '-' }}
     </div>
 
@@ -73,22 +76,22 @@
 
     <!-- Aksi Cepat -->
     <div v-if="booking.status !== 'cancelled' && booking.status !== 'completed' && (can('bookings.edit') || can('bookings.cancel'))"
-         style="margin-top:16px">
+         class="u-mt-4">
       <div class="info-section-title">AKSI CEPAT</div>
-      <el-button v-if="can('bookings.edit')" style="width:100%;margin-bottom:8px;justify-content:flex-start" plain
+      <el-button class="action-btn" v-if="can('bookings.edit')" plain
         @click="openCompleteConfirm">
         <el-icon><CircleCheck /></el-icon> Mark as Completed
       </el-button>
-      <el-button v-if="can('bookings.cancel') && !hasStarted(booking)" type="danger" plain style="width:100%;justify-content:flex-start"
+      <el-button class="action-btn-last" v-if="can('bookings.cancel') && !hasStarted(booking)" type="danger" plain
         @click="openCancelForm">
         <el-icon><CircleClose /></el-icon> Cancel Booking
       </el-button>
     </div>
 
     <!-- Catatan -->
-    <div style="margin-top:16px" v-if="booking.notes">
+    <div class="u-mt-4" v-if="booking.notes">
       <div class="info-section-title">CATATAN</div>
-      <p style="font-size:12px;color:var(--text-secondary);background:var(--bg-main);padding:10px;border-radius:6px">
+      <p class="notes-box">
         {{ booking.notes }}
       </p>
     </div>
@@ -104,9 +107,9 @@
            DIALOG: Cancel Booking
       ════════════════════════════════════════════════════════ -->
       <el-dialog v-model="showCancelDialog" title="Batalkan Booking" width="400px" align-center>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">
+        <p class="u-text-sm u-text-secondary u-mb-3">
           Masukkan alasan pembatalan booking
-          <strong style="color:var(--text-primary)">{{ booking?.booking_code }}</strong>.
+          <strong class="value-strong">{{ booking?.booking_code }}</strong>.
         </p>
         <el-form :model="cancelForm" ref="cancelFormRef">
           <el-form-item prop="reason" :rules="[{ required: true, min: 5, message: 'Alasan minimal 5 karakter', trigger: 'blur' }]">
@@ -197,4 +200,16 @@ const openCompleteConfirm = async () => {
   font-size: 12px; font-weight: 700; color: var(--warning);
   display: flex; align-items: center; gap: 7px; margin-top: 10px;
 }
+
+/* C3: former inline styles */
+.panel-title { font-size: var(--font-size-sm); font-weight: 700; letter-spacing: 0.5px; }
+.customer-card { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); padding: var(--space-3); background: var(--surface-page); border-radius: var(--radius-lg); }
+.customer-avatar { background: linear-gradient(135deg, var(--action), var(--action-hover)); font-weight: 700; }
+.customer-name { font-weight: 700; font-size: var(--font-size-base); }
+.booking-code { font-family: monospace; color: var(--action); }
+.cancel-note { margin-top: var(--space-3); background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-lg); padding: var(--space-2); font-size: var(--font-size-xs); color: var(--danger); }
+.action-btn { width: 100%; margin-bottom: var(--space-2); justify-content: flex-start; }
+.action-btn-last { width: 100%; justify-content: flex-start; }
+.notes-box { font-size: var(--font-size-xs); color: var(--text-secondary); background: var(--surface-page); padding: var(--space-2); border-radius: var(--radius-md); }
+.value-strong { color: var(--text-primary); }
 </style>

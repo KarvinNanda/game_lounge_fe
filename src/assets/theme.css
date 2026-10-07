@@ -115,3 +115,9 @@ img { max-width: 100%; }
     animation-iteration-count: infinite !important;
   }
 }
+
+/* Card outlines use the token border; local copies with !important were removed in C3. */
+.el-card.table-card,
+.el-card.form-card,
+.el-card.detail-card,
+.el-card.global-holiday-card { border-color: var(--border); }

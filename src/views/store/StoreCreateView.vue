@@ -8,7 +8,7 @@
     />
 
     <!-- Steps -->
-    <el-card shadow="never" class="steps-card" style="margin-bottom:20px">
+    <el-card shadow="never" class="steps-card step-intro">
       <el-steps :active="currentStep" finish-status="success" align-center>
         <el-step :title="isMobile ? 'Informasi' : 'Informasi Cabang'" />
         <el-step :title="isMobile ? 'Jam' : 'Jam Operasional'" />
@@ -20,13 +20,13 @@
     <!-- ── Step 0: Info Cabang ── -->
     <el-card shadow="never" v-show="currentStep === 0">
       <div class="step-header">
-        <el-icon size="26" style="color:var(--color-primary)"><Shop /></el-icon>
+        <el-icon size="26" class="u-text-action"><Shop /></el-icon>
         <div>
           <h3 class="step-title">Informasi Cabang</h3>
           <p class="step-desc">Masukkan informasi dasar cabang Anda.</p>
         </div>
       </div>
-      <el-form :model="form" :rules="infoRules" ref="infoFormRef" label-position="top" style="margin-top:20px">
+      <el-form class="step-section" :model="form" :rules="infoRules" ref="infoFormRef" label-position="top">
         <div class="two-col">
           <div>
             <el-form-item label="Nama Cabang *" prop="name">
@@ -52,11 +52,11 @@
             <el-form-item label="Status Cabang">
               <div class="status-toggle">
                 <div class="status-option" :class="{ active: form.status === 'active' }" @click="form.status = 'active'">
-                  <el-icon style="color:var(--color-success)"><CircleCheck /></el-icon>
+                  <el-icon class="u-text-success"><CircleCheck /></el-icon>
                   <div><div class="so-title">Aktif</div><div class="so-desc">Cabang dapat digunakan</div></div>
                 </div>
                 <div class="status-option" :class="{ active: form.status === 'inactive' }" @click="form.status = 'inactive'">
-                  <el-icon style="color:var(--color-danger)"><CircleClose /></el-icon>
+                  <el-icon class="u-text-danger"><CircleClose /></el-icon>
                   <div><div class="so-title">Nonaktif</div><div class="so-desc">Cabang tidak ditampilkan</div></div>
                 </div>
               </div>
@@ -66,10 +66,10 @@
           <div>
             <el-form-item label="Foto Cabang">
               <div class="photo-upload" :class="{ 'has-img': form.photo_preview }" @click="triggerPhotoInput" @dragover.prevent @drop.prevent="onPhotoDrop">
-                <input ref="photoInput" type="file" accept="image/jpeg,image/png,image/webp" style="display:none" @change="onPhotoChange" />
+                <input class="file-input-hidden" ref="photoInput" type="file" accept="image/jpeg,image/png,image/webp" @change="onPhotoChange" />
                 <template v-if="!form.photo_preview">
                   <div class="upload-placeholder">
-                    <el-icon size="32" style="color:var(--color-primary)"><UploadFilled /></el-icon>
+                    <el-icon size="32" class="u-text-action"><UploadFilled /></el-icon>
                     <p class="up-title">Klik atau drag & drop foto</p>
                     <p class="up-hint">JPG, PNG, WEBP · Maks. 2MB · 1280×720 px</p>
                   </div>
@@ -90,14 +90,14 @@
     <!-- ── Step 1: Jam Operasional ── -->
     <el-card shadow="never" v-show="currentStep === 1">
       <div class="step-header">
-        <el-icon size="26" style="color:var(--color-primary)"><Clock /></el-icon>
+        <el-icon size="26" class="u-text-action"><Clock /></el-icon>
         <div>
           <h3 class="step-title">Jam Operasional</h3>
           <p class="step-desc">Atur jam buka dan tutup cabang Anda.</p>
         </div>
       </div>
       <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 280px', gap:'20px', marginTop:'20px' }">
-        <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="stack-md">
           <div class="hours-card">
             <div class="hours-header">
               <div>
@@ -107,8 +107,8 @@
               <el-switch v-model="form.weekday_active" />
             </div>
             <div v-if="form.weekday_active" class="hours-inputs">
-              <el-form-item label="Buka"><el-time-picker v-model="form.weekday_open" format="HH:mm" value-format="HH:mm" placeholder="10:00" style="width:100%" /></el-form-item>
-              <el-form-item label="Tutup"><el-time-picker v-model="form.weekday_close" format="HH:mm" value-format="HH:mm" placeholder="23:00" style="width:100%" /></el-form-item>
+              <el-form-item label="Buka"><el-time-picker v-model="form.weekday_open" format="HH:mm" value-format="HH:mm" placeholder="10:00" class="u-w-full" /></el-form-item>
+              <el-form-item label="Tutup"><el-time-picker v-model="form.weekday_close" format="HH:mm" value-format="HH:mm" placeholder="23:00" class="u-w-full" /></el-form-item>
             </div>
           </div>
 
@@ -121,8 +121,8 @@
               <el-switch v-model="form.weekend_active" />
             </div>
             <div v-if="form.weekend_active" class="hours-inputs">
-              <el-form-item label="Buka"><el-time-picker v-model="form.weekend_open" format="HH:mm" value-format="HH:mm" placeholder="10:00" style="width:100%" /></el-form-item>
-              <el-form-item label="Tutup"><el-time-picker v-model="form.weekend_close" format="HH:mm" value-format="HH:mm" placeholder="23:00" style="width:100%" /></el-form-item>
+              <el-form-item label="Buka"><el-time-picker v-model="form.weekend_open" format="HH:mm" value-format="HH:mm" placeholder="10:00" class="u-w-full" /></el-form-item>
+              <el-form-item label="Tutup"><el-time-picker v-model="form.weekend_close" format="HH:mm" value-format="HH:mm" placeholder="23:00" class="u-w-full" /></el-form-item>
             </div>
           </div>
 
@@ -134,21 +134,21 @@
               </div>
               <el-switch v-model="form.holiday_active" />
             </div>
-            <div v-if="form.holiday_active" style="margin-top:12px">
-              <el-table :data="form.holidays" size="small" style="margin-bottom:8px">
+            <div v-if="form.holiday_active" class="u-mt-3">
+              <el-table :data="form.holidays" size="small" class="u-mb-2">
                 <el-table-column label="Tanggal" min-width="140">
                   <template #default="{ row }">
-                    <el-date-picker v-model="row.date" type="date" format="DD/MM/YYYY" value-format="YYYY-MM-DD" size="small" style="width:100%" />
+                    <el-date-picker v-model="row.date" type="date" format="DD/MM/YYYY" value-format="YYYY-MM-DD" size="small" class="u-w-full" />
                   </template>
                 </el-table-column>
                 <el-table-column label="Buka" width="110">
                   <template #default="{ row }">
-                    <el-time-picker v-model="row.open_time" format="HH:mm" value-format="HH:mm" size="small" style="width:100%" />
+                    <el-time-picker v-model="row.open_time" format="HH:mm" value-format="HH:mm" size="small" class="u-w-full" />
                   </template>
                 </el-table-column>
                 <el-table-column label="Tutup" width="110">
                   <template #default="{ row }">
-                    <el-time-picker v-model="row.close_time" format="HH:mm" value-format="HH:mm" size="small" style="width:100%" />
+                    <el-time-picker v-model="row.close_time" format="HH:mm" value-format="HH:mm" size="small" class="u-w-full" />
                   </template>
                 </el-table-column>
                 <el-table-column width="50" align="center">
@@ -157,7 +157,7 @@
                   </template>
                 </el-table-column>
               </el-table>
-              <el-button plain style="width:100%" @click="form.holidays.push({ date:'', open_time:'10:00', close_time:'23:00' })">
+              <el-button plain class="u-w-full" @click="form.holidays.push({ date:'', open_time:'10:00', close_time:'23:00' })">
                 <el-icon><Plus /></el-icon> Tambah Tanggal
               </el-button>
             </div>
@@ -166,8 +166,8 @@
 
         <div class="info-box">
           <div class="info-box-title"><el-icon><InfoFilled /></el-icon> Info</div>
-          <p style="font-size:12px;color:var(--text-secondary);margin-bottom:10px">Jam operasional digunakan untuk:</p>
-          <div v-for="t in infoTips" :key="t" class="info-tip"><el-icon style="color:var(--color-primary);flex-shrink:0"><Check /></el-icon><span>{{ t }}</span></div>
+          <p class="u-text-xs u-text-secondary u-mb-2">Jam operasional digunakan untuk:</p>
+          <div v-for="t in infoTips" :key="t" class="info-tip"><el-icon class="accent-icon"><Check /></el-icon><span>{{ t }}</span></div>
         </div>
       </div>
     </el-card>
@@ -175,7 +175,7 @@
     <!-- ── Step 2: Room Setup ── -->
     <el-card shadow="never" v-show="currentStep === 2">
       <div class="step-header">
-        <el-icon size="26" style="color:var(--color-primary)"><Grid /></el-icon>
+        <el-icon size="26" class="u-text-action"><Grid /></el-icon>
         <div>
           <h3 class="step-title">{{ isEdit ? 'Manajemen Ruangan' : 'Room Setup' }}</h3>
           <p class="step-desc">{{ isEdit ? 'Aktifkan / nonaktifkan ruangan per tipe. Ruangan nonaktif tidak bisa dibooking.' : 'Pilih tipe ruangan yang tersedia di cabang ini dan tentukan jumlah unitnya.' }}</p>
@@ -183,15 +183,15 @@
       </div>
 
       <!-- ── EDIT MODE: Manajemen Ruangan with tabs ── -->
-      <div v-if="isEdit" style="margin-top:20px">
+      <div class="step-section" v-if="isEdit">
         <!-- Summary bar -->
         <div class="room-summary-bar">
           <span>Total: <strong>{{ storeRooms.length }}</strong> ruangan</span>
-          <span style="color:var(--color-success)">Aktif: <strong>{{ storeRooms.filter(r => r.is_active).length }}</strong></span>
-          <span style="color:var(--text-secondary)">Nonaktif: <strong>{{ storeRooms.filter(r => !r.is_active).length }}</strong></span>
+          <span class="u-text-success">Aktif: <strong>{{ storeRooms.filter(r => r.is_active).length }}</strong></span>
+          <span class="u-text-secondary">Nonaktif: <strong>{{ storeRooms.filter(r => !r.is_active).length }}</strong></span>
         </div>
 
-        <div v-if="roomGroupsByTemplate.length === 0" style="text-align:center;padding:32px;color:var(--text-muted);font-size:13px">
+        <div class="list-empty" v-if="roomGroupsByTemplate.length === 0">
           Tidak ada ruangan di cabang ini.
         </div>
 
@@ -230,43 +230,43 @@
       </div>
 
       <!-- ── CREATE MODE: Room template selection ── -->
-      <div v-else style="margin-top:20px">
+      <div class="step-section" v-else>
         <!-- Desktop/Tablet table -->
-        <el-table v-if="!isMobile" :data="roomTemplates" style="width:100%" v-loading="roomsLoading">
+        <el-table v-if="!isMobile" :data="roomTemplates" class="u-w-full" v-loading="roomsLoading">
           <el-table-column width="50">
             <template #default="{ row }"><el-checkbox v-model="row.selected" /></template>
           </el-table-column>
           <el-table-column label="Tipe Room" min-width="220">
             <template #default="{ row }">
-              <div style="display:flex;align-items:center;gap:12px">
+              <div class="u-flex u-gap-3">
                 <div class="room-thumb">
                   <img v-if="row.image_url" :src="getImageUrl(row.image_url)" />
-                  <el-icon v-else size="16" style="color:var(--text-muted)"><Picture /></el-icon>
+                  <el-icon v-else size="16" class="u-text-muted"><Picture /></el-icon>
                 </div>
                 <div>
-                  <div style="font-weight:600;font-size:13px">{{ row.name }}</div>
-                  <div style="font-size:11px;color:var(--text-secondary)">{{ row.capacity_min }}–{{ row.capacity_max }} orang</div>
+                  <div class="u-fw-semibold u-text-sm">{{ row.name }}</div>
+                  <div class="u-text-xs u-text-secondary">{{ row.capacity_min }}–{{ row.capacity_max }} orang</div>
                 </div>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="Fasilitas" min-width="180">
             <template #default="{ row }">
-              <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
-                <img v-for="f in row.facilities?.slice(0,4)" :key="f.id" :src="getImageUrl(f.icon_url)" :title="f.name" style="width:20px;height:20px;object-fit:contain;border-radius:3px;background:var(--bg-main)" />
-                <span v-if="row.facilities?.length > 4" style="font-size:11px;color:var(--text-secondary)">+{{ row.facilities.length - 4 }}</span>
-                <span v-if="!row.facilities?.length" style="font-size:12px;color:var(--text-muted)">—</span>
+              <div class="tag-list">
+                <img class="facility-icon" v-for="f in row.facilities?.slice(0,4)" :key="f.id" :src="getImageUrl(f.icon_url)" :title="f.name" />
+                <span v-if="row.facilities?.length > 4" class="u-text-xs u-text-secondary">+{{ row.facilities.length - 4 }}</span>
+                <span v-if="!row.facilities?.length" class="u-text-xs u-text-muted">—</span>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="Jumlah Unit" width="160">
             <template #default="{ row }">
-              <div v-if="row.selected" style="display:flex;align-items:center;gap:6px">
+              <div v-if="row.selected" class="u-flex u-gap-1">
                 <el-button size="small" circle plain @click="row.unit_count = Math.max(1, row.unit_count - 1)"><el-icon><Minus /></el-icon></el-button>
-                <span style="width:28px;text-align:center;font-weight:700;font-size:14px">{{ row.unit_count }}</span>
+                <span class="hour-day-index">{{ row.unit_count }}</span>
                 <el-button size="small" circle plain @click="row.unit_count++"><el-icon><Plus /></el-icon></el-button>
               </div>
-              <span v-else style="color:var(--text-muted);font-size:12px">—</span>
+              <span v-else class="u-text-muted u-text-xs">—</span>
             </template>
           </el-table-column>
         </el-table>
@@ -274,27 +274,27 @@
         <!-- Mobile card list -->
         <div v-else v-loading="roomsLoading" class="room-card-list">
           <div v-for="row in roomTemplates" :key="row.id" class="room-card" :class="{ selected: row.selected }" @click="row.selected = !row.selected">
-            <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+            <div class="row-main">
               <el-checkbox v-model="row.selected" @click.stop />
               <div class="room-thumb">
                 <img v-if="row.image_url" :src="getImageUrl(row.image_url)" />
-                <el-icon v-else size="16" style="color:var(--text-muted)"><Picture /></el-icon>
+                <el-icon v-else size="16" class="u-text-muted"><Picture /></el-icon>
               </div>
-              <div style="min-width:0">
-                <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ row.name }}</div>
-                <div style="font-size:11px;color:var(--text-secondary)">{{ row.capacity_min }}–{{ row.capacity_max }} orang</div>
+              <div class="min-w-0">
+                <div class="room-name">{{ row.name }}</div>
+                <div class="u-text-xs u-text-secondary">{{ row.capacity_min }}–{{ row.capacity_max }} orang</div>
               </div>
             </div>
-            <div v-if="row.selected" style="display:flex;align-items:center;gap:6px;flex-shrink:0" @click.stop>
+            <div class="row-tools" v-if="row.selected" @click.stop>
               <el-button size="small" circle plain @click="row.unit_count = Math.max(1, row.unit_count - 1)"><el-icon><Minus /></el-icon></el-button>
-              <span style="width:28px;text-align:center;font-weight:700;font-size:14px">{{ row.unit_count }}</span>
+              <span class="hour-day-index">{{ row.unit_count }}</span>
               <el-button size="small" circle plain @click="row.unit_count++"><el-icon><Plus /></el-icon></el-button>
             </div>
           </div>
         </div>
 
-        <div class="info-box" style="margin-top:12px;flex-direction:row;align-items:center;gap:8px">
-          <el-icon style="color:var(--color-info)"><InfoFilled /></el-icon>
+        <div class="info-box room-row-actions">
+          <el-icon class="u-text-action"><InfoFilled /></el-icon>
           <span>Jumlah unit = banyaknya ruangan dengan tipe yang sama di cabang ini.</span>
         </div>
       </div><!-- end v-else create mode -->
@@ -304,7 +304,7 @@
     <!-- ── Step 3: Review ── -->
     <el-card shadow="never" v-show="currentStep === 3">
       <div class="step-header">
-        <el-icon size="26" style="color:var(--color-primary)"><Finished /></el-icon>
+        <el-icon size="26" class="u-text-action"><Finished /></el-icon>
         <div>
           <h3 class="step-title">Review & Konfirmasi</h3>
           <p class="step-desc">Periksa kembali sebelum menyimpan.</p>
@@ -313,29 +313,29 @@
       <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px', marginTop:'20px' }">
         <div class="review-box">
           <div class="review-title">Informasi Cabang</div>
-          <div style="display:flex;gap:12px;margin-top:10px">
-            <img v-if="form.photo_preview" :src="form.photo_preview" style="width:80px;height:60px;border-radius:8px;object-fit:cover;flex-shrink:0" />
-            <div style="display:flex;flex-direction:column;gap:6px">
+          <div class="form-row">
+            <img class="review-photo" v-if="form.photo_preview" :src="form.photo_preview" />
+            <div class="stack-sm">
               <div class="rv-row"><span>Nama</span><span>{{ form.name || '—' }}</span></div>
               <div class="rv-row"><span>WhatsApp</span><span>{{ form.whatsapp || '—' }}</span></div>
               <div class="rv-row"><span>Status</span><el-tag :type="form.status === 'active' ? 'success' : 'danger'" size="small">{{ form.status }}</el-tag></div>
             </div>
           </div>
-          <div class="rv-row" style="margin-top:8px"><span>Alamat</span><span style="text-align:right;max-width:180px">{{ form.address || '—' }}</span></div>
+          <div class="rv-row u-mt-2"><span>Alamat</span><span class="review-value">{{ form.address || '—' }}</span></div>
         </div>
 
         <div class="review-box">
           <div class="review-title">Jam Operasional</div>
-          <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px">
+          <div class="stack-sm-spaced">
             <div class="rv-row"><span>Senin – Kamis</span><span>{{ form.weekday_active ? `${form.weekday_open} – ${form.weekday_close}` : '—' }}</span></div>
             <div class="rv-row"><span>Jumat – Minggu</span><span>{{ form.weekend_active ? `${form.weekend_open} – ${form.weekend_close}` : '—' }}</span></div>
             <div class="rv-row"><span>Hari Libur</span><span>{{ form.holidays.length }} tanggal</span></div>
           </div>
         </div>
       </div>
-      <div class="review-box" style="margin-top:12px">
+      <div class="review-box u-mt-3">
         <div class="review-title">Room Setup — {{ selectedRooms.length }} tipe dipilih</div>
-        <el-table :data="selectedRooms" size="small" style="margin-top:10px">
+        <el-table :data="selectedRooms" size="small" class="u-mt-2">
           <el-table-column label="Room" prop="name" min-width="160" />
           <el-table-column label="Kapasitas" width="120"><template #default="{ row }">{{ row.capacity_min }}–{{ row.capacity_max }} orang</template></el-table-column>
           <el-table-column label="Jumlah Unit" width="110"><template #default="{ row }">{{ row.unit_count }} unit</template></el-table-column>
@@ -658,4 +658,25 @@ onMounted(async () => {
   :deep(.el-step__title) { font-size:11px; }
   :deep(.el-steps) { padding:0 4px; }
 }
+
+/* C3: former inline styles */
+.step-section { margin-top: var(--space-5); }
+.hour-day-index { width: 28px; text-align: center; font-weight: 700; font-size: var(--font-size-base); }
+.review-photo { width: 80px; height: 60px; border-radius: var(--radius-lg); object-fit: cover; flex-shrink: 0; }
+.facility-icon { width: 20px; height: 20px; object-fit: contain; border-radius: var(--radius-sm); background: var(--surface-page); }
+.review-value { text-align: right; max-width: 180px; }
+.list-empty { text-align: center; padding: calc(var(--space-4) * 2); color: var(--text-muted); font-size: var(--font-size-sm); }
+.min-w-0 { min-width: 0; }
+.room-row-actions { margin-top: var(--space-3); flex-direction: row; align-items: center; gap: var(--space-2); }
+.step-intro { margin-bottom: var(--space-5); }
+.room-name { font-weight: 600; font-size: var(--font-size-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-input-hidden { display: none; }
+.tag-list { display: flex; gap: var(--space-1); flex-wrap: wrap; align-items: center; }
+.form-row { display: flex; gap: var(--space-3); margin-top: var(--space-2); }
+.stack-sm-spaced { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-2); }
+.stack-sm { display: flex; flex-direction: column; gap: var(--space-1); }
+.stack-md { display: flex; flex-direction: column; gap: var(--space-3); }
+.row-tools { display: flex; align-items: center; gap: var(--space-1); flex-shrink: 0; }
+.row-main { display: flex; align-items: center; gap: var(--space-3); flex: 1; min-width: 0; }
+.accent-icon { color: var(--action); flex-shrink: 0; }
 </style>

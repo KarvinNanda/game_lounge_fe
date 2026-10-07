@@ -2,11 +2,11 @@
   <!-- Event Detail Panel -->
   <div class="right-panel">
     <div class="panel-header">
-      <span style="font-size:14px;font-weight:700">DETAIL EVENT</span>
+      <span class="panel-title">DETAIL EVENT</span>
       <el-button circle text @click="emit('close')"><el-icon><Close /></el-icon></el-button>
     </div>
 
-    <el-tag type="warning" style="margin-bottom:12px">
+    <el-tag type="warning" class="u-mb-3">
       <el-icon><Star /></el-icon> {{ event.status?.toUpperCase() }}
     </el-tag>
 
@@ -14,10 +14,10 @@
     <div class="info-grid">
       <div class="info-row"><span>Nama Event</span><strong>{{ event.event_name }}</strong></div>
       <div v-if="event?.description" class="detail-row">
-        <span class="detail-label" style="color:var(--text-secondary);font-size:12px">
+        <span class="detail-label u-text-secondary u-text-xs">
           Deskripsi
         </span>
-        <p style="margin:0;font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word">
+        <p class="event-description">
           {{ event.description }}
         </p>
       </div>
@@ -29,20 +29,20 @@
       </div>
       <div class="info-row">
         <span>Total Harga</span>
-        <strong style="color:var(--color-primary)">{{ formatRp(event.total_price) }}</strong>
+        <strong class="u-text-action">{{ formatRp(event.total_price) }}</strong>
       </div>
     </div>
 
     <div v-if="event.status !== 'cancelled' && event.status !== 'completed'"
-         style="margin-top:16px">
+         class="u-mt-4">
       <div class="info-section-title">AKSI</div>
-      <el-button type="danger" plain style="width:100%" @click="openCancelEventForm">
+      <el-button type="danger" plain class="u-w-full" @click="openCancelEventForm">
         <el-icon><CircleClose /></el-icon> Batalkan Event
       </el-button>
     </div>
 
     <div v-if="event.cancel_reason" class="cancel-info">
-      <div style="font-weight:600;margin-bottom:4px">Alasan Pembatalan</div>
+      <div class="u-fw-semibold u-mb-1">Alasan Pembatalan</div>
       {{ event.cancel_reason }}
     </div>
 
@@ -50,9 +50,9 @@
            DIALOG: Cancel Event Booking
       ════════════════════════════════════════════════════════ -->
       <el-dialog v-model="showCancelEventDialog" title="Batalkan Event Booking" width="400px" align-center>
-        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:14px">
+        <p class="u-text-sm u-text-secondary u-mb-3">
           Masukkan alasan pembatalan event
-          <strong style="color:var(--text-primary)">{{ event?.event_name }}</strong>.
+          <strong class="value-strong">{{ event?.event_name }}</strong>.
         </p>
         <el-form :model="cancelEventForm" ref="cancelEventFormRef">
           <el-form-item prop="reason"
@@ -134,4 +134,9 @@ const handleCancelEvent = async () => {
   font-size: 12px;
   color: var(--color-danger);
 }
+
+/* C3: former inline styles */
+.panel-title { font-size: var(--font-size-base); font-weight: 700; }
+.event-description { margin: 0; font-size: var(--font-size-sm); line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.value-strong { color: var(--text-primary); }
 </style>

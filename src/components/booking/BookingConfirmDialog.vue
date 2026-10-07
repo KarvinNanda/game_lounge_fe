@@ -2,13 +2,13 @@
   <el-dialog :model-value="modelValue" title="KONFIRMASI BOOKING" width="420px" align-center @update:model-value="emit('update:modelValue', $event)">
     <div v-if="priceCalc">
       <!-- Customer summary -->
-      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-main);border-radius:8px;margin-bottom:16px">
-        <el-avatar :size="40" style="background:linear-gradient(135deg,#0282DE,#0262b0);font-weight:700;flex-shrink:0">
+      <div class="customer-card">
+        <el-avatar class="customer-avatar" :size="40">
           {{ form.customer_name?.[0]?.toUpperCase() }}
         </el-avatar>
         <div>
-          <div style="font-weight:700">{{ form.customer_name }}</div>
-          <div style="font-size:12px;color:var(--text-secondary)">
+          <div class="u-fw-bold">{{ form.customer_name }}</div>
+          <div class="u-text-xs u-text-secondary">
             {{ form.customer_whatsapp || form.customer_email || 'Walk-in' }}
           </div>
         </div>
@@ -24,26 +24,26 @@
         <span>{{ form.start_time }} – {{ form.end_time }} ({{ form.duration_hours }} Jam)</span>
       </div>
 
-      <div style="background:var(--bg-card-hover);border:1px solid var(--border-color);border-radius:8px;padding:12px;margin:12px 0">
-        <div v-for="item in priceCalc.breakdown" :key="item.time_range"
-             style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
-          <span style="color:var(--text-secondary)">{{ item.description }}</span>
+      <div class="price-box">
+        <div class="price-line" v-for="item in priceCalc.breakdown" :key="item.time_range"
+            >
+          <span class="u-text-secondary">{{ item.description }}</span>
           <span>{{ formatRp(item.amount) }}</span>
         </div>
-        <div v-if="priceCalc.has_flash_sale"
-             style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-danger);margin-bottom:5px">
-          <span>⚡ Flash Sale</span>
+        <div class="price-line-flash" v-if="priceCalc.has_flash_sale"
+            >
+          <span><el-icon aria-hidden="true"><Lightning /></el-icon> Flash Sale</span>
           <span>- {{ formatRp(priceCalc.flash_discount) }}</span>
         </div>
         <!-- Voucher discount di confirm modal -->
-        <div v-if="voucherDiscount && !voucherDiscount.invalid"
-             style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-success);margin-bottom:5px">
-          <span>🎟️ {{ voucherName }}</span>
+        <div class="price-line-voucher" v-if="voucherDiscount && !voucherDiscount.invalid"
+            >
+          <span><el-icon aria-hidden="true"><Ticket /></el-icon> {{ voucherName }}</span>
           <span>- {{ formatRp(voucherDiscount.amount) }}</span>
         </div>
-        <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border-color);font-weight:700">
+        <div class="price-total-row">
           <span>Total Bayar</span>
-          <span style="font-size:16px" :style="{ color: voucherDiscount && !voucherDiscount.invalid ? 'var(--color-success)' : 'var(--color-primary)' }">
+          <span class="price-total-amount" :style="{ color: voucherDiscount && !voucherDiscount.invalid ? 'var(--color-success)' : 'var(--color-primary)' }">
             {{ formatRp(voucherDiscount && !voucherDiscount.invalid ? voucherDiscount.finalPrice : priceCalc.final_price) }}
           </span>
         </div>
@@ -51,11 +51,14 @@
 
       <div class="confirm-row">
         <span>Payment</span>
-        <span>{{ form.payment_method === 'play_credits' ? '🎮 Play Credits' : '💵 Cash' }}</span>
+        <span>
+          <el-icon aria-hidden="true"><component :is="form.payment_method === 'play_credits' ? 'Coin' : 'Money'" /></el-icon>
+          {{ form.payment_method === 'play_credits' ? 'Play Credits' : 'Cash' }}
+        </span>
       </div>
       <div v-if="form.voucher_code" class="confirm-row">
         <span>Voucher</span>
-        <span style="font-family:monospace;font-weight:700;color:var(--color-primary)">{{ form.voucher_code }}</span>
+        <span class="voucher-code">{{ form.voucher_code }}</span>
       </div>
     </div>
 
@@ -94,4 +97,15 @@ const emit = defineEmits(['update:modelValue', 'confirm'])
 }
 .confirm-row > span:last-child,
 .confirm-row > strong { color: var(--text-primary); font-weight: 700; font-size: 13px; text-align: right; }
+
+/* C3: former inline styles */
+.customer-card { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--surface-page); border-radius: var(--radius-lg); margin-bottom: var(--space-4); }
+.customer-avatar { background: linear-gradient(135deg, var(--action), var(--action-hover)); font-weight: 700; flex-shrink: 0; }
+.price-box { background: var(--surface-muted); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-3); margin: var(--space-3) 0; }
+.price-line { display: flex; justify-content: space-between; font-size: var(--font-size-xs); margin-bottom: var(--space-1); }
+.price-line-flash { display: flex; justify-content: space-between; font-size: var(--font-size-xs); color: var(--danger); margin-bottom: var(--space-1); }
+.price-line-voucher { display: flex; justify-content: space-between; font-size: var(--font-size-xs); color: var(--success); margin-bottom: var(--space-1); }
+.price-total-row { display: flex; justify-content: space-between; padding-top: var(--space-2); border-top: 1px solid var(--border); font-weight: 700; }
+.price-total-amount { font-size: var(--font-size-lg); }
+.voucher-code { font-family: monospace; font-weight: 700; color: var(--action); }
 </style>

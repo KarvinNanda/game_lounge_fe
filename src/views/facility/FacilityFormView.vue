@@ -18,7 +18,7 @@
           </el-form-item>
 
           <el-form-item label="Kategori" prop="category_id">
-            <el-select v-model="form.category_id" placeholder="Pilih kategori" style="width:100%">
+            <el-select v-model="form.category_id" placeholder="Pilih kategori" class="u-w-full">
               <el-option v-for="c in categories" :key="c.id" :label="c.name" :value="c.id" />
             </el-select>
             <div class="field-hint">
@@ -45,7 +45,7 @@
                 :class="{ active: form.is_active }"
                 @click="form.is_active = true"
               >
-                <el-icon style="color:var(--color-success)"><CircleCheck /></el-icon>
+                <el-icon class="u-text-success"><CircleCheck /></el-icon>
                 <div>
                   <div class="status-option-title">Aktif</div>
                   <div class="status-option-desc">Ditampilkan & dapat digunakan</div>
@@ -56,7 +56,7 @@
                 :class="{ active: !form.is_active }"
                 @click="form.is_active = false"
               >
-                <el-icon style="color:var(--color-danger)"><CircleClose /></el-icon>
+                <el-icon class="u-text-danger"><CircleClose /></el-icon>
                 <div>
                   <div class="status-option-title">Nonaktif</div>
                   <div class="status-option-desc">Disembunyikan dari store</div>
@@ -73,10 +73,10 @@
           <div class="form-section-title">Icon Fasilitas</div>
 
           <div class="icon-upload-area" :class="{ 'has-image': iconPreview }" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
-            <input ref="fileInput" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none" @change="onFileChange" />
+            <input class="file-input-hidden" ref="fileInput" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" @change="onFileChange" />
             <template v-if="!iconPreview">
               <div class="upload-placeholder">
-                <el-icon size="36" style="color:var(--color-primary)"><UploadFilled /></el-icon>
+                <el-icon size="36" class="u-text-action"><UploadFilled /></el-icon>
                 <p class="upload-title">Klik atau drag & drop icon</p>
                 <p class="upload-hint">PNG, JPG, SVG, WEBP · Maks. 2MB · Rekomendasi 512×512 px</p>
               </div>
@@ -94,13 +94,13 @@
                   <el-icon><Close /></el-icon>
                 </el-button>
               </div>
-              <p class="upload-hint" style="margin-top:8px">Klik untuk ganti icon</p>
+              <p class="upload-hint u-mt-2">Klik untuk ganti icon</p>
             </template>
           </div>
 
           <div class="icon-tips">
-            <div class="tip-item"><el-icon style="color:var(--color-primary)"><InfoFilled /></el-icon> Icon akan ditampilkan di daftar fasilitas room</div>
-            <div class="tip-item"><el-icon style="color:var(--color-primary)"><InfoFilled /></el-icon> Gunakan background transparan untuk tampilan terbaik</div>
+            <div class="tip-item"><el-icon class="u-text-action"><InfoFilled /></el-icon> Icon akan ditampilkan di daftar fasilitas room</div>
+            <div class="tip-item"><el-icon class="u-text-action"><InfoFilled /></el-icon> Gunakan background transparan untuk tampilan terbaik</div>
           </div>
         </el-card>
       </div>
@@ -236,7 +236,6 @@ onMounted(async () => {
 <style scoped>
 .form-layout { display:grid; grid-template-columns:1fr 320px; gap:16px; }
 @media (max-width:639px) { .form-layout { grid-template-columns:1fr; } }
-.form-card { border-color:var(--border-color) !important; }
 .form-section-title { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--border-color); }
 
 .field-hint { font-size:11px; color:var(--text-muted); margin-top:4px; }
@@ -290,4 +289,7 @@ onMounted(async () => {
   background:var(--bg-card); border:1px solid var(--border-color);
   border-radius:10px;
 }
+
+/* C3: former inline styles */
+.file-input-hidden { display: none; }
 </style>

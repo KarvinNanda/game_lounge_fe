@@ -18,16 +18,16 @@
     ]" />
 
     <!-- Filter -->
-    <el-card shadow="never" style="margin-top:16px">
+    <el-card shadow="never" class="u-mt-4">
       <FilterBar>
-        <el-input v-model="filters.search" placeholder="Cari nama atau kode voucher..."
-          prefix-icon="Search" style="width:260px" clearable @input="debounceSearch" />
-        <el-select v-model="filters.status" placeholder="Semua Status" clearable style="width:140px" @change="applyFilters">
+        <el-input class="filter-search" v-model="filters.search" placeholder="Cari nama atau kode voucher..."
+          prefix-icon="Search" clearable @input="debounceSearch" />
+        <el-select class="filter-status" v-model="filters.status" placeholder="Semua Status" clearable @change="applyFilters">
           <el-option label="Aktif" value="active" />
           <el-option label="Kadaluwarsa" value="expired" />
           <el-option label="Nonaktif" value="inactive" />
         </el-select>
-        <el-select v-model="filters.type" placeholder="Semua Jenis" clearable style="width:160px" @change="applyFilters">
+        <el-select class="filter-type" v-model="filters.type" placeholder="Semua Jenis" clearable @change="applyFilters">
           <el-option label="Booking Ruangan" value="booking" />
           <el-option label="Play Credits" value="play_credits" />
           <el-option label="Keduanya" value="both" />
@@ -39,11 +39,11 @@
     </el-card>
 
     <!-- Table -->
-    <el-card shadow="never" style="margin-top:14px">
+    <el-card shadow="never" class="u-mt-3">
       <div v-if="isMobile" class="m-card-list">
         <div class="m-card" v-for="row in voucherList" :key="row.id">
           <div class="m-card-icon" :style="{ background: getCodeColor(row.type) }">
-            <span style="font-size:9px;font-weight:800;color:var(--text-primary);letter-spacing:-0.5px">{{ row.code?.slice(0,4) }}</span>
+            <span class="code-chip">{{ row.code?.slice(0,4) }}</span>
           </div>
           <div class="m-card-body">
             <div class="m-card-title">{{ row.name }}</div>
@@ -53,7 +53,7 @@
           </div>
           <div class="m-card-end">
             <el-tag :type="getStatusTag(row.status)" size="small">{{ getStatusLabel(row.status) }}</el-tag>
-            <div style="display:flex;gap:4px">
+            <div class="m-card-actions">
               <el-button v-if="can('promotion.edit')" size="small" circle plain @click="openForm(row)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('promotion.edit')" size="small" circle plain type="danger" @click="handleDelete(row)"><el-icon><Delete /></el-icon></el-button>
             </div>
@@ -62,18 +62,18 @@
       </div>
 
       <div class="table-wrap">
-      <el-table :data="voucherList" v-loading="loading" size="small" style="width:100%">
+      <el-table :data="voucherList" v-loading="loading" size="small" class="u-w-full">
 
         <!-- Kode -->
         <el-table-column label="VOUCHER" min-width="200">
           <template #default="{ row }">
-            <div style="display:flex;align-items:center;gap:10px">
+            <div class="u-flex u-gap-2">
               <div class="code-badge" :style="{ background: getCodeColor(row.type) }">
                 {{ row.code }}
               </div>
               <div>
-                <div style="font-weight:600;font-size:13px">{{ row.name }}</div>
-                <div style="font-size:11px;color:var(--text-secondary)">{{ row.description || '-' }}</div>
+                <div class="u-fw-semibold u-text-sm">{{ row.name }}</div>
+                <div class="u-text-xs u-text-secondary">{{ row.description || '-' }}</div>
               </div>
             </div>
           </template>
@@ -89,8 +89,8 @@
         <!-- Target Ruangan -->
         <el-table-column label="RUANGAN" width="130" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
-            <span v-if="row.is_all_room_types" style="font-size:12px;color:var(--color-primary-light)">Semua</span>
-            <span v-else style="font-size:12px;color:var(--text-secondary)">
+            <span v-if="row.is_all_room_types" class="u-text-xs u-text-action">Semua</span>
+            <span v-else class="u-text-xs u-text-secondary">
               {{ row.room_templates?.map(rt => rt.name).join(', ') || '-' }}
             </span>
           </template>
@@ -100,10 +100,10 @@
         <el-table-column label="DISKON" width="150">
           <template #default="{ row }">
             <div>
-              <span style="font-weight:600">
+              <span class="u-fw-semibold">
                 {{ row.discount_type === 'percentage' ? row.discount_value + '%' : formatRp(row.discount_value) }}
               </span>
-              <div v-if="row.discount_type === 'percentage' && row.max_discount" style="font-size:10px;color:var(--text-secondary)">
+              <div v-if="row.discount_type === 'percentage' && row.max_discount" class="u-text-xs u-text-secondary">
                 Maks. {{ formatRp(row.max_discount) }}
               </div>
             </div>
@@ -113,9 +113,9 @@
         <!-- Berlaku -->
         <el-table-column label="BERLAKU" width="180" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
-            <div style="font-size:12px">
+            <div class="u-text-xs">
               <div>{{ formatDate(row.start_date) }}</div>
-              <div style="color:var(--text-secondary)">
+              <div class="u-text-secondary">
                 {{ row.end_date ? '– ' + formatDate(row.end_date) : '– Tanpa batas' }}
               </div>
             </div>
@@ -125,9 +125,9 @@
         <!-- Penggunaan -->
         <el-table-column label="PENGGUNAAN" width="140" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
-            <div style="font-size:12px">
-              <span style="font-weight:600;color:var(--color-primary)">{{ row.used_count }}</span>
-              <span style="color:var(--text-secondary)"> / {{ row.total_members }} member</span>
+            <div class="u-text-xs">
+              <span class="u-fw-semibold u-text-action">{{ row.used_count }}</span>
+              <span class="u-text-secondary"> / {{ row.total_members }} member</span>
             </div>
           </template>
         </el-table-column>
@@ -135,9 +135,9 @@
         <!-- Terkirim -->
         <el-table-column label="TERKIRIM" width="110" v-if="!isTablet && !isMobile">
           <template #default="{ row }">
-            <div style="display:flex;align-items:center;gap:4px;font-size:12px">
-              <span style="font-weight:600">{{ row.total_sent || 0 }}</span>
-              <span v-if="row.send_channel" style="color:var(--text-secondary)">
+            <div class="u-flex u-gap-1 u-text-xs">
+              <span class="u-fw-semibold">{{ row.total_sent || 0 }}</span>
+              <span v-if="row.send_channel" class="u-text-secondary">
                 <el-icon v-if="row.send_channel === 'email' || row.send_channel === 'all'" size="12"><Message /></el-icon>
                 <el-icon v-if="row.send_channel === 'whatsapp' || row.send_channel === 'all'" size="12"><ChatDotRound /></el-icon>
               </span>
@@ -157,7 +157,7 @@
         <!-- Aksi -->
         <el-table-column label="AKSI" width="110" fixed="right">
           <template #default="{ row }">
-            <div style="display:flex;gap:4px">
+            <div class="m-card-actions">
               <el-tooltip content="Detail" placement="top">
                 <el-button size="small" circle plain @click="viewDetail(row)">
                   <el-icon><View /></el-icon>
@@ -179,8 +179,8 @@
       </el-table>
 
       <!-- Pagination -->
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding-top:10px;border-top:1px solid var(--border-color)">
-        <span style="font-size:12px;color:var(--text-secondary)">
+      <div class="table-footer">
+        <span class="u-text-xs u-text-secondary">
           Menampilkan {{ voucherList.length }} dari {{ total }} data
         </span>
         <TablePagination
@@ -203,7 +203,7 @@
       :size="isMobile ? '100%' : '480px'"
       :destroy-on-close="true"
     >
-      <div style="padding:0 4px">
+      <div class="drawer-body">
         <el-form :model="form" :rules="formRules" ref="formRef" label-position="top">
 
           <!-- Nama -->
@@ -214,11 +214,11 @@
 
           <!-- Kode -->
           <el-form-item label="Kode Voucher *" prop="code">
-            <div style="display:flex;gap:8px;width:100%">
+            <div class="send-actions">
               <el-input
                 v-model="form.code"
                 placeholder="VIP10"
-                style="flex:1"
+                class="u-flex-1"
                 @input="form.code = form.code.toUpperCase()"
               />
               <el-button @click="handleGenerateCode" :loading="generatingCode">
@@ -234,59 +234,59 @@
           </el-form-item>
 
           <!-- Masa Berlaku -->
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="two-col">
             <el-form-item label="Tanggal Mulai *" prop="start_date">
               <el-date-picker v-model="form.start_date" type="date"
-                value-format="YYYY-MM-DD" style="width:100%" />
+                value-format="YYYY-MM-DD" class="u-w-full" />
             </el-form-item>
             <el-form-item label="Tanggal Berakhir">
               <el-date-picker v-model="form.end_date" type="date"
-                value-format="YYYY-MM-DD" style="width:100%"
+                value-format="YYYY-MM-DD" class="u-w-full"
                 :disabled="form.no_end_date" placeholder="Pilih tanggal" />
             </el-form-item>
           </div>
-          <el-checkbox
+          <el-checkbox class="field-hint-tight"
             v-model="form.no_end_date"
             @change="(v) => { if (v) form.end_date = '' }"
-            style="margin-top:-8px;margin-bottom:12px"
+           
           >
             Tanpa Tanggal Berakhir
           </el-checkbox>
 
           <!-- Jenis Voucher -->
           <el-form-item label="Jenis Voucher *" prop="type">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="two-col-tight">
               <div class="type-option" :class="{ active: form.type === 'booking' || form.type === 'both' }"
                 @click="form.type = form.type === 'both' ? 'play_credits' : (form.type === 'play_credits' ? 'both' : 'booking')">
                 <el-icon><Calendar /></el-icon>
                 <div>
-                  <div style="font-weight:600;font-size:12px">Booking Ruangan</div>
-                  <div style="font-size:10px;color:var(--text-secondary)">Diskon sewa ruangan</div>
+                  <div class="u-fw-semibold u-text-xs">Booking Ruangan</div>
+                  <div class="u-text-xs u-text-secondary">Diskon sewa ruangan</div>
                 </div>
               </div>
               <div class="type-option" :class="{ active: form.type === 'play_credits' || form.type === 'both' }"
                 @click="form.type = form.type === 'both' ? 'booking' : (form.type === 'booking' ? 'both' : 'play_credits')">
                 <el-icon><Coin /></el-icon>
                 <div>
-                  <div style="font-weight:600;font-size:12px">Play Credits</div>
-                  <div style="font-size:10px;color:var(--text-secondary)">Diskon beli credits</div>
+                  <div class="u-fw-semibold u-text-xs">Play Credits</div>
+                  <div class="u-text-xs u-text-secondary">Diskon beli credits</div>
                 </div>
               </div>
             </div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:6px">
+            <div class="u-text-xs u-text-muted u-mt-1">
               Aktifkan keduanya untuk voucher yang berlaku di booking dan play credits
             </div>
           </el-form-item>
 
           <!-- Diskon -->
           <el-form-item label="Tipe Diskon *" prop="discount_type">
-            <el-radio-group v-model="form.discount_type" style="display:flex;gap:16px">
+            <el-radio-group class="row-gap-lg" v-model="form.discount_type">
               <el-radio label="percentage">Persentase (%)</el-radio>
               <el-radio label="nominal">Nominal (Rp)</el-radio>
             </el-radio-group>
           </el-form-item>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="two-col">
             <el-form-item
               :label="form.discount_type === 'percentage' ? 'Nilai Diskon (%)' : 'Nilai Diskon (Rp)'"
               prop="discount_value"
@@ -295,13 +295,13 @@
                 v-model="form.discount_value"
                 :min="0"
                 :max="form.discount_type === 'percentage' ? 100 : undefined"
-                style="width:100%"
+                class="u-w-full"
               />
             </el-form-item>
             <el-form-item label="Maksimal Diskon (Rp)" v-if="form.discount_type === 'percentage'">
               <el-input-number
                 v-model="form.max_discount"
-                :min="0" style="width:100%"
+                :min="0" class="u-w-full"
                 :formatter="v => v ? `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ''"
                 :parser="v => v.replace(/Rp\s?|(\.*)/g, '')"
               />
@@ -309,7 +309,7 @@
             <el-form-item label="Minimum Pembelian (Rp)" v-else>
               <el-input-number
                 v-model="form.min_purchase"
-                :min="0" style="width:100%"
+                :min="0" class="u-w-full"
                 :formatter="v => v ? `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ''"
                 :parser="v => v.replace(/Rp\s?|(\.*)/g, '')"
               />
@@ -319,7 +319,7 @@
           <el-form-item v-if="form.discount_type === 'percentage'" label="Minimum Pembelian (Rp)">
             <el-input-number
               v-model="form.min_purchase"
-              :min="0" style="width:100%"
+              :min="0" class="u-w-full"
               :formatter="v => v ? `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ''"
               :parser="v => v.replace(/Rp\s?|(\.*)/g, '')"
             />
@@ -330,14 +330,14 @@
             <el-checkbox
               v-model="form.is_all_stores"
               @change="(v) => { if (v) form.store_ids = [] }"
-              style="margin-bottom:8px"
+              class="u-mb-2"
             >Semua Cabang</el-checkbox>
             <el-select
               v-if="!form.is_all_stores"
               v-model="form.store_ids"
               multiple
               placeholder="Pilih cabang"
-              style="width:100%"
+              class="u-w-full"
             >
               <el-option v-for="s in allStores" :key="s.id" :label="s.name" :value="s.id" />
             </el-select>
@@ -345,7 +345,7 @@
 
           <!-- Target Ruangan -->
           <el-form-item label="Target Ruangan">
-            <el-radio-group v-model="form.is_all_room_types" style="display:flex;gap:16px;margin-bottom:8px"
+            <el-radio-group class="row-gap-lg-spaced" v-model="form.is_all_room_types"
               @change="() => { if (form.is_all_room_types) voucherRoomTemplateIds.value = [] }">
               <el-radio :label="true">Semua Ruangan</el-radio>
               <el-radio :label="false">Ruangan Tertentu</el-radio>
@@ -359,7 +359,7 @@
                   class="room-type-checkbox"
                 >{{ rt.name }}</el-checkbox>
               </el-checkbox-group>
-              <div v-if="!roomTemplates.length" style="font-size:12px;color:var(--text-muted);padding:6px 0">
+              <div class="recipient-note" v-if="!roomTemplates.length">
                 Tidak ada tipe ruangan tersedia
               </div>
             </div>
@@ -396,14 +396,14 @@
             </div>
             <div
               v-if="!form.send_channel"
-              style="font-size:11px;color:var(--text-muted);margin-top:6px;display:flex;align-items:center;gap:4px"
+              class="u-flex u-text-xs u-text-muted u-mt-1 u-gap-1"
             >
               <el-icon size="12"><InfoFilled /></el-icon>
               Tidak dipilih = voucher dibuat tanpa mengirim notifikasi
             </div>
             <div
               v-else
-              style="font-size:11px;color:var(--color-success);margin-top:6px;display:flex;align-items:center;gap:4px"
+              class="u-flex u-text-xs u-text-success u-mt-1 u-gap-1"
             >
               <el-icon size="12"><CircleCheck /></el-icon>
               Notifikasi akan dikirim ke semua member aktif saat voucher disimpan
@@ -425,9 +425,9 @@
         />
 
         <!-- Footer -->
-        <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border-color)">
-          <el-button style="flex:1" @click="formVisible = false">Batal</el-button>
-          <el-button type="primary" style="flex:1" :loading="formLoading" @click="handleSubmit">
+        <div class="drawer-footer">
+          <el-button class="u-flex-1" @click="formVisible = false">Batal</el-button>
+          <el-button type="primary" class="u-flex-1" :loading="formLoading" @click="handleSubmit">
             <el-icon><Check /></el-icon>
             {{ editingVoucher ? 'Simpan Perubahan' : (form.send_channel ? 'Simpan & Kirim' : 'Simpan Voucher') }}
           </el-button>
@@ -445,21 +445,21 @@
         <div class="voucher-banner" :style="{ background: getBannerGradient(selectedVoucher.type) }">
           <div>
             <div class="code-badge-lg">{{ selectedVoucher.code }}</div>
-            <div style="font-size:18px;font-weight:800;color:#fff;margin-top:8px">{{ selectedVoucher.name }}</div>
-            <div v-if="selectedVoucher.description" style="font-size:12px;color:rgba(255,255,255,0.7);margin-top:4px">
+            <div class="banner-name">{{ selectedVoucher.name }}</div>
+            <div class="banner-sub" v-if="selectedVoucher.description">
               {{ selectedVoucher.description }}
             </div>
           </div>
-          <div style="text-align:right">
-            <div style="font-size:28px;font-weight:900;color:#fff">
+          <div class="text-right">
+            <div class="banner-value">
               {{ selectedVoucher.discount_type === 'percentage'
                 ? selectedVoucher.discount_value + '%'
                 : formatRp(selectedVoucher.discount_value) }}
             </div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.65)">
+            <div class="banner-label">
               {{ selectedVoucher.discount_type === 'percentage' ? 'Diskon' : 'Potongan' }}
             </div>
-            <el-tag :type="getStatusTag(selectedVoucher.status)" size="small" style="margin-top:6px">
+            <el-tag :type="getStatusTag(selectedVoucher.status)" size="small" class="u-mt-1">
               {{ getStatusLabel(selectedVoucher.status) }}
             </el-tag>
           </div>
@@ -488,19 +488,19 @@
           </div>
           <div class="detail-row">
             <span>Cabang</span>
-            <span v-if="selectedVoucher.is_all_stores" style="color:var(--color-primary-light)">Semua Cabang</span>
+            <span v-if="selectedVoucher.is_all_stores" class="u-text-action">Semua Cabang</span>
             <span v-else>{{ selectedVoucher.stores?.map(s => s.store?.name).join(', ') || '-' }}</span>
           </div>
           <div class="detail-row">
             <span>Target Ruangan</span>
-            <span v-if="selectedVoucher.is_all_room_types" style="color:var(--color-primary-light)">Semua Ruangan</span>
+            <span v-if="selectedVoucher.is_all_room_types" class="u-text-action">Semua Ruangan</span>
             <span v-else>{{ selectedVoucher.room_templates?.map(rt => rt.name).join(', ') || '-' }}</span>
           </div>
           <div class="detail-row">
             <span>Penggunaan</span>
             <span>
-              <strong style="color:var(--color-primary)">{{ selectedVoucher.used_count }}</strong>
-              <span style="color:var(--text-secondary)"> / {{ selectedVoucher.total_members }} member</span>
+              <strong class="u-text-action">{{ selectedVoucher.used_count }}</strong>
+              <span class="u-text-secondary"> / {{ selectedVoucher.total_members }} member</span>
             </span>
           </div>
           <div class="detail-row">
@@ -509,8 +509,8 @@
         </div>
 
         <!-- Usage list -->
-        <div style="margin-top:16px" v-if="selectedVoucher.usages?.length">
-          <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text-primary)">
+        <div class="u-mt-4" v-if="selectedVoucher.usages?.length">
+          <div class="section-title">
             Riwayat Penggunaan ({{ selectedVoucher.usages.length }})
           </div>
           <el-table :data="selectedVoucher.usages.slice(0, 5)" size="small" max-height="200">
@@ -525,7 +525,7 @@
             </el-table-column>
           </el-table>
         </div>
-        <div v-else style="text-align:center;padding:20px;color:var(--text-muted);font-size:13px">
+        <div class="list-empty" v-else>
           Belum ada yang menggunakan voucher ini
         </div>
       </div>
@@ -763,10 +763,10 @@ const getCodeColor = (type) => ({
 }[type] || 'rgba(2,130,222,0.15)')
 
 const getBannerGradient = (type) => ({
-  booking:     'linear-gradient(135deg,#0282DE,#0262b0)',
-  play_credits:'linear-gradient(135deg,#059669,#047857)',
-  both:        'linear-gradient(135deg,#d97706,#b45309)',
-}[type] || 'linear-gradient(135deg,#0282DE,#0262b0)')
+  booking:     'linear-gradient(135deg,var(--el-color-primary),var(--el-color-primary-dark-2))',
+  play_credits:'linear-gradient(135deg,var(--el-color-success),var(--el-color-success-dark-2))',
+  both:        'linear-gradient(135deg,var(--el-color-warning),var(--el-color-warning-dark-2))',
+}[type] || 'linear-gradient(135deg,var(--el-color-primary),var(--el-color-primary-dark-2))')
 
 const getTypeLabel = (t) => ({
   booking:      'Booking',
@@ -865,7 +865,7 @@ onMounted(async () => {
 }
 .code-badge-lg {
   display:inline-block; padding:5px 14px; border-radius:6px;
-  background:rgba(255,255,255,0.22); color:#fff;
+  background:rgba(255,255,255,0.22); color:var(--text-on-action);
   font-size:14px; font-weight:900; font-family:monospace; letter-spacing:1.5px;
 }
 .detail-grid { display:flex; flex-direction:column; }
@@ -894,7 +894,7 @@ onMounted(async () => {
 }
 .room-type-checkbox {
   border:1.5px solid var(--border-color); border-radius:8px;
-  padding:7px 12px; margin:0 !important;
+  padding:7px 12px; margin:0;
   transition:all 0.18s;
 }
 .room-type-checkbox:hover {
@@ -935,4 +935,28 @@ onMounted(async () => {
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
+
+/* C3: former inline styles */
+.drawer-footer { display: flex; gap: var(--space-2); margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+.row-gap-lg { display: flex; gap: var(--space-4); }
+.row-gap-lg-spaced { display: flex; gap: var(--space-4); margin-bottom: var(--space-2); }
+.m-card-actions { display: flex; gap: var(--space-1); }
+.send-actions { display: flex; gap: var(--space-2); width: 100%; }
+.table-footer { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--border); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.two-col-tight { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.banner-label { font-size: var(--font-size-xs); color: rgba(255,255,255,0.65); }
+.banner-sub { font-size: var(--font-size-xs); color: rgba(255,255,255,0.7); margin-top: var(--space-1); }
+.recipient-note { font-size: var(--font-size-xs); color: var(--text-muted); padding: var(--space-1) 0; }
+.section-title { font-size: var(--font-size-sm); font-weight: 700; margin-bottom: var(--space-2); color: var(--text-primary); }
+.banner-name { font-size: 18px; font-weight: 800; color: var(--text-on-action); margin-top: var(--space-2); }
+.banner-value { font-size: 28px; font-weight: 900; color: var(--text-on-action); }
+.code-chip { font-size: var(--font-size-xs); font-weight: 800; color: var(--text-primary); letter-spacing: -0.5px; }
+.field-hint-tight { margin-top: calc(var(--space-2) * -1); margin-bottom: var(--space-3); }
+.drawer-body { padding: 0 var(--space-1); }
+.list-empty { text-align: center; padding: var(--space-5); color: var(--text-muted); font-size: var(--font-size-sm); }
+.text-right { text-align: right; }
+.filter-status { width: 140px; }
+.filter-type { width: 160px; }
+.filter-search { width: 260px; }
 </style>

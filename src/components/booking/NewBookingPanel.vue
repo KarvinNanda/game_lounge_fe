@@ -2,15 +2,15 @@
   <!-- New Booking Form Panel -->
   <div class="right-panel">
     <div class="panel-header">
-      <span style="font-size:13px;font-weight:700;letter-spacing:0.5px">BOOKING BARU</span>
+      <span class="panel-title">BOOKING BARU</span>
       <el-button circle text @click="emit('close')"><el-icon><Close /></el-icon></el-button>
     </div>
 
     <!-- Room info chip -->
     <div class="room-chip">
-      <el-icon style="color:var(--color-primary)"><Location /></el-icon>
-      <span style="font-weight:600;font-size:13px">{{ newBookingForm.room_name }}</span>
-      <span style="color:var(--text-muted);font-size:11px">• {{ newBookingForm.start_time }} – {{ newBookingForm.end_time }}</span>
+      <el-icon class="u-text-action"><Location /></el-icon>
+      <span class="u-fw-semibold u-text-sm">{{ newBookingForm.room_name }}</span>
+      <span class="u-text-muted u-text-xs">• {{ newBookingForm.start_time }} – {{ newBookingForm.end_time }}</span>
     </div>
 
     <el-form :model="newBookingForm" ref="newBookingFormRef" label-position="top" size="small">
@@ -22,25 +22,25 @@
           filterable remote :remote-method="searchCustomers"
           :loading="customerSearchLoading"
           placeholder="Cari nama / WhatsApp customer..."
-          style="width:100%"
+          class="u-w-full"
           @change="onCustomerChange"
           clearable
         >
           <el-option v-for="c in customerOptions" :key="c.id"
             :label="c.name" :value="c.id">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px">
-              <span style="font-weight:600;font-size:13px">{{ c.name }} - {{ c.whatsapp }}</span>
+            <div class="u-flex u-justify-between u-gap-1">
+              <span class="u-fw-semibold u-text-sm">{{ c.name }} - {{ c.whatsapp }}</span>
               <el-tag :type="c.type === 'member' ? 'warning' : 'info'" size="small">
                 {{ c.type === 'member' ? 'Member' : 'Regular' }}
               </el-tag>
             </div>
-            <div v-if="c.whatsapp || c.phone" style="display:flex;align-items:center;gap:4px;margin-top:2px">
-              <span style="font-size:10px;font-weight:600;color:#25D366;">WA</span>
-              <span style="font-size:10px;color:var(--text-secondary);font-variant-numeric:tabular-nums">{{ c.whatsapp || c.phone }}</span>
+            <div v-if="c.whatsapp || c.phone" class="u-flex u-gap-1 u-mt-1">
+              <span class="wa-badge">WA</span>
+              <span class="customer-phone">{{ c.whatsapp || c.phone }}</span>
             </div>
           </el-option>
         </el-select>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:2px">
+        <div class="u-text-xs u-text-muted u-mt-1">
           Kosongkan untuk walk-in tanpa data
         </div>
       </el-form-item>
@@ -52,7 +52,7 @@
       </el-form-item>
 
       <!-- Kontak -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="two-col">
         <el-form-item label="WhatsApp">
           <el-input v-model="newBookingForm.customer_whatsapp" placeholder="08xx-xxxx" />
         </el-form-item>
@@ -64,25 +64,25 @@
       <!-- Tanggal -->
       <el-form-item label="Tanggal Booking">
         <el-date-picker v-model="newBookingForm.booking_date" type="date"
-          value-format="YYYY-MM-DD" style="width:100%"
+          value-format="YYYY-MM-DD" class="u-w-full"
           @change="recalculatePrice" />
       </el-form-item>
 
       <!-- Jam -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="two-col">
         <el-form-item label="Jam Mulai *">
           <el-time-picker v-model="newBookingForm.start_time" format="HH:mm"
-            value-format="HH:mm" style="width:100%" @change="recalculatePrice" />
+            value-format="HH:mm" class="u-w-full" @change="recalculatePrice" />
         </el-form-item>
         <el-form-item label="Jam Selesai *">
           <el-time-picker v-model="newBookingForm.end_time" format="HH:mm"
-            value-format="HH:mm" style="width:100%" @change="recalculatePrice" />
+            value-format="HH:mm" class="u-w-full" @change="recalculatePrice" />
         </el-form-item>
       </div>
 
       <!-- Durasi Quick Select -->
       <el-form-item label="Tambah Durasi">
-        <div style="display:flex;gap:2px;flex-wrap:wrap">
+        <div class="duration-buttons">
           <el-button
             v-for="d in [1, 2, 3, 4, 5, 6, 8,10]" :key="d" size="small"
             :type="newBookingForm.duration_hours === d ? 'primary' : 'default'"
@@ -92,52 +92,52 @@
       </el-form-item>
 
       <!-- Kalkulasi Harga -->
-      <div v-if="priceCalcLoading" style="text-align:center;padding:12px;color:var(--text-muted);font-size:12px">
+      <div class="price-placeholder" v-if="priceCalcLoading">
         <el-icon class="is-loading"><Loading /></el-icon> Menghitung harga...
       </div>
       <div v-else-if="priceCalc" class="price-breakdown-box">
         <div v-for="item in priceCalc.breakdown" :key="item.time_range" class="breakdown-row">
-          <span style="font-size:11px;color:var(--text-secondary)">{{ item.description }}</span>
-          <span style="font-size:12px;font-weight:600">{{ formatRp(item.amount) }}</span>
+          <span class="u-text-xs u-text-secondary">{{ item.description }}</span>
+          <span class="u-text-xs u-fw-semibold">{{ formatRp(item.amount) }}</span>
         </div>
-        <!-- <div v-if="priceCalc.has_flash_sale" class="breakdown-row" style="color:var(--color-danger)">
-          <span style="font-size:11px">⚡ Flash Sale: {{ priceCalc.flash_sale_name }}</span>
-          <span style="font-size:12px">- {{ formatRp(priceCalc.flash_discount) }}</span>
+        <!-- <div v-if="priceCalc.has_flash_sale" class="breakdown-row u-text-danger">
+          <span class="u-text-xs"><el-icon aria-hidden="true"><Lightning /></el-icon> Flash Sale: {{ priceCalc.flash_sale_name }}</span>
+          <span class="u-text-xs">- {{ formatRp(priceCalc.flash_discount) }}</span>
         </div> -->
 
         <!-- Voucher discount preview -->
         <template v-if="voucherDiscount">
           <div v-if="voucherDiscount.invalid" class="breakdown-row voucher-invalid-row">
-            <span style="font-size:11px">🎟️ Voucher {{ newBookingForm.voucher_code }}</span>
-            <span style="font-size:11px">{{ voucherDiscount.reason }}</span>
+            <span class="u-text-xs"><el-icon aria-hidden="true"><Ticket /></el-icon> Voucher {{ newBookingForm.voucher_code }}</span>
+            <span class="u-text-xs">{{ voucherDiscount.reason }}</span>
           </div>
           <div v-else class="breakdown-row voucher-discount-row">
-            <span style="font-size:11px">
-              🎟️ {{ selectedVoucherData?.name }}
-              <span style="opacity:0.7">({{ selectedVoucherData?.discount_type === 'percentage' ? selectedVoucherData.discount_value + '%' : formatRp(selectedVoucherData.discount_value) }})</span>
+            <span class="u-text-xs">
+              <el-icon aria-hidden="true"><Ticket /></el-icon> {{ selectedVoucherData?.name }}
+              <span class="dimmed">({{ selectedVoucherData?.discount_type === 'percentage' ? selectedVoucherData.discount_value + '%' : formatRp(selectedVoucherData.discount_value) }})</span>
             </span>
-            <span style="font-size:12px;font-weight:700">- {{ formatRp(voucherDiscount.amount) }}</span>
+            <span class="u-text-xs u-fw-bold">- {{ formatRp(voucherDiscount.amount) }}</span>
           </div>
         </template>
 
         <div class="breakdown-total">
           <span>Total Bayar</span>
-          <strong style="font-size:15px" :style="{ color: voucherDiscount && !voucherDiscount.invalid ? 'var(--color-success)' : 'var(--color-primary)' }">
+          <strong class="price-amount" :style="{ color: voucherDiscount && !voucherDiscount.invalid ? 'var(--color-success)' : 'var(--color-primary)' }">
             {{ formatRp(voucherDiscount && !voucherDiscount.invalid ? voucherDiscount.finalPrice : priceCalc.final_price) }}
           </strong>
         </div>
-        <div v-if="voucherDiscount && !voucherDiscount.invalid"
-             style="text-align:right;font-size:10px;color:var(--text-muted);margin-top:2px;text-decoration:line-through">
+        <div class="price-original" v-if="voucherDiscount && !voucherDiscount.invalid"
+            >
           Sebelum diskon: {{ formatRp(priceCalc.final_price) }}
         </div>
       </div>
 
       <!-- Play Credits -->
       <div v-if="availableCredits.length > 0" class="credits-section">
-        <div style="font-size:11px;font-weight:700;margin-bottom:8px;color:var(--color-success)">
-          🎮 Pakai Play Credits?
+        <div class="u-text-xs u-fw-bold u-mb-2 u-text-success">
+          <el-icon aria-hidden="true"><Coin /></el-icon> Pakai Play Credits?
         </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="payment-options">
 
           <!-- Opsi: Cash -->
           <div
@@ -147,8 +147,8 @@
             <div class="payment-option__check">
               <el-icon v-if="newBookingForm.payment_method === 'cash'"><Check /></el-icon>
             </div>
-            <span style="font-size:12px;font-weight:600">💵 Cash</span>
-            <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">— Bayar langsung</span>
+            <span class="u-text-xs u-fw-semibold"><el-icon aria-hidden="true"><Money /></el-icon> Cash</span>
+            <span class="option-hint">— Bayar langsung</span>
           </div>
 
           <!-- Opsi: Play Credits -->
@@ -160,11 +160,11 @@
             <div class="payment-option__check">
               <el-icon v-if="newBookingForm.play_credit_id === cr.id && newBookingForm.payment_method !== 'cash'"><Check /></el-icon>
             </div>
-            <div style="display:flex;flex-direction:column;gap:1px">
-              <span style="font-size:12px;font-weight:700">🎮 {{ cr.package?.name }}</span>
-              <span style="font-size:11px;color:var(--text-secondary)">
+            <div class="credit-info">
+              <span class="u-text-xs u-fw-bold"><el-icon aria-hidden="true"><Coin /></el-icon> {{ cr.package?.name }}</span>
+              <span class="u-text-xs u-text-secondary">
                 {{ cr.remaining_hours }} Jam tersisa
-                <span style="color:var(--text-muted)">&nbsp;·&nbsp; exp. {{ formatDate(cr.expires_at) }}</span>
+                <span class="u-text-muted">&nbsp;·&nbsp; exp. {{ formatDate(cr.expires_at) }}</span>
               </span>
             </div>
           </div>
@@ -177,7 +177,7 @@
         <el-select
           v-model="newBookingForm.voucher_code"
           placeholder="Pilih voucher..."
-          filterable clearable style="width:100%"
+          filterable clearable class="u-w-full"
           :loading="voucherOptionsLoading"
           no-data-text="Tidak ada voucher tersedia"
         >
@@ -187,22 +187,22 @@
             :label="v.name"
             :value="v.code"
           >
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <div class="u-flex u-justify-between u-gap-2">
               <div>
-                <span style="font-family:monospace;font-size:11px;font-weight:800;color:var(--color-primary)">{{ v.code }}</span>
-                <span style="margin-left:8px;font-size:12px">{{ v.name }}</span>
+                <span class="voucher-code">{{ v.code }}</span>
+                <span class="voucher-name">{{ v.name }}</span>
               </div>
-              <span style="font-size:12px;font-weight:700;color:var(--color-success);flex-shrink:0">
+              <span class="voucher-amount">
                 {{ v.discount_type === 'percentage' ? v.discount_value + '%' : formatRp(v.discount_value) }}
               </span>
             </div>
-            <div v-if="v.end_date" style="font-size:10px;color:var(--text-muted);margin-top:1px">
+            <div class="voucher-meta" v-if="v.end_date">
               Berlaku s/d {{ formatDate(v.end_date) }}
             </div>
           </el-option>
         </el-select>
-        <div v-if="!voucherOptionsLoading && availableVouchers.length === 0"
-             style="font-size:11px;color:var(--text-muted);margin-top:3px">
+        <div class="voucher-hint" v-if="!voucherOptionsLoading && availableVouchers.length === 0"
+            >
           Tidak ada voucher booking yang tersedia untuk customer ini
         </div>
       </el-form-item>
@@ -214,29 +214,29 @@
       </el-form-item>
     </el-form>
 
-    <el-button type="primary" style="width:100%;margin-top:8px"
+    <el-button type="primary" class="u-w-full u-mt-2"
       :loading="creatingBooking" :disabled="!priceCalc && !priceCalcLoading" @click="openConfirmModal">
       Lanjutkan →
     </el-button>
 
-      <BookingConfirmDialog
-        v-model="showConfirmModal"
-        :form="newBookingForm"
-        :price-calc="priceCalc"
-        :voucher-discount="voucherDiscount"
-        :voucher-name="selectedVoucherData?.name || ''"
-        :loading="creatingBooking"
-        @confirm="handleCreateBooking"
-      />
+    <BookingConfirmDialog
+      v-model="showConfirmModal"
+      :form="newBookingForm"
+      :price-calc="priceCalc"
+      :voucher-discount="voucherDiscount"
+      :voucher-name="selectedVoucherData?.name || ''"
+      :loading="creatingBooking"
+      @confirm="handleCreateBooking"
+    />
 
-      <BookingSuccessDialog
-        v-model="showSuccessModal"
-        :code="createdBookingCode"
-        :whatsapp="newBookingForm.customer_whatsapp"
-        :email="newBookingForm.customer_email"
-        @view="viewCreatedBooking"
-        @again="resetForNewBooking"
-      />
+    <BookingSuccessDialog
+      v-model="showSuccessModal"
+      :code="createdBookingCode"
+      :whatsapp="newBookingForm.customer_whatsapp"
+      :email="newBookingForm.customer_email"
+      @view="viewCreatedBooking"
+      @again="resetForNewBooking"
+    />
   </div>
 </template>
 
@@ -523,9 +523,10 @@ onUnmounted(cancelPriceCalc)
   border-color: var(--color-primary);
   background: rgba(2,130,222,0.04);
 }
-.payment-option--selected {
-  border-color: var(--color-success) !important;
-  background: rgba(16,185,129,0.08) !important;
+/* Two classes: beats .payment-option:hover, so the selected look stays while hovering. */
+.payment-option.payment-option--selected {
+  border-color: var(--success);
+  background: rgba(16,185,129,0.08);
 }
 .payment-option__check {
   width: 18px;
@@ -543,6 +544,25 @@ onUnmounted(cancelPriceCalc)
 .payment-option--selected .payment-option__check {
   border-color: var(--color-success);
   background: var(--color-success);
-  color: #fff;
+  color: var(--text-on-action);
 }
+
+/* C3: former inline styles */
+.panel-title { font-size: var(--font-size-sm); font-weight: 700; letter-spacing: 0.5px; }
+.wa-badge { font-size: var(--font-size-xs); font-weight: 600; color: var(--brand-whatsapp); }
+.customer-phone { font-size: var(--font-size-xs); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.duration-buttons { display: flex; gap: var(--space-1); flex-wrap: wrap; }
+.price-placeholder { text-align: center; padding: var(--space-3); color: var(--text-muted); font-size: var(--font-size-xs); }
+.dimmed { opacity: 0.7; }
+.price-amount { font-size: var(--font-size-base); }
+.price-original { text-align: right; font-size: var(--font-size-xs); color: var(--text-muted); margin-top: var(--space-1); text-decoration: line-through; }
+.payment-options { display: flex; flex-direction: column; gap: var(--space-1); }
+.option-hint { font-size: var(--font-size-xs); color: var(--text-secondary); margin-left: var(--space-1); }
+.credit-info { display: flex; flex-direction: column; }
+.voucher-code { font-family: monospace; font-size: var(--font-size-xs); font-weight: 800; color: var(--action); }
+.voucher-name { margin-left: var(--space-2); font-size: var(--font-size-xs); }
+.voucher-amount { font-size: var(--font-size-xs); font-weight: 700; color: var(--success); flex-shrink: 0; }
+.voucher-meta { font-size: var(--font-size-xs); color: var(--text-muted); }
+.voucher-hint { font-size: var(--font-size-xs); color: var(--text-muted); margin-top: var(--space-1); }
 </style>

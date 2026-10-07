@@ -29,7 +29,8 @@ defineProps({
 .ui-page-header__title { font-size: 18px; font-weight: 700; line-height: 1.3; color: var(--text-primary); margin: 0; }
 .ui-page-header__desc {
   font-size: var(--font-size-xs); color: var(--text-secondary); margin: 2px 0 0;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  /* Two lines, then an ellipsis: long instructions stay readable on phones. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
 }
 .ui-page-header__actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
 </style>

@@ -39,6 +39,13 @@
   --warning:        #B45309;
   --danger:         #D42222;
   --violet:         #6D28D9;  /* happy-hour / member accents, 7:1 on white */
+  --text-on-action: #FFFFFF;   /* text/icons on --action, --success, --danger fills */
+  --brand-whatsapp: #25D366;   /* WhatsApp brand green (buttons/badges only) */
+  /* Event bookings on the booking grid (violet block) */
+  --event-bg:         #534AB7;
+  --event-border:     #3C3489;
+  --event-text:       #EEEDFE;
+  --event-text-muted: #AFA9EC;
 
   /* Sidebar */
   --sidebar-width:       232px;

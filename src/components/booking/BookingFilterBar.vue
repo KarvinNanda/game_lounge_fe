@@ -2,13 +2,13 @@
   <!-- ── Filter Bar ────────────────────────────────────────── -->
   <div class="filter-bar">
     <!-- Tanggal -->
-    <el-date-picker
+    <el-date-picker class="filter-date"
       :model-value="date"
       @update:model-value="emit('update:date', $event)"
       type="date"
       format="DD MMM YYYY"
       value-format="YYYY-MM-DD"
-      style="width:200px"
+     
       @change="emit('change')"
     />
     <!-- Cabang — badge jika terkunci ke 1 store, dropdown jika bisa pilih -->
@@ -18,12 +18,12 @@
       <el-icon><Location /></el-icon>
       <span>{{ lockedStoreName }}</span>
     </div>
-    <el-select
+    <el-select class="filter-store"
       v-else
       :model-value="store"
       @update:model-value="emit('update:store', $event)"
       placeholder="Pilih Cabang"
-      style="width:220px"
+     
       @change="emit('change')"
     >
       <el-option
@@ -34,12 +34,12 @@
       />
     </el-select>
     <!-- Ruangan -->
-    <el-select :model-value="room" @update:model-value="emit('update:room', $event)" placeholder="Semua Ruangan" clearable style="width:170px" @change="emit('change')">
+    <el-select class="filter-room" :model-value="room" @update:model-value="emit('update:room', $event)" placeholder="Semua Ruangan" clearable @change="emit('change')">
       <el-option v-for="r in rooms" :key="r.id" :label="r.name" :value="r.id" />
     </el-select>
 
-    <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-      <span style="font-size:11px;color:var(--text-secondary)">
+    <div class="legend">
+      <span class="u-text-xs u-text-secondary">
         Jam Operasional: {{ operatingHours }}
       </span>
     </div>
@@ -47,22 +47,23 @@
 
   <!-- ── Status Legend ─────────────────────────────────────── -->
   <div class="legend-bar">
-    <div class="legend-item"><div class="dot" style="background:var(--color-primary)"></div>Upcoming</div>
-    <div class="legend-item"><div class="dot" style="background:#10B981"></div>Ongoing</div>
-    <div class="legend-item"><div class="dot" style="background:#94A3B8"></div>Completed</div>
-    <div class="legend-item"><div class="dot" style="background:#EF4444"></div>Cancelled</div>
-    <div class="legend-item"><div class="dot" style="background:#F59E0B;box-shadow:0 0 0 2px rgba(245,158,11,0.3)"></div>Ending Soon</div>
+    <div class="legend-item"><div class="dot dot--upcoming"></div>Upcoming</div>
+    <div class="legend-item"><div class="dot dot--ongoing"></div>Ongoing</div>
+    <div class="legend-item"><div class="dot dot--completed"></div>Completed</div>
+    <div class="legend-item"><div class="dot dot--cancelled"></div>Cancelled</div>
+    <div class="legend-item"><div class="dot dot--ending"></div>Ending Soon</div>
   </div>
 
   <!-- ── Holiday Warning Banner ────────────────────────────── -->
   <div v-if="effectiveHours?.is_holiday" class="holiday-banner">
     <el-icon size="16"><WarningFilled /></el-icon>
     <div>
-      <span style="font-weight:700">
-        {{ effectiveHours.holiday_type === 'global' ? '🗓️ Hari Libur Nasional' : '📅 Tanggal Merah Cabang' }}
+      <span class="u-fw-bold">
+        <el-icon aria-hidden="true"><Calendar /></el-icon>
+        {{ effectiveHours.holiday_type === 'global' ? 'Hari Libur Nasional' : 'Tanggal Merah Cabang' }}
         — {{ effectiveHours.holiday_name }}
       </span>
-      <span style="margin-left:8px;opacity:0.85">
+      <span class="holiday-hours">
         Jam operasional: {{ effectiveHours.open_time?.slice(0,5) }} – {{ effectiveHours.close_time?.slice(0,5) }}
         · Happy Hour tidak berlaku
       </span>
@@ -127,4 +128,17 @@ const emit = defineEmits(['update:date', 'update:store', 'update:room', 'change'
   cursor: default;
   white-space: nowrap;
 }
+
+/* C3: former inline styles */
+/* el-date-picker renders no scoped root: reach it from the bar (0,3,0 beats .el-date-editor.el-input). */
+.filter-bar :deep(.filter-date) { width: 200px; }
+.filter-store { width: 220px; }
+.filter-room { width: 170px; }
+.legend { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
+.dot--upcoming { background: var(--el-color-primary); }
+.dot--ongoing { background: var(--el-color-success); }
+.dot--completed { background: var(--el-color-info); }
+.dot--cancelled { background: var(--el-color-danger); }
+.dot--ending { background: var(--warning); box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
+.holiday-hours { margin-left: var(--space-2); opacity: 0.85; }
 </style>

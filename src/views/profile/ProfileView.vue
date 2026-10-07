@@ -28,7 +28,7 @@
               <span v-else-if="branches.length">
                 {{ branches.map(s => s.name).join(', ') }}
               </span>
-              <span v-else style="color:var(--text-muted)">—</span>
+              <span v-else class="u-text-muted">—</span>
             </div>
           </div>
         </el-card>
@@ -63,19 +63,19 @@
                   <el-tag size="small" type="success" plain>Semua Cabang</el-tag>
                 </template>
                 <template v-else-if="branches.length">
-                  <div style="display:flex;flex-wrap:wrap;gap:4px">
+                  <div class="tag-list">
                     <el-tag v-for="s in branches" :key="s.id" size="small" plain>
                       {{ s.name }}
                     </el-tag>
                   </div>
                 </template>
-                <span v-else style="color:var(--text-muted)">—</span>
+                <span v-else class="u-text-muted">—</span>
               </span>
             </div>
             <div class="info-row" v-if="staff?.role?.permissions?.length">
               <span class="info-label">Permissions</span>
               <span class="info-value">
-                <div style="display:flex;flex-wrap:wrap;gap:4px">
+                <div class="tag-list">
                   <el-tag
                     v-for="p in staff.role.permissions.slice(0, 8)"
                     :key="p"
@@ -122,7 +122,7 @@
                 />
               </el-form-item>
             </div>
-            <div style="display:flex;justify-content:flex-end">
+            <div class="form-actions">
               <el-button type="primary" :loading="changingPw" @click="changePassword">
                 <el-icon><Lock /></el-icon> Simpan Password
               </el-button>
@@ -207,7 +207,7 @@ const changePassword = async () => {
 
 /* Identity Card */
 .identity-card {
-  border-color:var(--border-color) !important;
+  border-color:var(--border);
   text-align:center; padding:8px 0;
 }
 .avatar-wrap { position:relative; display:inline-block; margin-bottom:16px; }
@@ -215,7 +215,7 @@ const changePassword = async () => {
   width:80px; height:80px; border-radius:50%;
   background:var(--color-primary);
   display:flex; align-items:center; justify-content:center;
-  font-size:28px; font-weight:800; color:#fff;
+  font-size:28px; font-weight:800; color:var(--text-on-action);
   letter-spacing:1px; position:relative; z-index:1;
 }
 .avatar-ring {
@@ -234,7 +234,6 @@ const changePassword = async () => {
 .meta-item .el-icon { margin-top:1px; flex-shrink:0; color:var(--text-muted); }
 
 /* Detail Card */
-.detail-card { border-color:var(--border-color) !important; }
 .section-title {
   font-size:14px; font-weight:700; color:var(--text-primary);
   margin-bottom:20px; padding-bottom:10px;
@@ -251,4 +250,8 @@ const changePassword = async () => {
 
 /* Password form */
 .two-col-form { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+/* C3: former inline styles */
+.tag-list { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.form-actions { display: flex; justify-content: flex-end; }
 </style>

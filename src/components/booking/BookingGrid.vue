@@ -2,10 +2,10 @@
   <div class="grid-area" :class="{ 'with-panel': withPanel }">
 
     <!-- Date Navigation -->
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div class="u-flex u-justify-between u-mb-3">
       <el-button circle plain @click="emit('change-date', -1)"><el-icon><ArrowLeft /></el-icon></el-button>
-      <span style="font-weight:700;font-size:15px;display:flex;align-items:center;gap:6px">
-        <el-icon style="color:var(--color-primary)"><CalendarIcon /></el-icon>
+      <span class="grid-date-title">
+        <el-icon class="u-text-action"><CalendarIcon /></el-icon>
         {{ formatDateDisplay(date) }}
       </span>
       <el-button circle plain @click="emit('change-date', 1)"><el-icon><ArrowRight /></el-icon></el-button>
@@ -48,19 +48,19 @@
               :style="getEventBlockStyle(event)"
               @click="emit('event-click', event)"
             >
-              <el-icon size="18" style="color:#EEEDFE;margin-bottom:4px"><Star /></el-icon>
+              <el-icon class="event-block-icon" size="18"><Star /></el-icon>
               <div class="event-block-title">EVENT</div>
               <div class="event-block-name">{{ event.event_name }}</div>
               <div class="event-block-time">{{ event.start_time?.slice(0,5) }} – {{ event.end_time?.slice(0,5) }}</div>
-              <div v-if="event.booking_scope === 'per_room_type'"
-                   style="font-size:9px;opacity:0.75;margin-top:2px">Per Tipe Ruangan</div>
+              <div class="event-block-scope" v-if="event.booking_scope === 'per_room_type'"
+                  >Per Tipe Ruangan</div>
             </div>
           </template>
         </div>
 
         <!-- Empty state -->
         <div v-if="roomGroups.length === 0 && !loading" class="empty-grid-state">
-          <el-icon size="40" style="color:var(--text-muted)"><CalendarIcon /></el-icon>
+          <el-icon size="40" class="u-text-muted"><CalendarIcon /></el-icon>
           <p>Belum ada data ruangan. Pilih cabang terlebih dahulu.</p>
         </div>
 
@@ -73,8 +73,8 @@
             <!-- Room label -->
             <div class="room-label-cell">
               <div>
-                <div style="font-weight:600;font-size:12px">{{ room.name }}</div>
-                <div style="font-size:10px;color:var(--text-muted)">{{ room.room_template?.name }}</div>
+                <div class="u-fw-semibold u-text-xs">{{ room.name }}</div>
+                <div class="u-text-xs u-text-muted">{{ room.room_template?.name }}</div>
               </div>
             </div>
 
@@ -262,11 +262,11 @@ const getEventBlockStyle = (event) =>
 .booking-block:hover { filter: brightness(1.08); }
 
 /* Booking blocks — solid colours, white text ≥ 4.5:1 */
-.block-upcoming  { background: var(--el-color-primary); color: #fff; border: 1px solid var(--el-color-primary-dark-2); }
-.block-ongoing   { background: var(--el-color-success); color: #fff; border: 1px solid var(--el-color-success-dark-2); }
-.block-completed { background: var(--el-color-info);    color: #fff; border: 1px solid var(--el-color-info-dark-2); }
-.block-cancelled { background: var(--el-color-danger);  color: #fff; border: 1px solid var(--el-color-danger-dark-2); text-decoration: line-through; }
-.ending-soon     { border-color: #F59E0B !important; box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
+.block-upcoming  { background: var(--el-color-primary); color: var(--text-on-action); border: 1px solid var(--el-color-primary-dark-2); }
+.block-ongoing   { background: var(--el-color-success); color: var(--text-on-action); border: 1px solid var(--el-color-success-dark-2); }
+.block-completed { background: var(--el-color-info);    color: var(--text-on-action); border: 1px solid var(--el-color-info-dark-2); }
+.block-cancelled { background: var(--el-color-danger);  color: var(--text-on-action); border: 1px solid var(--el-color-danger-dark-2); text-decoration: line-through; }
+.ending-soon     { border-color: var(--warning); box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
 
 .block-name { font-weight: 700; font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .block-time { font-size: 11px; font-weight: 600; margin-top: 1px; }
@@ -298,7 +298,7 @@ const getEventBlockStyle = (event) =>
 }
 .room-type-tab.active {
   background:var(--color-primary);
-  border-color:var(--color-primary); color:#fff;
+  border-color:var(--action); color:var(--text-on-action);
 }
 .tab-count {
   background:rgba(255,255,255,0.25);
@@ -331,8 +331,8 @@ const getEventBlockStyle = (event) =>
 /* Merged event block */
 .event-merged-block {
   position: absolute;
-  background: #534AB7;
-  border: 2px solid #3C3489;
+  background: var(--event-bg);
+  border: 2px solid var(--event-border);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -346,8 +346,13 @@ const getEventBlockStyle = (event) =>
 }
 .event-merged-block:hover { opacity: 0.85; }
 
-.event-block-title { font-size: 11px; font-weight: 700; color: #EEEDFE; letter-spacing: 1px; }
-.event-block-name  { font-size: 13px; font-weight: 500; color: #EEEDFE; text-align: center; padding: 0 8px; }
-.event-block-time  { font-size: 11px; color: #AFA9EC; }
+.event-block-title { font-size: 11px; font-weight: 700; color: var(--event-text); letter-spacing: 1px; }
+.event-block-name  { font-size: 13px; font-weight: 500; color: var(--event-text); text-align: center; padding: 0 8px; }
+.event-block-time  { font-size: 11px; color: var(--event-text-muted); }
 
+
+/* C3: former inline styles */
+.grid-date-title { font-weight: 700; font-size: var(--font-size-base); display: flex; align-items: center; gap: var(--space-1); }
+.event-block-icon { color: var(--event-text); margin-bottom: var(--space-1); }
+.event-block-scope { font-size: var(--font-size-xs); opacity: 0.75; margin-top: var(--space-1); }
 </style>

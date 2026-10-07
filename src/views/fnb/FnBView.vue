@@ -8,28 +8,29 @@
     <el-tabs v-model="activeTab" class="fnb-tabs">
 
       <!-- ── TAB 1: Menu Management ───────────────────────── -->
-      <el-tab-pane label="🍔 Menu" name="menu">
+      <el-tab-pane name="menu">
+        <template #label>
+          <span class="u-flex u-gap-1"><el-icon aria-hidden="true"><Food /></el-icon> Menu</span>
+        </template>
 
         <!-- Toolbar -->
         <FilterBar>
-          <el-select v-model="selectedCategory" placeholder="Semua Kategori"
-            clearable style="width:200px" @change="fetchItems">
+          <el-select class="filter-category" v-model="selectedCategory" placeholder="Semua Kategori"
+            clearable @change="fetchItems">
             <el-option label="Semua Kategori" value="" />
             <el-option v-for="cat in categories" :key="cat.id"
               :label="cat.name" :value="cat.id" />
           </el-select>
-          <template #actions>
-            <template v-if="canEdit">
-              <el-button @click="handleSyncMoka" :loading="syncLoading" type="info" plain>
-                🔄 Sync dari Moka
-              </el-button>
-              <el-button @click="openCategoryDialog" plain>
-                + Kategori Baru
-              </el-button>
-              <el-button @click="openItemDialog()" type="primary">
-                + Tambah Item
-              </el-button>
-            </template>
+          <template v-if="canEdit" #actions>
+            <el-button @click="handleSyncMoka" :loading="syncLoading" type="info" plain>
+              <el-icon aria-hidden="true"><Refresh /></el-icon> Sync dari Moka
+            </el-button>
+            <el-button @click="openCategoryDialog" plain>
+              + Kategori Baru
+            </el-button>
+            <el-button @click="openItemDialog()" type="primary">
+              + Tambah Item
+            </el-button>
           </template>
         </FilterBar>
 
@@ -51,19 +52,19 @@
         <el-table :data="items" v-loading="loadingItems" border stripe>
           <el-table-column label="Item" min-width="200">
             <template #default="{ row }">
-              <div style="display:flex;align-items:center;gap:10px">
+              <div class="u-flex u-gap-2">
                 <el-avatar v-if="row.image_url" :src="row.image_url" shape="square" :size="40" />
-                <el-avatar v-else shape="square" :size="40">🍽️</el-avatar>
+                <el-avatar v-else shape="square" :size="40"><el-icon aria-hidden="true"><Dish /></el-icon></el-avatar>
                 <div>
-                  <div style="font-weight:600">{{ row.name }}</div>
-                  <div style="font-size:11px;color:var(--text-secondary)">{{ row.category?.name }}</div>
+                  <div class="u-fw-semibold">{{ row.name }}</div>
+                  <div class="u-text-xs u-text-secondary">{{ row.category?.name }}</div>
                 </div>
               </div>
             </template>
           </el-table-column>
           <el-table-column label="Harga" width="140">
             <template #default="{ row }">
-              <span style="color:var(--color-primary);font-weight:600">
+              <span class="u-text-action u-fw-semibold">
                 Rp {{ formatRp(row.price) }}
               </span>
             </template>
@@ -83,7 +84,7 @@
           <el-table-column label="Sumber" width="100" align="center">
             <template #default="{ row }">
               <el-tag v-if="row.moka_item_id" type="info" size="small">Moka</el-tag>
-              <span v-else style="color:var(--text-muted);font-size:11px">Manual</span>
+              <span v-else class="u-text-muted u-text-xs">Manual</span>
             </template>
           </el-table-column>
           <el-table-column v-if="canEdit" label="Aksi" width="80" align="center">
@@ -95,8 +96,8 @@
           </el-table-column>
         </el-table>
 
-        <div v-if="!items.length && !loadingItems"
-          style="text-align:center;padding:40px;color:var(--text-muted)">
+        <div class="table-empty" v-if="!items.length && !loadingItems"
+         >
           Belum ada item. Klik "+ Tambah Item" atau sync dari Moka.
         </div>
       </el-tab-pane>
@@ -104,8 +105,8 @@
       <!-- ── TAB 2: FnB Orders ─────────────────────────────── -->
       <el-tab-pane name="orders">
         <template #label>
-          <span style="display:flex;align-items:center;gap:6px">
-            📋 Pesanan FnB
+          <span class="u-flex u-gap-1">
+            <el-icon aria-hidden="true"><List /></el-icon> Pesanan FnB
             <el-badge v-if="pendingCount > 0" :value="pendingCount" type="danger" />
           </span>
         </template>
@@ -114,12 +115,12 @@
         <FilterBar>
           <el-alert v-if="noAccess" type="warning" :closable="false" show-icon
             title="Tidak ada cabang aktif yang bisa Anda akses. Hubungi admin." />
-          <el-select v-else v-model="orderFilter.store_id" :placeholder="canPickAll ? 'Semua Cabang' : 'Pilih Cabang'"
-            :clearable="canPickAll" style="width:180px" @change="fetchOrders">
+          <el-select class="filter-store" v-else v-model="orderFilter.store_id" :placeholder="canPickAll ? 'Semua Cabang' : 'Pilih Cabang'"
+            :clearable="canPickAll" @change="fetchOrders">
             <el-option v-for="s in stores" :key="s.id" :label="s.name" :value="s.id" />
           </el-select>
-          <el-select v-model="orderFilter.status" placeholder="Semua Status"
-            clearable style="width:160px" @change="fetchOrders">
+          <el-select class="filter-status" v-model="orderFilter.status" placeholder="Semua Status"
+            clearable @change="fetchOrders">
             <el-option label="Menunggu"   value="pending" />
             <el-option label="Disiapkan"  value="preparing" />
             <el-option label="Diantar"    value="delivered" />
@@ -141,15 +142,15 @@
           <el-card v-for="order in orders" :key="order.id" class="order-card" shadow="hover">
             <div class="order-header">
               <div>
-                <div style="font-weight:700;font-size:14px">{{ order.customer?.name }}</div>
-                <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">
-                  🚪 {{ order.room?.room_template?.name }} — {{ order.room?.name || 'Unit tidak diketahui' }}
+                <div class="order-title">{{ order.customer?.name }}</div>
+                <div class="u-text-xs u-text-secondary u-mt-1">
+                  <el-icon aria-hidden="true"><OfficeBuilding /></el-icon> {{ order.room?.room_template?.name }} — {{ order.room?.name || 'Unit tidak diketahui' }}
                 </div>
-                <div style="font-size:11px;color:var(--text-muted);margin-top:2px">
+                <div class="u-text-xs u-text-muted u-mt-1">
                   {{ formatTime(order.created_at) }}
                 </div>
               </div>
-              <el-tag :type="statusTagType(order.status)" style="font-weight:600;flex-shrink:0">
+              <el-tag class="order-item-qty" :type="statusTagType(order.status)">
                 {{ statusLabel(order.status) }}
               </el-tag>
             </div>
@@ -158,17 +159,17 @@
             <div class="order-items">
               <div v-for="item in order.items" :key="item.id" class="order-item-row">
                 <span>{{ item.item_name }}</span>
-                <span style="color:var(--text-muted)">×{{ item.quantity }}</span>
-                <span style="font-weight:600">Rp {{ formatRp(item.price * item.quantity) }}</span>
+                <span class="u-text-muted">×{{ item.quantity }}</span>
+                <span class="u-fw-semibold">Rp {{ formatRp(item.price * item.quantity) }}</span>
               </div>
             </div>
 
             <div class="order-footer">
-              <div style="font-weight:700;font-size:13px">
+              <div class="u-fw-bold u-text-sm">
                 Total: Rp {{ formatRp(order.total_amount) }}
               </div>
-              <div v-if="order.notes" style="font-size:11px;color:var(--text-muted);margin-top:4px">
-                📝 {{ order.notes }}
+              <div v-if="order.notes" class="u-text-xs u-text-muted u-mt-1">
+                <el-icon aria-hidden="true"><EditPen /></el-icon> {{ order.notes }}
               </div>
             </div>
 
@@ -177,18 +178,18 @@
               <el-button v-if="order.status === 'pending'"
                 @click="updateStatus(order.id, 'preparing')"
                 type="warning" size="small">
-                🍳 Siapkan
+                <el-icon aria-hidden="true"><KnifeFork /></el-icon> Siapkan
               </el-button>
               <el-button v-if="order.status === 'preparing'"
                 @click="updateStatus(order.id, 'delivered')"
                 type="success" size="small">
-                ✅ Tandai Diantar
+                <el-icon aria-hidden="true"><CircleCheck /></el-icon> Tandai Diantar
               </el-button>
               <el-button
                 v-if="['pending','preparing'].includes(order.status)"
                 @click="updateStatus(order.id, 'cancelled')"
                 type="danger" plain size="small">
-                ❌ Batalkan
+                <el-icon aria-hidden="true"><CircleClose /></el-icon> Batalkan
               </el-button>
             </div>
           </el-card>
@@ -233,7 +234,7 @@
     >
       <el-form :model="itemForm" label-position="top">
         <el-form-item label="Kategori *">
-          <el-select v-model="itemForm.category_id" style="width:100%" placeholder="Pilih kategori">
+          <el-select v-model="itemForm.category_id" class="u-w-full" placeholder="Pilih kategori">
             <el-option v-for="cat in categories" :key="cat.id"
               :label="cat.name" :value="cat.id" />
           </el-select>
@@ -244,15 +245,15 @@
         <el-form-item label="Deskripsi">
           <el-input v-model="itemForm.description" type="textarea" :rows="2" />
         </el-form-item>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="two-col">
           <el-form-item label="Harga *">
-            <el-input-number v-model="itemForm.price" :min="0" :step="500" style="width:100%" />
+            <el-input-number v-model="itemForm.price" :min="0" :step="500" class="u-w-full" />
           </el-form-item>
           <el-form-item label="Urutan Tampil">
-            <el-input-number v-model="itemForm.sort_order" :min="0" style="width:100%" />
+            <el-input-number v-model="itemForm.sort_order" :min="0" class="u-w-full" />
           </el-form-item>
         </div>
-        <div v-if="editingItem" style="display:flex;gap:24px;margin-top:4px">
+        <div class="switch-row" v-if="editingItem">
           <el-form-item label="Tersedia">
             <el-switch v-model="itemForm.is_available" />
           </el-form-item>
@@ -524,7 +525,7 @@ onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval) })
   gap: 16px;
   min-height: 120px;
 }
-.order-card { border-radius: 12px !important; }
+.order-card { --el-card-border-radius: 12px; }
 .order-header {
   display: flex;
   justify-content: space-between;
@@ -549,4 +550,14 @@ onUnmounted(() => { if (refreshInterval) clearInterval(refreshInterval) })
 .order-item-row span:first-child { flex: 1 }
 .order-footer { font-size: 12px; margin-bottom: 12px }
 .order-actions { display: flex; gap: 8px; flex-wrap: wrap }
+
+/* C3: former inline styles */
+.filter-category { width: 200px; }
+.table-empty { text-align: center; padding: calc(var(--space-5) * 2); color: var(--text-muted); }
+.filter-store { width: 180px; }
+.filter-status { width: 160px; }
+.order-title { font-weight: 700; font-size: var(--font-size-base); }
+.order-item-qty { font-weight: 600; flex-shrink: 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.switch-row { display: flex; gap: var(--space-6); margin-top: var(--space-1); }
 </style>

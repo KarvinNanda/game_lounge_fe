@@ -9,6 +9,7 @@ import router from './router'
 import { installErrorHandlers } from './utils/globalErrors'
 import './assets/tokens.css'
 import './assets/theme.css'
+import './assets/utilities.css'
 
 const app = createApp(App)
 if (import.meta.env.PROD) installErrorHandlers(app)
