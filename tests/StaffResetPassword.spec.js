@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import ElementPlus, { ElMessageBox } from 'element-plus'
+import ElementPlus, { ElMessageBox, ElMessage } from 'element-plus'
 import * as Icons from '@element-plus/icons-vue'
 
 // A staff username is user-controlled data. The reset-password dialog must show it
@@ -43,6 +43,28 @@ describe('StaffView reset password dialog', () => {
     const rendered = mount({ render: () => message })
     expect(rendered.text()).toContain(EVIL)
     expect(rendered.find('img').exists()).toBe(false)
-    expect(rendered.text()).toContain('Password baru akan dikirimkan ke email staff.')
+    // The backend now emails a 24-hour set-password link and ends the staff's sessions.
+    expect(rendered.text()).toContain('Link atur password (berlaku 24 jam) akan dikirim ke email staff.')
+    expect(rendered.text()).toContain('Password lama langsung tidak berlaku dan semua sesinya berakhir.')
+  })
+
+  it('confirms with the backend wording once the link is sent', async () => {
+    m.getStaffs.mockResolvedValue({ data: { data: [{ id: 's1', username: 'kasir', email: 'e@x.id', role: { name: 'Kasir' } }], meta: { total: 1 } } })
+    m.getRoles.mockResolvedValue(empty)
+    m.getStores.mockResolvedValue(empty)
+    m.resetStaffPassword.mockResolvedValue({ data: {} })
+    vi.spyOn(ElMessageBox, 'confirm').mockResolvedValue('confirm')
+    const success = vi.spyOn(ElMessage, 'success').mockImplementation(() => {})
+    const pinia = createPinia()
+    setActivePinia(pinia)
+    useAuthStore().staff = { id: 'me', username: 'root', role: { is_system: true, name: 'Owner' } }
+    const w = mount(StaffView, { attachTo: document.body, global: { plugins: [pinia, ElementPlus], components: Icons, stubs: { AuditTrail: true } } })
+    await flushPromises()
+
+    await w.findComponent(Icons.Key).element.closest('button').click()
+    await flushPromises()
+
+    expect(m.resetStaffPassword).toHaveBeenCalledWith('s1')
+    expect(success).toHaveBeenCalledWith('Link atur password telah dikirim ke email staff')
   })
 })

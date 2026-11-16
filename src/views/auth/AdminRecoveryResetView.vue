@@ -20,8 +20,13 @@
         </el-icon>
         <h2 class="recovery-title u-mt-4">Link Tidak Valid</h2>
         <p class="recovery-desc">
-          Link reset password sudah kadaluwarsa atau sudah pernah digunakan.
-          Silakan request link baru.
+          Link atur password sudah kadaluwarsa atau sudah pernah digunakan.
+        </p>
+        <!-- The page cannot tell whose token it was: staff links come from a Super Admin
+             reset, and only a Super Admin can request a new link from /admin-recovery. -->
+        <p class="recovery-desc">
+          <strong>Staff:</strong> Minta Super Admin untuk reset ulang.<br />
+          <strong>Super Admin:</strong> Minta link baru lewat tombol di bawah.
         </p>
         <el-button type="primary" @click="$router.push('/admin-recovery')">
           Request Link Baru
