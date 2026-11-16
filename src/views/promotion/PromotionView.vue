@@ -67,14 +67,12 @@
         <!-- Kode -->
         <el-table-column label="VOUCHER" min-width="200">
           <template #default="{ row }">
-            <div class="u-flex u-gap-2">
+            <div class="voucher-cell">
               <div class="code-badge" :style="{ background: getCodeColor(row.type) }">
                 {{ row.code }}
               </div>
-              <div>
-                <div class="u-fw-semibold u-text-sm">{{ row.name }}</div>
-                <div class="u-text-xs u-text-secondary">{{ row.description || '-' }}</div>
-              </div>
+              <div class="u-fw-semibold u-text-sm">{{ row.name }}</div>
+              <div class="voucher-desc u-text-xs u-text-secondary" :title="row.description">{{ row.description || '-' }}</div>
             </div>
           </template>
         </el-table-column>
@@ -814,6 +812,16 @@ onMounted(async () => {
   font-size:11.5px; font-weight:800; font-family:monospace; letter-spacing:0.7px;
   color:var(--text-primary); white-space:nowrap; flex-shrink:0;
   border: 1px solid rgba(124,58,237,0.2);
+}
+
+/* Badge sits above the name so the text gets the full column width;
+   the column is only 200px and the badge alone takes about 110px.
+   The name always wraps in full; only the secondary description is clamped
+   (full text: hover title, or the edit drawer). */
+.voucher-cell { display:flex; flex-direction:column; align-items:flex-start; gap:4px; }
+.voucher-desc {
+  display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical;
+  overflow:hidden;
 }
 
 /* ── Type option cards (drawer) ──────────────────────── */
