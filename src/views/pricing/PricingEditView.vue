@@ -181,7 +181,7 @@
                 <el-table-column label="Harga per Jam" min-width="200">
                   <template #default="{ row }">
                     <el-input-number class="input-date"
-                      v-model="row.price_per_hour"
+                      v-model="row.price_per_hour" :precision="0"
                       :min="0"
                       :step="5000"
                      
@@ -241,7 +241,7 @@
               >
                 <template #default="{ row }">
                   <el-input-number class="input-price"
-                    v-model="row.prices[dur]"
+                    v-model="row.prices[dur]" :precision="0"
                     :min="0"
                     :step="5000"
                     size="small"
@@ -436,7 +436,7 @@
             <div class="calc-row">
               <el-form-item class="grow-flush" label="Harga per Hari (Rp)">
                 <el-input-number
-                  v-model="eventPrice"
+                  v-model="eventPrice" :precision="0"
                   :min="0"
                   :step="100000"
                   class="u-w-full"
@@ -503,7 +503,7 @@
         </el-form-item>
         <el-form-item label="Harga per Jam Flash Sale (Rp)">
           <el-input-number
-            v-model="fsForm.price_per_hour"
+            v-model="fsForm.price_per_hour" :precision="0"
             :min="0"
             :step="5000"
             class="u-w-full"

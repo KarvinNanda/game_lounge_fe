@@ -247,7 +247,7 @@
         </el-form-item>
         <div class="two-col">
           <el-form-item label="Harga *">
-            <el-input-number v-model="itemForm.price" :min="0" :step="500" class="u-w-full" />
+            <el-input-number v-model="itemForm.price" :precision="0" :min="0" :step="500" class="u-w-full" />
           </el-form-item>
           <el-form-item label="Urutan Tampil">
             <el-input-number v-model="itemForm.sort_order" :min="0" class="u-w-full" />

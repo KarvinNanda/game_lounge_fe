@@ -458,7 +458,9 @@ const handleResetPassword = async (row) => {
     await ElMessageBox.confirm(
       h('span', [
         'Reset password untuk ', h('b', row.username), '?', h('br'),
-        h('span', { class: 'u-text-xs u-text-secondary' }, 'Password baru akan dikirimkan ke email staff.'),
+        h('span', { class: 'u-text-xs u-text-secondary' }, 'Link atur password (berlaku 24 jam) akan dikirim ke email staff.'),
+        h('br'),
+        h('span', { class: 'u-text-xs u-text-secondary' }, 'Password lama langsung tidak berlaku dan semua sesinya berakhir.'),
       ]),
       'Reset Password',
       {
@@ -469,7 +471,7 @@ const handleResetPassword = async (row) => {
     )
     resettingPassword.value = true
     await resetStaffPassword(row.id)
-    ElMessage.success('Password berhasil direset. Email konfirmasi dikirim ke staff.')
+    ElMessage.success('Link atur password telah dikirim ke email staff')
   } catch (e) {
     if (e !== 'cancel') notifyError(e, 'Gagal reset password')
   } finally {
