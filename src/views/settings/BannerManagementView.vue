@@ -393,6 +393,14 @@ onMounted(fetchBanners)
   display:flex;flex-direction:row;align-items:center;
   gap:6px;flex-shrink:0;
 }
+
+/* Phones: the 140px thumb plus five action buttons left about 80px for the text.
+   Stack the card: full-width 3:1 image, text, then the actions on their own row. */
+@media (max-width:639px) {
+  .banner-card { flex-wrap:wrap; align-items:flex-start; }
+  .banner-thumb { width:100%; min-width:0; height:auto; aspect-ratio:3 / 1; }
+  .banner-actions { width:100%; justify-content:flex-end; }
+}
 .action-divider {
   width:1px;height:24px;background:var(--border-color);margin:0 4px;
 }

@@ -54,3 +54,6 @@ Thumbs.db
 # ── Local design docs (not committed) ──────
 docs/superpowers/
 .superpowers/
+
+# Personal running notes (not project docs)
+NOTES.md

@@ -8,7 +8,6 @@ import * as Icons from '@element-plus/icons-vue'
 const { get } = vi.hoisted(() => ({ get: vi.fn() }))
 vi.mock('@/api/index', () => ({ default: { get, post: vi.fn(), put: vi.fn() }, publicApi: { get: vi.fn() } }))
 
-import router from '@/router'
 import FnBView from '@/views/fnb/FnBView.vue'
 import { useAuthStore } from '@/stores/authStore'
 
@@ -32,10 +31,14 @@ const mountAs = async (permissions, store_access = ALL_STORES) => {
 const buttonTexts = (w) => w.findAll('button').map((b) => b.text())
 
 describe('FnB', () => {
-  afterEach(() => get.mockReset())
+  afterEach(() => { get.mockReset(); vi.unstubAllEnvs() })
 
-  it('route is guarded by orders_fnb.view (the permission the backend enforces)', () => {
-    expect(router.getRoutes().find((r) => r.path === '/fnb').meta.permission).toBe('orders_fnb.view')
+  it('route is guarded by orders_fnb.view (the permission the backend enforces)', async () => {
+    // The route only exists while VITE_FNB_ENABLED is on (see tests/fnbFlag.spec.js).
+    vi.stubEnv('VITE_FNB_ENABLED', 'true')
+    vi.resetModules()
+    const { default: flaggedRouter } = await import('@/router')
+    expect(flaggedRouter.getRoutes().find((r) => r.path === '/fnb').meta.permission).toBe('orders_fnb.view')
   })
 
   it('RoleView offers exactly the FnB permissions the backend uses', () => {

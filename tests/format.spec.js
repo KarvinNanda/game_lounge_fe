@@ -6,6 +6,9 @@ describe('format', () => {
     expect(formatRp(1500000)).toBe('Rp 1.500.000')
     expect(formatRp(null)).toBe('Rp 0')
   })
+  it('formatRp rounds to whole rupiah (an average like 1.322.000 / 9 must not show decimals)', () => {
+    expect(formatRp(1322000 / 9)).toBe('Rp 146.889')
+  })
   it('formatDateDisplay gives the long Indonesian date, "-" when empty', () => {
     expect(formatDateDisplay('2026-10-07')).toBe('Rabu, 07 Oktober 2026')
     expect(formatDateDisplay('')).toBe('-')

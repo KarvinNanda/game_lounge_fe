@@ -251,7 +251,15 @@ const changePassword = async () => {
 /* Password form */
 .two-col-form { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
+/* Phones: the fixed 280px column and the two-column form made the page wider than the screen. */
+@media (max-width:639px) {
+  .profile-layout { grid-template-columns:1fr; }
+  .two-col-form { grid-template-columns:1fr; }
+  .info-label { width:110px; }
+}
+
 /* C3: former inline styles */
 .tag-list { display: flex; flex-wrap: wrap; gap: var(--space-1); }
 .form-actions { display: flex; justify-content: flex-end; }
+
 </style>

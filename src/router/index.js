@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import { isFnbEnabled } from '@/config/features'
 
 const routes = [
   {
@@ -49,7 +50,8 @@ const routes = [
       { path: 'customers',                name: 'Customers',   meta: { permission: 'customers.view' },    component: () => import('@/views/customer/CustomerView.vue') },
       { path: 'play-credits',             name: 'PlayCredits', meta: { permission: 'play_credits.view' }, component: () => import('@/views/play_credits/PlayCreditsView.vue') },
       { path: 'promotion',                name: 'Promotion',   meta: { permission: 'promotion.view' },    component: () => import('@/views/promotion/PromotionView.vue') },
-      { path: 'fnb',                      name: 'FnB',         meta: { permission: 'orders_fnb.view' },          component: () => import('@/views/fnb/FnBView.vue') },
+      // Only when the backend serves /api/admin/fnb (FNB_ENABLED); otherwise every call 404s.
+      ...(isFnbEnabled() ? [{ path: 'fnb', name: 'FnB', meta: { permission: 'orders_fnb.view' }, component: () => import('@/views/fnb/FnBView.vue') }] : []),
 
       // SYSTEM — guarded by settings.staff_role
       { path: 'staff', name: 'Staff', meta: { permission: 'settings.staff_role' }, component: () => import('@/views/staff/StaffView.vue') },
@@ -58,7 +60,10 @@ const routes = [
       { path: 'settings/global-holidays', name: 'GlobalHolidays', meta: { permission: 'settings.branches' }, component: () => import('@/views/settings/GlobalHolidayView.vue') },
       { path: 'settings/banners', name: 'BannerManagement', meta: { permission: 'settings.branches' }, component: () => import('@/views/settings/BannerManagementView.vue') },
     ]
-  }
+  },
+  // Unknown URLs (including /fnb while FnB is off) used to render a blank page.
+  // Send them to the dashboard; the guard still sends logged-out users to /login.
+  { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })
