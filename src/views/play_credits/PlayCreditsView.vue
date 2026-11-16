@@ -392,7 +392,7 @@
           <div :style="{ display:'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap:'14px' }">
             <el-form-item label="Harga *" prop="price">
               <el-input-number
-                v-model="pkgForm.price" :min="0" :step="10000" class="u-w-full"
+                v-model="pkgForm.price" :precision="0" :min="0" :step="10000" class="u-w-full"
                 :formatter="v => `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.')"
                 :parser="v => v.replace(/Rp\s?|(\.*)/g, '')"
               />

@@ -292,7 +292,7 @@
               prop="discount_value"
             >
               <el-input-number
-                v-model="form.discount_value"
+                v-model="form.discount_value" :precision="form.discount_type === 'nominal' ? 0 : undefined"
                 :min="0"
                 :max="form.discount_type === 'percentage' ? 100 : undefined"
                 class="u-w-full"
@@ -300,7 +300,7 @@
             </el-form-item>
             <el-form-item label="Maksimal Diskon (Rp)" v-if="form.discount_type === 'percentage'">
               <el-input-number
-                v-model="form.max_discount"
+                v-model="form.max_discount" :precision="0"
                 :min="0" class="u-w-full"
                 :formatter="v => v ? `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ''"
                 :parser="v => v.replace(/Rp\s?|(\.*)/g, '')"
@@ -308,7 +308,7 @@
             </el-form-item>
             <el-form-item label="Minimum Pembelian (Rp)" v-else>
               <el-input-number
-                v-model="form.min_purchase"
+                v-model="form.min_purchase" :precision="0"
                 :min="0" class="u-w-full"
                 :formatter="v => v ? `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ''"
                 :parser="v => v.replace(/Rp\s?|(\.*)/g, '')"
@@ -318,7 +318,7 @@
 
           <el-form-item v-if="form.discount_type === 'percentage'" label="Minimum Pembelian (Rp)">
             <el-input-number
-              v-model="form.min_purchase"
+              v-model="form.min_purchase" :precision="0"
               :min="0" class="u-w-full"
               :formatter="v => v ? `Rp ${v}`.replace(/\B(?=(\d{3})+(?!\d))/g, '.') : ''"
               :parser="v => v.replace(/Rp\s?|(\.*)/g, '')"
