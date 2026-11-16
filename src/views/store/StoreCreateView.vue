@@ -182,60 +182,74 @@
         </div>
       </div>
 
-      <!-- ── EDIT MODE: Manajemen Ruangan with tabs ── -->
+      <!-- ── EDIT MODE: one card per room type ─────────────────────────────
+           Units switch on/off right away (PATCH per unit). Added units and
+           types are pending until the store is saved (PUT rooms target counts). -->
       <div class="step-section" v-if="isEdit">
-        <!-- Summary bar -->
         <div class="room-summary-bar">
-          <span>Total: <strong>{{ storeRooms.length }}</strong> ruangan</span>
+          <span>Total: <strong>{{ storeRooms.length }}</strong> unit</span>
           <span class="u-text-success">Aktif: <strong>{{ storeRooms.filter(r => r.is_active).length }}</strong></span>
           <span class="u-text-secondary">Nonaktif: <strong>{{ storeRooms.filter(r => !r.is_active).length }}</strong></span>
         </div>
 
-        <div class="list-empty" v-if="roomGroupsByTemplate.length === 0">
-          Tidak ada ruangan di cabang ini.
+        <div class="list-empty" v-if="editRoomRows.length === 0">
+          Belum ada ruangan di cabang ini. Tambahkan tipe ruangan di bawah.
         </div>
 
-        <!-- Tabs per template -->
-        <el-tabs v-else v-model="activeRoomTemplateTab" type="border-card" class="room-mgmt-tabs">
-          <el-tab-pane
-            v-for="group in roomGroupsByTemplate"
-            :key="group.templateId"
-            :label="`${group.templateName} (${group.rooms.length})`"
-            :name="String(group.templateId)"
+        <div class="room-type-grid">
+        <div v-for="row in editRoomRows" :key="row.id" class="room-type-card">
+          <div class="room-type-head">
+            <span class="room-type-name">{{ row.name }}</span>
+            <el-tag v-if="!row.can_add" size="small" type="info">Tipe nonaktif</el-tag>
+            <!-- Saved units (as in the summary above) and pending ones counted apart. -->
+            <span class="room-type-count">{{ row.existing_units }} unit<template v-if="row.unit_count > row.existing_units"> · +{{ row.unit_count - row.existing_units }} baru</template></span>
+          </div>
+          <div
+            v-for="room in unitsOf(row.id)"
+            :key="room.id"
+            class="room-unit-row"
+            :class="{ 'room-unit-inactive': !room.is_active }"
           >
-            <div class="room-mgmt-list">
-              <div
-                v-for="room in group.rooms"
-                :key="room.id"
-                class="room-mgmt-row"
-                :class="{ 'room-mgmt-inactive': !room.is_active }"
-              >
-                <div class="room-mgmt-info">
-                  <span class="room-mgmt-name">{{ room.name }}</span>
-                  <el-tag :type="room.is_active ? 'success' : 'danger'" size="small">
-                    {{ room.is_active ? 'Aktif' : 'Nonaktif' }}
-                  </el-tag>
-                </div>
-                <el-switch
-                  v-model="room.is_active"
-                  :loading="togglingRoomId === room.id"
-                  active-text="Aktif"
-                  inactive-text="Nonaktif"
-                  @change="(val) => handleToggleRoom(room, val)"
-                />
-              </div>
-            </div>
-          </el-tab-pane>
-        </el-tabs>
+            <span class="room-unit-name">{{ room.name }}</span>
+            <el-switch
+              v-model="room.is_active"
+              :loading="togglingRoomId === room.id"
+              active-text="Aktif"
+              inactive-text="Nonaktif"
+              @change="(val) => handleToggleRoom(room, val)"
+            />
+          </div>
+          <div v-for="n in row.unit_count - row.existing_units" :key="`new-${n}`" class="room-unit-row room-unit-new">
+            <span class="room-unit-name">Unit baru {{ n }} <span class="room-unit-hint">(tersimpan saat store disimpan)</span></span>
+            <el-button class="room-unit-cancel" plain type="danger" size="small" @click="removePendingUnit(row)">Batal</el-button>
+          </div>
+          <el-button v-if="row.can_add" link type="primary" class="room-add-unit" @click="row.unit_count++">
+            <el-icon><Plus /></el-icon> Tambah unit
+          </el-button>
+        </div>
+        </div><!-- end room-type-grid -->
+
+        <el-select
+          v-if="addableRoomTypes.length"
+          v-model="roomTypeToAdd"
+          placeholder="Tambah tipe ruangan"
+          class="room-add-type"
+          @change="addRoomType"
+        >
+          <el-option v-for="t in addableRoomTypes" :key="t.id" :label="t.name" :value="t.id" />
+        </el-select>
+        <div class="info-box room-row-actions">
+          <el-icon class="u-text-action"><InfoFilled /></el-icon>
+          <span>Unit hanya bisa ditambah. Untuk berhenti memakai unit, nonaktifkan unitnya.</span>
+        </div>
       </div>
 
-      <!-- ── Room types and unit counts (create: pick types; edit: add units or types) ── -->
-      <div class="step-section">
-        <div v-if="isEdit" class="add-rooms-title">Tambah unit atau tipe ruangan</div>
+      <!-- ── CREATE MODE: pick room types and how many units ── -->
+      <div class="step-section" v-else>
         <!-- Desktop/Tablet table -->
         <el-table v-if="!isMobile" :data="roomTemplates" class="u-w-full" v-loading="roomsLoading">
           <el-table-column width="50">
-            <template #default="{ row }"><el-checkbox v-model="row.selected" :disabled="row.existing_units > 0" /></template>
+            <template #default="{ row }"><el-checkbox v-model="row.selected" /></template>
           </el-table-column>
           <el-table-column label="Tipe Ruangan" min-width="220">
             <template #default="{ row }">
@@ -245,7 +259,7 @@
                   <el-icon v-else size="16" class="u-text-muted"><Picture /></el-icon>
                 </div>
                 <div>
-                  <div class="u-fw-semibold u-text-sm">{{ row.name }}<el-tag v-if="row.existing_units" size="small" type="info" class="existing-tag">Sudah ada</el-tag></div>
+                  <div class="u-fw-semibold u-text-sm">{{ row.name }}</div>
                   <div class="u-text-xs u-text-secondary">{{ row.capacity_min }}–{{ row.capacity_max }} orang</div>
                 </div>
               </div>
@@ -260,50 +274,45 @@
               </div>
             </template>
           </el-table-column>
-          <el-table-column :label="isEdit ? 'Total Unit' : 'Jumlah Unit'" width="190">
+          <el-table-column label="Jumlah Unit" width="160">
             <template #default="{ row }">
               <div v-if="row.selected" class="u-flex u-gap-1">
-                <el-button size="small" circle plain :disabled="row.unit_count <= Math.max(row.existing_units, 1)" @click="row.unit_count = Math.max(row.existing_units, 1, row.unit_count - 1)"><el-icon><Minus /></el-icon></el-button>
+                <el-button size="small" circle plain :disabled="row.unit_count <= 1" @click="row.unit_count = Math.max(1, row.unit_count - 1)"><el-icon><Minus /></el-icon></el-button>
                 <span class="hour-day-index">{{ row.unit_count }}</span>
-                <el-button size="small" circle plain :disabled="!row.can_add" @click="row.unit_count++"><el-icon><Plus /></el-icon></el-button>
+                <el-button size="small" circle plain @click="row.unit_count++"><el-icon><Plus /></el-icon></el-button>
               </div>
-              <div v-if="row.selected && row.existing_units" class="unit-note">
-                Saat ini: {{ row.existing_units }}<span v-if="row.unit_count > row.existing_units" class="new-units"> · +{{ row.unit_count - row.existing_units }} baru</span>
-                <span v-if="!row.can_add"> · Tipe nonaktif, tidak bisa ditambah</span>
-              </div>
-              <span v-if="!row.selected" class="u-text-muted u-text-xs">—</span>
+              <span v-else class="u-text-muted u-text-xs">—</span>
             </template>
           </el-table-column>
         </el-table>
 
         <!-- Mobile card list -->
         <div v-else v-loading="roomsLoading" class="room-card-list">
-          <div v-for="row in roomTemplates" :key="row.id" class="room-card" :class="{ selected: row.selected }" @click="row.existing_units || (row.selected = !row.selected)">
+          <div v-for="row in roomTemplates" :key="row.id" class="room-card" :class="{ selected: row.selected }" @click="row.selected = !row.selected">
             <div class="row-main">
-              <el-checkbox v-model="row.selected" :disabled="row.existing_units > 0" @click.stop />
+              <el-checkbox v-model="row.selected" @click.stop />
               <div class="room-thumb">
                 <img v-if="row.image_url" :src="getImageUrl(row.image_url)" />
                 <el-icon v-else size="16" class="u-text-muted"><Picture /></el-icon>
               </div>
               <div class="min-w-0">
-                <div class="room-name">{{ row.name }}<el-tag v-if="row.existing_units" size="small" type="info" class="existing-tag">Sudah ada</el-tag></div>
+                <div class="room-name">{{ row.name }}</div>
                 <div class="u-text-xs u-text-secondary">{{ row.capacity_min }}–{{ row.capacity_max }} orang</div>
               </div>
             </div>
             <div class="row-tools" v-if="row.selected" @click.stop>
-              <el-button size="small" circle plain :disabled="row.unit_count <= Math.max(row.existing_units, 1)" @click="row.unit_count = Math.max(row.existing_units, 1, row.unit_count - 1)"><el-icon><Minus /></el-icon></el-button>
+              <el-button size="small" circle plain :disabled="row.unit_count <= 1" @click="row.unit_count = Math.max(1, row.unit_count - 1)"><el-icon><Minus /></el-icon></el-button>
               <span class="hour-day-index">{{ row.unit_count }}</span>
-              <el-button size="small" circle plain :disabled="!row.can_add" @click="row.unit_count++"><el-icon><Plus /></el-icon></el-button>
-              <span v-if="row.existing_units" class="unit-note">Saat ini: {{ row.existing_units }}<span v-if="row.unit_count > row.existing_units" class="new-units"> · +{{ row.unit_count - row.existing_units }} baru</span><span v-if="!row.can_add"> · Tipe nonaktif, tidak bisa ditambah</span></span>
+              <el-button size="small" circle plain @click="row.unit_count++"><el-icon><Plus /></el-icon></el-button>
             </div>
           </div>
         </div>
 
         <div class="info-box room-row-actions">
           <el-icon class="u-text-action"><InfoFilled /></el-icon>
-          <span>Jumlah unit = banyaknya ruangan dengan tipe yang sama di cabang ini.{{ isEdit ? ' Unit hanya bisa ditambah; untuk mengurangi, nonaktifkan unit di atas.' : '' }}</span>
+          <span>Jumlah unit = banyaknya ruangan dengan tipe yang sama di cabang ini.</span>
         </div>
-      </div><!-- end room types and unit counts -->
+      </div><!-- end create mode -->
 
     </el-card>
 
@@ -421,25 +430,38 @@ const selectedRooms = computed(() => roomTemplates.value.filter(r => r.selected)
 
 // The API returns times as HH:mm:ss; show HH:mm. Display only, the payload is unchanged.
 const hhmm = (t) => (t || '').slice(0, 5)
-// Same A-Z order as the unit tabs above (roomGroupsByTemplate), so both lists line up.
+// Room types are listed A-Z in both modes.
 const byName = (a, b) => a.name.localeCompare(b.name)
 
-// ── Manajemen Ruangan (edit mode) ─────────────────────────────
-const storeRooms        = ref([])
-const togglingRoomId    = ref(null)
-const activeRoomTemplateTab = ref(null)
+// ── Ruangan (edit mode): one card per room type ───────────────
+const storeRooms     = ref([])
+const togglingRoomId = ref(null)
+const roomTypeToAdd  = ref(null)
 
-const roomGroupsByTemplate = computed(() => {
-  if (!storeRooms.value.length) return []
-  const groups = {}
-  for (const room of storeRooms.value) {
-    const tid   = room.room_template?.id || 0
-    const tname = room.room_template?.name || 'Lainnya'
-    if (!groups[tid]) groups[tid] = { templateId: tid, templateName: tname, rooms: [] }
-    groups[tid].rooms.push(room)
+// Types shown as cards: the ones the branch has, plus types added in this edit.
+const editRoomRows = computed(() => roomTemplates.value.filter(r => r.selected))
+// Types that can still be added: not on the branch yet and active (the backend
+// rejects new units for inactive types).
+const addableRoomTypes = computed(() => roomTemplates.value.filter(r => !r.selected && r.can_add))
+
+const unitsOf = (templateId) => storeRooms.value
+  .filter(r => (r.room_template?.id ?? r.room_template_id) === templateId)
+  .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }))
+
+// Drop one pending unit. A type added in this edit disappears with its last one.
+const removePendingUnit = (row) => {
+  if (row.unit_count > row.existing_units) row.unit_count--
+  if (row.existing_units === 0 && row.unit_count === 0) {
+    row.selected = false
+    row.unit_count = 1
   }
-  return Object.values(groups).sort((a, b) => a.templateName.localeCompare(b.templateName))
-})
+}
+
+const addRoomType = (id) => {
+  const row = roomTemplates.value.find(r => r.id === id)
+  if (row) { row.selected = true; row.unit_count = 1 }
+  roomTypeToAdd.value = null
+}
 
 const handleToggleRoom = async (room, isActive) => {
   togglingRoomId.value = room.id
@@ -556,8 +578,6 @@ onMounted(async () => {
       // Rebuild from the unfiltered list: an inactive type the branch already has
       // must stay visible, but create mode has filtered it out.
       roomTemplates.value = roomSetupRows(allTemplates, storeRooms.value).sort(byName)
-      // Open the first type so its per-unit on/off switches are visible right away.
-      activeRoomTemplateTab.value = roomGroupsByTemplate.value[0] ? String(roomGroupsByTemplate.value[0].templateId) : null
     } catch {}
   }
 })
@@ -565,10 +585,6 @@ onMounted(async () => {
 
 <style scoped>
 .step-header { display:flex; gap:14px; align-items:flex-start; }
-.add-rooms-title { font-size:14px; font-weight:700; color:var(--text-primary); margin:20px 0 10px; }
-.new-units { font-weight:600; color:var(--el-color-success); white-space:nowrap; }
-.unit-note { font-size:12px; color:var(--text-secondary); margin-top:4px; }
-.existing-tag { margin-left:6px; vertical-align:middle; }
 .step-title { font-size:16px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
 .step-desc { font-size:12px; color:var(--text-secondary); }
 
@@ -663,20 +679,6 @@ onMounted(async () => {
   background:var(--bg-main); border:1px solid var(--border-color);
   border-radius:8px; padding:8px 14px; margin-bottom:12px;
 }
-.room-mgmt-tabs :deep(.el-tabs__content) { padding:0; }
-/* Match the light, rounded borders of the summary bar and table around it. */
-.room-mgmt-tabs.el-tabs--border-card { border:1px solid var(--border-color); border-radius:var(--radius-md); overflow:hidden; box-shadow:none; }
-.room-mgmt-list { display:flex; flex-direction:column; }
-.room-mgmt-row {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:10px 14px; border-bottom:1px solid var(--border-color);
-  transition:background 0.15s;
-}
-.room-mgmt-row:last-child { border-bottom:none; }
-.room-mgmt-row:hover { background:var(--bg-main); }
-.room-mgmt-inactive { opacity:0.6; }
-.room-mgmt-info { display:flex; align-items:center; gap:10px; }
-.room-mgmt-name { font-size:13px; font-weight:600; min-width:100px; }
 
 /* Stepper title font */
 :deep(.el-step__title) { font-size:12px; }
@@ -685,6 +687,25 @@ onMounted(async () => {
   :deep(.el-steps) { padding:0 4px; }
 }
 
+/* Edit mode: one card per room type (units with switches, pending new units). */
+/* One column on phones and tablets; two on desktop so a unit's name and its
+   switch stay close together instead of ~1100px apart on a wide screen. */
+.room-type-grid { display:grid; grid-template-columns:1fr; gap:var(--space-3); margin-top:var(--space-3); align-items:start; }
+@media (min-width:1024px) { .room-type-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); } }
+.room-type-card { border:1px solid var(--border-color); border-radius:var(--radius-md); padding:var(--space-3) var(--space-4); background:var(--bg-card); }
+.room-type-head { display:flex; align-items:center; gap:var(--space-2); margin-bottom:var(--space-1); }
+.room-type-name { font-size:14px; font-weight:700; color:var(--text-primary); }
+.room-type-count { margin-left:auto; font-size:12px; color:var(--text-secondary); }
+.room-unit-row { display:flex; align-items:center; justify-content:space-between; gap:var(--space-2); padding:var(--space-2) 0; border-top:1px solid var(--border-color); }
+.room-unit-name { font-size:13px; font-weight:600; }
+.room-unit-inactive .room-unit-name { color:var(--text-secondary); }
+.room-unit-new .room-unit-name { color:var(--el-color-success); }
+.room-unit-hint { font-weight:400; font-size:12px; color:var(--text-secondary); }
+.room-add-unit { margin-top:var(--space-1); }
+.room-add-unit :deep(.el-icon) { margin-right:var(--space-1); }
+/* Phones: a 36px target like the other small buttons, instead of a bare text link. */
+@media (max-width:639px) { .room-unit-cancel { min-height:36px; padding:0 var(--space-3); } }
+.room-add-type { width:100%; max-width:320px; margin-top:var(--space-3); }
 /* C3: former inline styles */
 .step-section { margin-top: var(--space-5); }
 .hour-day-index { width: 28px; text-align: center; font-weight: 700; font-size: var(--font-size-base); }
