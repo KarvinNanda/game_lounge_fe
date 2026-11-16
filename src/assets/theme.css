@@ -98,6 +98,47 @@ img { max-width: 100%; }
 .fade-enter-from,
 .fade-leave-to { opacity: 0; }
 
+/* ── Card tabs on phones: a 3-column grid ────────────────
+   A card or border-card tab row wider than the screen became a scroll strip
+   that cut labels ("Paket Nor..."). On phones every tab is shown at once as a
+   grid of segments: 3 columns, or 2 when there are only 2 tabs. The header
+   gets height: auto so the extra row pushes content down instead of
+   overlapping it (Element Plus gives the header a fixed height).
+   !important is required: Element Plus sets the strip's scroll offset as an
+   inline transform, and its card tab borders use more specific selectors. */
+@media (max-width: 639px) {
+  .el-tabs--card > .el-tabs__header,
+  .el-tabs--border-card > .el-tabs__header { height: auto; border-bottom: 0; background: none; margin-bottom: 0; }
+  .el-tabs--card > .el-tabs__header .el-tabs__nav-wrap,
+  .el-tabs--border-card > .el-tabs__header .el-tabs__nav-wrap { padding: 0; margin-bottom: var(--space-3); }
+  .el-tabs--card > .el-tabs__header .el-tabs__nav-prev,
+  .el-tabs--card > .el-tabs__header .el-tabs__nav-next,
+  .el-tabs--border-card > .el-tabs__header .el-tabs__nav-prev,
+  .el-tabs--border-card > .el-tabs__header .el-tabs__nav-next { display: none; }
+  .el-tabs--card > .el-tabs__header .el-tabs__nav-scroll,
+  .el-tabs--border-card > .el-tabs__header .el-tabs__nav-scroll { overflow: visible; }
+  .el-tabs--card > .el-tabs__header .el-tabs__nav,
+  .el-tabs--border-card > .el-tabs__header .el-tabs__nav {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px;
+    float: none; width: 100%; border: 0 !important; transform: none !important;
+  }
+  .el-tabs--card > .el-tabs__header .el-tabs__nav:not(:has(> .el-tabs__item:nth-child(3))),
+  .el-tabs--border-card > .el-tabs__header .el-tabs__nav:not(:has(> .el-tabs__item:nth-child(3))) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .el-tabs--card > .el-tabs__header .el-tabs__item,
+  .el-tabs--border-card > .el-tabs__header .el-tabs__item {
+    height: auto; min-height: 40px; padding: 8px 6px !important; margin: 0 !important;
+    justify-content: center; text-align: center; white-space: normal; line-height: 1.25;
+    border: 1px solid var(--border-color) !important; border-radius: var(--radius-md);
+    background: var(--bg-card); color: var(--text-secondary);
+  }
+  .el-tabs--card > .el-tabs__header .el-tabs__item.is-active,
+  .el-tabs--border-card > .el-tabs__header .el-tabs__item.is-active {
+    border-color: var(--action) !important; background: var(--action-soft); color: var(--action); font-weight: 600;
+  }
+}
+
 /* ── Reduced motion ──────────────────────────────────────
    !important is required: it must beat every component's
    own transition, including Element Plus internals. */
