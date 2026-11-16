@@ -509,6 +509,7 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
+import { formatRp } from '@/utils/format'
 import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getCustomers, getCustomerById,
@@ -736,7 +737,6 @@ const openWhatsApp = (number) => {
 
 // ── Helpers ───────────────────────────────────────────────────
 
-const formatRp = (v) => `Rp ${(v || 0).toLocaleString('id-ID')}`
 const formatRpShort = (v) => {
   if (!v) return 'Rp 0'
   if (v >= 1_000_000) return `Rp ${(v / 1_000_000).toFixed(1).replace('.0', '')}jt`

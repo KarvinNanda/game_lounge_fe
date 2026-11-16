@@ -678,6 +678,7 @@ import { usePermission } from '@/composables/usePermission'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { notifyError } from '@/utils/notify'
+import { formatRp } from '@/utils/format'
 import AuditTrail from '@/components/AuditTrail.vue'
 import {
   getPackages, getActivePackages, createPackage, updatePackage, deletePackage,
@@ -942,7 +943,6 @@ const handleAdjustCredit = async () => {
 }
 
 // ── Helpers ───────────────────────────────────────────────────
-const formatRp = (v) => `Rp ${(v || 0).toLocaleString('id-ID')}`
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-'
 const formatTime = (d) => d ? new Date(d).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'
 const getProgressColor = (percent) => {

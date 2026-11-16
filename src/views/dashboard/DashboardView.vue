@@ -278,6 +278,7 @@ import { cssVar } from '@/utils/cssVar'
 import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { notifyError } from '@/utils/notify'
+import { formatRp } from '@/utils/format'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import * as echarts from 'echarts'
 import * as XLSX from 'xlsx'
@@ -353,7 +354,6 @@ const statItems = computed(() => {
 })
 
 // ── Helpers ───────────────────────────────────────────────────
-const formatRp        = (v) => `Rp ${(v || 0).toLocaleString('id-ID')}`
 const formatDate      = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) : '-'
 const formatDateShort = (d) => d ? new Date(d).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'2-digit' }) : '-'
 

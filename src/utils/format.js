@@ -1,7 +1,9 @@
 // Display helpers shared by the booking components (moved unchanged from
 // BookingView.vue).
 
-export const formatRp = (v) => `Rp ${(v || 0).toLocaleString('id-ID')}`
+// Rupiah has no sub-unit in practice. Values computed as floats (averages,
+// percentage discounts) are rounded to whole rupiah for display.
+export const formatRp = (v) => `Rp ${(v || 0).toLocaleString('id-ID', { maximumFractionDigits: 0 })}`
 
 export const formatDateDisplay = (d) => {
   if (!d) return '-'
