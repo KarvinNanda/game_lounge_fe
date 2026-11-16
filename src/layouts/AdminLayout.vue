@@ -568,7 +568,8 @@ const handleUserCommand = async (cmd) => {
 
 @media (max-width: 639px) {
   .app-header { padding: 0 var(--space-3); }
-  .page-content { padding: var(--space-3); }
+  /* 16px side gutter on phones; 12px put text and cards too close to the screen edge. */
+  .page-content { padding: var(--space-3) var(--space-4); }
   .user-info { display: none; }
 }
 
