@@ -8,12 +8,13 @@
       <!-- Header -->
       <div class="panel-header">
         <div>
-          <h1 class="page-title">Customer / Member Management</h1>
+          <div class="page-crumb">Dashboard → Pelanggan</div>
+          <h1 class="page-title">Pelanggan</h1>
           <p class="page-desc">Kelola data pelanggan dan riwayat transaksi</p>
         </div>
         <div class="header-actions">
           <el-button v-if="can('customers.create')" @click="openForm(null)">
-            <el-icon><Plus /></el-icon> Add Customer
+            <el-icon><Plus /></el-icon> Tambah Pelanggan
           </el-button>
         </div>
       </div>
@@ -22,17 +23,17 @@
       <FilterBar>
         <el-input class="filter-search"
           v-model="filters.search"
-          placeholder="Search customer name or WhatsApp..."
+          placeholder="Cari nama / WhatsApp"
           prefix-icon="Search"
          
           clearable
           @input="debounceFetch"
         />
         <el-select class="filter-select" v-model="filters.status" placeholder="Semua Status" clearable @change="applyFilters">
-          <el-option label="Active" value="active" />
-          <el-option label="Inactive" value="inactive" />
+          <el-option label="Aktif" value="active" />
+          <el-option label="Nonaktif" value="inactive" />
         </el-select>
-        <el-select class="filter-select" v-model="filters.gender" placeholder="Semua Gender" clearable @change="applyFilters">
+        <el-select class="filter-select" v-model="filters.gender" placeholder="Semua Jenis Kelamin" clearable @change="applyFilters">
           <el-option label="Laki-laki" value="male" />
           <el-option label="Perempuan" value="female" />
         </el-select>
@@ -49,18 +50,18 @@
           </div>
           <div class="m-card-body">
             <div class="m-card-title">{{ row.name }}</div>
-            <div class="m-card-meta">{{ row.whatsapp }} · {{ row.total_visit || 0 }}x visit</div>
+            <div class="m-card-meta">{{ row.whatsapp }} · {{ row.total_visit || 0 }}x kunjungan</div>
           </div>
           <div class="m-card-end m-card-end-row">
-            <el-tag :type="row.type === 'member' ? 'warning' : 'info'" size="small">{{ row.type === 'member' ? 'Member' : 'Regular' }}</el-tag>
+            <el-tag :type="row.type === 'member' ? 'warning' : 'info'" size="small">{{ row.type === 'member' ? 'Member' : 'Reguler' }}</el-tag>
             <el-dropdown trigger="click" @command="(cmd) => handleCommand(cmd, row)">
               <el-button size="small" circle plain @click.stop><el-icon><MoreFilled /></el-icon></el-button>
               <template #dropdown>
                 <el-dropdown-menu>
                   <el-dropdown-item command="view"><el-icon><View /></el-icon> Lihat Detail</el-dropdown-item>
-                  <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
+                  <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Ubah Pelanggan</el-dropdown-item>
                   <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Kirim ulang link atur password</el-dropdown-item>
-                  <el-dropdown-item v-if="can('customers.edit')" command="delete" class="u-text-danger"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
+                  <el-dropdown-item v-if="can('customers.edit')" command="delete" class="u-text-danger"><el-icon><Delete /></el-icon> Hapus Pelanggan</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -79,7 +80,7 @@
           :row-class-name="({ row }) => row.id === selectedCustomer?.id ? 'selected-row' : ''"
         >
           <!-- Customer (avatar + name + badge) -->
-          <el-table-column label="CUSTOMER" min-width="180">
+          <el-table-column label="PELANGGAN" min-width="180">
             <template #default="{ row }">
               <div class="u-flex u-gap-2">
                 <!-- <el-avatar class="no-shrink" :size="36" :src="row.avatar_url">
@@ -88,7 +89,7 @@
                 <div>
                   <div class="u-fw-semibold u-text-sm">{{ row.name }}</div>
                   <el-tag :type="row.type === 'member' ? 'warning' : 'info'" size="small" class="u-mt-1">
-                    {{ row.type === 'member' ? 'Member' : 'Regular' }}
+                    {{ row.type === 'member' ? 'Member' : 'Reguler' }}
                   </el-tag>
                 </div>
               </div>
@@ -106,7 +107,7 @@
           </el-table-column>
 
           <!-- Last Visit -->
-          <el-table-column label="LAST VISIT" width="130">
+          <el-table-column label="KUNJUNGAN TERAKHIR" width="130">
             <template #default="{ row }">
               <div class="u-text-xs">
                 <div>{{ row.last_visit_date || '-' }}</div>
@@ -116,14 +117,14 @@
           </el-table-column>
 
           <!-- Total Visit -->
-          <el-table-column label="TOTAL VISIT" width="100">
+          <el-table-column label="KUNJUNGAN" width="120">
             <template #default="{ row }">
               <span class="u-fw-semibold">{{ row.total_visit || 0 }}x</span>
             </template>
           </el-table-column>
 
           <!-- Favorite Room -->
-          <el-table-column label="FAVORITE ROOM" width="140">
+          <el-table-column label="RUANGAN FAVORIT" width="140">
             <template #default="{ row }">
               <el-tag v-if="row.favorite_room" size="small">{{ row.favorite_room }}</el-tag>
               <span v-else class="u-text-muted u-text-xs">-</span>
@@ -131,7 +132,7 @@
           </el-table-column>
 
           <!-- Total Spent -->
-          <el-table-column label="TOTAL SPENT" width="130">
+          <el-table-column label="TOTAL BELANJA" width="130">
             <template #default="{ row }">
               <span class="u-text-xs u-fw-semibold">{{ formatRp(row.total_spent || 0) }}</span>
             </template>
@@ -141,7 +142,7 @@
           <el-table-column label="STATUS" width="90">
             <template #default="{ row }">
               <el-tag :type="row.status === 'active' ? 'success' : 'danger'" size="small">
-                {{ row.status === 'active' ? 'Active' : 'Inactive' }}
+                {{ row.status === 'active' ? 'Aktif' : 'Nonaktif' }}
               </el-tag>
             </template>
           </el-table-column>
@@ -156,9 +157,9 @@
                   </el-button>
                   <template #dropdown>
                     <el-dropdown-menu>
-                      <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
+                      <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Ubah Pelanggan</el-dropdown-item>
                       <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Kirim ulang link atur password</el-dropdown-item>
-                      <el-dropdown-item v-if="can('customers.edit')" command="delete" class="u-text-danger"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
+                      <el-dropdown-item v-if="can('customers.edit')" command="delete" class="u-text-danger"><el-icon><Delete /></el-icon> Hapus Pelanggan</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -171,7 +172,7 @@
       <!-- Pagination -->
       <div class="pagination-bar">
         <span class="u-text-xs u-text-secondary">
-          Showing {{ (filters.page - 1) * filters.per_page + 1 }}–{{ Math.min(filters.page * filters.per_page, total) }} of {{ total }} customers
+          Menampilkan {{ (filters.page - 1) * filters.per_page + 1 }}–{{ Math.min(filters.page * filters.per_page, total) }} dari {{ total }} pelanggan
         </span>
         <TablePagination
           v-model:page="filters.page"
@@ -194,10 +195,10 @@
           <div class="profile-name">{{ selectedCustomer.name }}</div>
           <div class="profile-tags">
             <el-tag :type="selectedCustomer.status === 'active' ? 'success' : 'danger'" size="small">
-              {{ selectedCustomer.status === 'active' ? 'Active' : 'Inactive' }}
+              {{ selectedCustomer.status === 'active' ? 'Aktif' : 'Nonaktif' }}
             </el-tag>
             <el-tag :type="selectedCustomer.type === 'member' ? 'warning' : 'info'" size="small">
-              {{ selectedCustomer.type === 'member' ? 'Member' : 'Regular' }}
+              {{ selectedCustomer.type === 'member' ? 'Member' : 'Reguler' }}
             </el-tag>
           </div>
           <div class="profile-contacts">
@@ -211,7 +212,7 @@
       <div class="dp-stats">
         <div class="dp-stat">
           <div class="dp-stat-val">{{ selectedCustomer.total_visit || 0 }}x</div>
-          <div class="dp-stat-lbl">Visit</div>
+          <div class="dp-stat-lbl">Kunjungan</div>
         </div>
         <div class="dp-stat-divider" />
         <div class="dp-stat">
@@ -221,7 +222,7 @@
         <div class="dp-stat-divider" />
         <div class="dp-stat">
           <div class="dp-stat-val dp-stat-money">{{ formatRpShort(selectedCustomer.total_spent || 0) }}</div>
-          <div class="dp-stat-lbl">Total Spent</div>
+          <div class="dp-stat-lbl">Total Belanja</div>
         </div>
       </div>
 
@@ -249,7 +250,7 @@
             <span class="dp-info-val">{{ formatDob(selectedCustomer.date_of_birth) }}</span>
           </div>
           <div class="dp-info-item">
-            <span class="dp-info-key">Gender</span>
+            <span class="dp-info-key">Jenis Kelamin</span>
             <span class="dp-info-val">{{ selectedCustomer.gender === 'male' ? 'Laki-laki' : selectedCustomer.gender === 'female' ? 'Perempuan' : '-' }}</span>
           </div>
           <div class="dp-info-item">
@@ -265,7 +266,7 @@
 
       <!-- ── Favorite Room ── -->
       <div class="dp-section" v-if="selectedCustomer.favorite_room_types?.length">
-        <div class="dp-section-title">Favorite Room</div>
+        <div class="dp-section-title">Ruangan Favorit</div>
         <div class="tag-list">
           <el-tag v-for="fav in selectedCustomer.favorite_room_types" :key="fav.id" size="small" type="info">
             {{ fav.room_template?.name }}
@@ -318,7 +319,7 @@
     <!-- Empty detail state -->
     <div class="detail-panel empty-detail" v-else>
       <el-icon size="40" class="u-text-muted"><UserFilled /></el-icon>
-      <p class="u-text-muted u-mt-2 u-text-sm">Pilih customer untuk melihat detail</p>
+      <p class="u-text-muted u-mt-2 u-text-sm">Pilih pelanggan untuk melihat detail</p>
     </div>
 
     <!-- ══════════════════════════════════════════════════════════
@@ -326,7 +327,7 @@
     ══════════════════════════════════════════════════════════ -->
     <el-drawer
       v-model="formVisible"
-      :title="editingCustomer ? 'Edit Customer' : 'Add Customer'"
+      :title="editingCustomer ? 'Ubah Pelanggan' : 'Tambah Pelanggan'"
       direction="rtl"
       :size="isMobile ? '100%' : '520px'"
       :destroy-on-close="true"
@@ -358,7 +359,7 @@
             />
           </el-form-item>
 
-          <el-form-item label="Gender">
+          <el-form-item label="Jenis Kelamin">
             <el-select v-model="form.gender" placeholder="Pilih gender" class="u-w-full">
               <el-option label="Laki-laki" value="male" />
               <el-option label="Perempuan" value="female" />
@@ -369,21 +370,21 @@
             <el-input v-model="form.occupation" placeholder="Contoh: Mahasiswa, Karyawan" />
           </el-form-item>
 
-          <el-form-item label="Tipe Customer">
+          <el-form-item label="Tipe Pelanggan">
             <el-select v-model="form.type" class="u-w-full">
-              <el-option label="Regular" value="regular" />
+              <el-option label="Reguler" value="regular" />
               <el-option label="Member" value="member" />
             </el-select>
           </el-form-item>
 
           <el-form-item v-if="editingCustomer" label="Status">
             <el-select v-model="form.status" class="u-w-full">
-              <el-option label="Active" value="active" />
-              <el-option label="Inactive" value="inactive" />
+              <el-option label="Aktif" value="active" />
+              <el-option label="Nonaktif" value="inactive" />
             </el-select>
           </el-form-item>
 
-          <el-form-item class="full-row" label="Favorite Room">
+          <el-form-item class="full-row" label="Ruangan Favorit">
             <el-select
               v-model="form.favorite_room_ids"
               multiple
@@ -437,7 +438,7 @@
       v-model="detailDrawerVisible"
       direction="rtl"
       size="100%"
-      :title="selectedCustomer?.name || 'Detail Customer'"
+      :title="selectedCustomer?.name || 'Detail Pelanggan'"
       :destroy-on-close="false"
     >
       <div v-if="selectedCustomer">
@@ -447,8 +448,8 @@
           <div class="profile-info">
             <div class="profile-name">{{ selectedCustomer.name }}</div>
             <div class="profile-tags">
-              <el-tag :type="selectedCustomer.status === 'active' ? 'success' : 'danger'" size="small">{{ selectedCustomer.status === 'active' ? 'Active' : 'Inactive' }}</el-tag>
-              <el-tag :type="selectedCustomer.type === 'member' ? 'warning' : 'info'" size="small">{{ selectedCustomer.type === 'member' ? 'Member' : 'Regular' }}</el-tag>
+              <el-tag :type="selectedCustomer.status === 'active' ? 'success' : 'danger'" size="small">{{ selectedCustomer.status === 'active' ? 'Aktif' : 'Nonaktif' }}</el-tag>
+              <el-tag :type="selectedCustomer.type === 'member' ? 'warning' : 'info'" size="small">{{ selectedCustomer.type === 'member' ? 'Member' : 'Reguler' }}</el-tag>
             </div>
             <div class="profile-contacts">
               <span><el-icon><Phone /></el-icon>{{ selectedCustomer.whatsapp }}</span>
@@ -458,11 +459,11 @@
         </div>
         <!-- Stats -->
         <div class="dp-stats">
-          <div class="dp-stat"><div class="dp-stat-val">{{ selectedCustomer.total_visit || 0 }}x</div><div class="dp-stat-lbl">Visit</div></div>
+          <div class="dp-stat"><div class="dp-stat-val">{{ selectedCustomer.total_visit || 0 }}x</div><div class="dp-stat-lbl">Kunjungan</div></div>
           <div class="dp-stat-divider" />
           <div class="dp-stat"><div class="dp-stat-val">{{ selectedCustomer.total_booking || 0 }}</div><div class="dp-stat-lbl">Booking</div></div>
           <div class="dp-stat-divider" />
-          <div class="dp-stat"><div class="dp-stat-val dp-stat-money">{{ formatRpShort(selectedCustomer.total_spent || 0) }}</div><div class="dp-stat-lbl">Total Spent</div></div>
+          <div class="dp-stat"><div class="dp-stat-val dp-stat-money">{{ formatRpShort(selectedCustomer.total_spent || 0) }}</div><div class="dp-stat-lbl">Total Belanja</div></div>
         </div>
         <!-- Actions -->
         <div class="dp-actions">
@@ -477,7 +478,7 @@
           <div class="dp-section-title">Informasi Pribadi</div>
           <div class="dp-info-list">
             <div class="dp-info-item"><span class="dp-info-key">Tanggal Lahir</span><span class="dp-info-val">{{ formatDob(selectedCustomer.date_of_birth) }}</span></div>
-            <div class="dp-info-item"><span class="dp-info-key">Gender</span><span class="dp-info-val">{{ selectedCustomer.gender === 'male' ? 'Laki-laki' : selectedCustomer.gender === 'female' ? 'Perempuan' : '-' }}</span></div>
+            <div class="dp-info-item"><span class="dp-info-key">Jenis Kelamin</span><span class="dp-info-val">{{ selectedCustomer.gender === 'male' ? 'Laki-laki' : selectedCustomer.gender === 'female' ? 'Perempuan' : '-' }}</span></div>
             <div class="dp-info-item"><span class="dp-info-key">Pekerjaan</span><span class="dp-info-val">{{ selectedCustomer.occupation || '-' }}</span></div>
             <div class="dp-info-item"><span class="dp-info-key">Bergabung</span><span class="dp-info-val">{{ formatDate(selectedCustomer.created_at) }}</span></div>
           </div>
@@ -765,6 +766,8 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Same look as PageHeader's breadcrumb; this page keeps its own two-panel header. */
+.page-crumb { font-size: 12px; color: var(--text-secondary); margin-bottom: 2px; }
 .customer-layout {
   display: grid;
   grid-template-columns: 1fr 360px;

@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Dashboard > Play Credits" title="Play Credits" />
+    <PageHeader breadcrumb="Dashboard → Play Credits" title="Play Credits" />
 
     <!-- 2 Tabs -->
     <el-tabs v-model="activeTab" type="card" @tab-change="onTabChange">
@@ -11,24 +11,24 @@
       ════════════════════════════════════════════════════════ -->
       <el-tab-pane name="packages">
         <template #label>
-          <span><el-icon><Coin /></el-icon> Play Credits Package</span>
+          <span><el-icon><Coin /></el-icon> Paket Play Credits</span>
         </template>
 
         <div class="u-mt-4">
           <!-- Header Tab -->
           <div class="detail-head">
             <div>
-              <h3 class="detail-name">Play Credits Package</h3>
+              <h3 class="detail-name">Paket Play Credits</h3>
               <p class="u-text-xs u-text-secondary">Kelola paket play credits yang tersedia untuk dijual</p>
             </div>
             <el-button v-if="can('play_credits.create')" type="primary" @click="openPackageForm(null)">
-              <el-icon><Plus /></el-icon> Create New Package
+              <el-icon><Plus /></el-icon> Buat Paket Baru
             </el-button>
           </div>
 
           <!-- Filter -->
           <div class="summary-row">
-            <el-input class="filter-search" v-model="pkgFilter.search" placeholder="Search package name..." prefix-icon="Search"
+            <el-input class="filter-search" v-model="pkgFilter.search" placeholder="Cari nama paket..." prefix-icon="Search"
               clearable @input="debouncePkg" />
             <el-select class="filter-w150" v-model="pkgFilter.status" placeholder="Semua Status" clearable @change="applyPkgFilters">
               <el-option label="Aktif" value="active" />
@@ -126,7 +126,7 @@
 
             <div class="u-flex u-justify-between u-mt-3">
               <span class="u-text-xs u-text-secondary">
-                Showing {{ packageList.length }} to {{ pkgTotal }} packages
+                Menampilkan {{ packageList.length }} dari {{ pkgTotal }} paket
               </span>
               <TablePagination v-model:page="pkgFilter.page" :page-size="pkgFilter.per_page" :total="pkgTotal" :sizes="false" @change="fetchPackages" />
             </div>
@@ -140,18 +140,18 @@
       ════════════════════════════════════════════════════════ -->
       <el-tab-pane name="members">
         <template #label>
-          <span><el-icon><User /></el-icon> Member Play Credits</span>
+          <span><el-icon><User /></el-icon> Play Credits Member</span>
         </template>
 
         <div class="u-mt-4">
           <!-- Header Tab -->
           <div class="detail-head-tight">
             <div>
-              <h3 class="detail-name-tight">Member Play Credits (Aktif)</h3>
+              <h3 class="detail-name-tight">Play Credits Member (Aktif)</h3>
               <p class="u-text-xs u-text-secondary">Daftar paket Play Credits aktif yang dimiliki member.</p>
             </div>
             <el-button v-if="can('play_credits.create')" type="primary" @click="openAssignDialog">
-              <el-icon><Plus /></el-icon> Assign Credits
+              <el-icon><Plus /></el-icon> Berikan Credits
             </el-button>
           </div>
 
@@ -163,7 +163,7 @@
 
           <!-- Filters -->
           <div class="filter-row">
-            <el-input class="filter-w200" v-model="memberFilter.search" placeholder="Search nama member..."
+            <el-input class="filter-w200" v-model="memberFilter.search" placeholder="Cari nama member..."
               prefix-icon="Search" clearable @input="debounceMembers" />
             <el-select class="filter-w150" v-model="memberFilter.package_id" placeholder="Semua Paket" clearable @change="applyMemberFilters">
               <el-option v-for="p in activePackages" :key="p.id" :label="p.name" :value="p.id" />
@@ -333,7 +333,7 @@
     ════════════════════════════════════════════════════════ -->
     <el-drawer
       v-model="packageFormVisible"
-      :title="editingPackage ? 'Edit Package' : 'Create New Package'"
+      :title="editingPackage ? 'Ubah Paket' : 'Buat Paket Baru'"
       direction="rtl"
       :size="isMobile ? '100%' : '760px'"
       :destroy-on-close="true"
@@ -352,7 +352,7 @@
               </div>
               <div>
                 <el-upload :auto-upload="false" :show-file-list="false" :on-change="onIconChange" accept="image/*">
-                  <el-button plain><el-icon><UploadFilled /></el-icon> Upload Image</el-button>
+                  <el-button plain><el-icon><UploadFilled /></el-icon> Unggah Gambar</el-button>
                 </el-upload>
                 <div class="u-text-xs u-text-muted u-mt-1">
                   Disarankan ukuran 512x512px (1:1)
@@ -426,7 +426,7 @@
             <div class="detail-title">
               {{ pkgForm.name || 'Nama Paket' }}
             </div>
-            <el-tag size="small" class="u-mb-2">Play Credits Package</el-tag>
+            <el-tag size="small" class="u-mb-2">Paket Play Credits</el-tag>
             <p class="u-text-xs u-text-secondary u-mb-3">
               {{ pkgForm.description || 'Deskripsi paket' }}
             </p>
@@ -471,7 +471,7 @@
     ════════════════════════════════════════════════════════ -->
     <el-drawer v-model="assignDialogVisible" title="Assign Play Credits ke Customer" direction="rtl" :size="isMobile ? '100%' : '440px'">
       <el-form :model="assignForm" :rules="assignRules" ref="assignFormRef" label-position="top">
-        <el-form-item label="Customer (Member) *" prop="customer_id">
+        <el-form-item label="Pelanggan (Member) *" prop="customer_id">
           <el-select
             v-model="assignForm.customer_id"
             filterable
@@ -520,7 +520,7 @@
       </el-form>
       <template #footer>
         <el-button @click="assignDialogVisible = false">Batal</el-button>
-        <el-button type="primary" :loading="assignLoading" @click="handleAssign">Assign Credits</el-button>
+        <el-button type="primary" :loading="assignLoading" @click="handleAssign">Berikan Credits</el-button>
       </template>
     </el-drawer>
 
@@ -741,7 +741,7 @@ const assignFormRef = ref()
 const assignForm = reactive({ customer_id: '', package_id: '', payment_amount: 0, notes: '' })
 const customerOptionsLoading = ref(false)
 const assignRules = {
-  customer_id: [{ required: true, message: 'Pilih customer', trigger: 'change' }],
+  customer_id: [{ required: true, message: 'Pilih pelanggan', trigger: 'change' }],
   package_id: [{ required: true, message: 'Pilih paket', trigger: 'change' }],
 }
 

@@ -6,13 +6,13 @@
       <template #actions>
         <el-dropdown @command="handleExport">
           <el-button size="small">
-            <el-icon><Download /></el-icon> Export
+            <el-icon><Download /></el-icon> Ekspor
             <el-icon class="el-icon--right"><ArrowDown /></el-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="excel"><el-icon><DocumentChecked /></el-icon> Export ke Excel</el-dropdown-item>
-              <el-dropdown-item command="pdf"><el-icon><Document /></el-icon> Export ke PDF</el-dropdown-item>
+              <el-dropdown-item command="excel"><el-icon><DocumentChecked /></el-icon> Ekspor ke Excel</el-dropdown-item>
+              <el-dropdown-item command="pdf"><el-icon><Document /></el-icon> Ekspor ke PDF</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -32,7 +32,7 @@
           :type="filters.period === 'custom' ? 'primary' : 'default'"
           size="small"
           @click="filters.period = 'custom'"
-        ><el-icon><Calendar /></el-icon> Custom</el-button>
+        ><el-icon><Calendar /></el-icon> Pilih Tanggal</el-button>
       </div>
 
       <el-alert v-if="noAccess" type="warning" :closable="false" show-icon
@@ -42,7 +42,7 @@
       </el-select>
 
       <el-select v-model="filters.type" size="small" :style="{ width: isMobile ? '100%' : '130px' }" @change="loadAll">
-        <el-option label="All Type"     value="all" />
+        <el-option label="Semua Tipe"   value="all" />
         <el-option label="Booking"      value="booking" />
         <el-option label="Play Credits" value="play_credits" />
       </el-select>
@@ -76,11 +76,11 @@
       <!-- Sales Trend -->
       <el-card shadow="never" class="trend-card">
         <div class="card-header-row">
-          <span class="card-title">Sales Trend</span>
+          <span class="card-title">Tren Penjualan</span>
           <el-select class="trend-granularity" v-model="filters.granularity" size="small" @change="loadTrend">
-            <el-option label="Daily"   value="daily" />
-            <el-option label="Weekly"  value="weekly" />
-            <el-option label="Monthly" value="monthly" />
+            <el-option label="Harian"   value="daily" />
+            <el-option label="Mingguan"  value="weekly" />
+            <el-option label="Bulanan" value="monthly" />
           </el-select>
         </div>
         <div v-if="trendData.length === 0 && !loading" class="trend-empty">
@@ -93,7 +93,7 @@
       <!-- Revenue by Type -->
       <el-card shadow="never" class="type-card">
         <div class="card-header-row u-mb-2">
-          <span class="card-title">Revenue by Type</span>
+          <span class="card-title">Pendapatan per Tipe</span>
         </div>
         <div class="donut-wrap">
           <div ref="donutChartRef" class="donut-chart" />
@@ -103,7 +103,7 @@
               <div class="legend-body">
                 <div class="legend-top">
                   <span class="legend-name">{{ item.label }}</span>
-                  <span class="legend-pct">{{ item.percentage }}%</span>
+                  <span class="legend-pct">{{ formatPercent(item.percentage) }}</span>
                 </div>
                 <div class="legend-rev">{{ formatRp(item.revenue) }}</div>
               </div>
@@ -123,7 +123,7 @@
       <!-- Revenue by Branch -->
       <el-card shadow="never" class="rev-card">
         <div class="card-header-row u-mb-2">
-          <span class="card-title">Revenue by Branch</span>
+          <span class="card-title">Pendapatan per Cabang</span>
         </div>
         <div v-if="!summary?.revenue_by_branch?.length" class="empty-rev">Belum ada data</div>
         <div v-else class="rev-list">
@@ -136,7 +136,7 @@
             </div>
             <div class="rev-right">
               <div class="rev-amount">{{ formatRp(b.revenue) }}</div>
-              <div class="rev-pct">{{ b.percentage?.toFixed(0) }}%</div>
+              <div class="rev-pct">{{ formatPercent(Math.round(b.percentage || 0)) }}</div>
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@
       <!-- Revenue by Room Type -->
       <el-card shadow="never" class="rev-card">
         <div class="card-header-row u-mb-2">
-          <span class="card-title">Revenue by Room Type</span>
+          <span class="card-title">Pendapatan per Tipe Ruangan</span>
         </div>
         <div v-if="!summary?.revenue_by_room_type?.length" class="empty-rev">Belum ada data</div>
         <div v-else class="rev-list">
@@ -162,7 +162,7 @@
             </div>
             <div class="rev-right">
               <div class="rev-amount">{{ formatRp(r.revenue) }}</div>
-              <div class="rev-pct">{{ r.percentage?.toFixed(0) }}%</div>
+              <div class="rev-pct">{{ formatPercent(Math.round(r.percentage || 0)) }}</div>
             </div>
           </div>
         </div>
@@ -198,7 +198,7 @@
       <div class="tx-toolbar">
         <el-select class="tx-filter" v-model="txFilter" size="small"
           @change="() => { txPage = 1; loadTransactions() }">
-          <el-option label="All Type"     value="all" />
+          <el-option label="Semua Tipe"   value="all" />
           <el-option label="Booking"      value="booking" />
           <el-option label="Play Credits" value="play_credits" />
         </el-select>
@@ -221,7 +221,7 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Customer" min-width="120">
+        <el-table-column label="Pelanggan" min-width="120">
           <template #default="{ row }">
             <span class="u-text-xs u-fw-bold">{{ row.customer_name }}</span>
           </template>
@@ -243,7 +243,7 @@
         </el-table-column>
         <el-table-column label="Status" width="110">
           <template #default="{ row }">
-            <el-tag type="success" size="small">{{ row.status }}</el-tag>
+            <el-tag type="success" size="small">{{ bookingStatusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
       </el-table>
@@ -256,13 +256,13 @@
         <el-button @click="showTransactionModal = false">Tutup</el-button>
         <el-dropdown @command="handleExport">
           <el-button type="primary" size="small">
-            <el-icon><Download /></el-icon> Export
+            <el-icon><Download /></el-icon> Ekspor
             <el-icon class="el-icon--right"><ArrowDown /></el-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="excel">Export ke Excel</el-dropdown-item>
-              <el-dropdown-item command="pdf">Export ke PDF</el-dropdown-item>
+              <el-dropdown-item command="excel">Ekspor ke Excel</el-dropdown-item>
+              <el-dropdown-item command="pdf">Ekspor ke PDF</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -278,7 +278,8 @@ import { cssVar } from '@/utils/cssVar'
 import { ref, reactive, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { notifyError } from '@/utils/notify'
-import { formatRp } from '@/utils/format'
+import { formatRp, formatPercent, formatCompact } from '@/utils/format'
+import { bookingStatusLabel } from '@/utils/bookingStatus'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import * as echarts from 'echarts'
 import * as XLSX from 'xlsx'
@@ -325,10 +326,10 @@ const txFilter     = ref('all')
 
 // ── Constants ─────────────────────────────────────────────────
 const periods = [
-  { label: 'Today',      value: 'today' },
-  { label: 'Yesterday',  value: 'yesterday' },
-  { label: 'This Week',  value: 'this_week' },
-  { label: 'This Month', value: 'this_month' },
+  { label: 'Hari Ini',   value: 'today' },
+  { label: 'Kemarin',    value: 'yesterday' },
+  { label: 'Minggu Ini', value: 'this_week' },
+  { label: 'Bulan Ini',  value: 'this_month' },
 ]
 
 // ── Computed ──────────────────────────────────────────────────
@@ -345,11 +346,11 @@ const statItems = computed(() => {
   const hint = (change) =>
     change === null || change === undefined ? '' : `${change >= 0 ? '↑' : '↓'} ${Math.abs(change)}% vs ${prevPeriodLabel.value}`
   return [
-    { label: 'Total Revenue',         value: formatRp(s.total_revenue),          hint: hint(s.total_revenue_change) },
-    { label: 'Booking Revenue',       value: formatRp(s.booking_revenue),        hint: hint(s.booking_revenue_change) },
-    { label: 'Play Credits Revenue',  value: formatRp(s.credits_revenue),        hint: hint(s.credits_revenue_change) },
+    { label: 'Total Pendapatan',      value: formatRp(s.total_revenue),          hint: hint(s.total_revenue_change) },
+    { label: 'Pendapatan Booking',    value: formatRp(s.booking_revenue),        hint: hint(s.booking_revenue_change) },
+    { label: 'Pendapatan Play Credits', value: formatRp(s.credits_revenue),        hint: hint(s.credits_revenue_change) },
     { label: 'Total Transaksi',       value: String(s.total_transactions ?? 0),  hint: hint(s.transactions_change) },
-    { label: 'Rata-rata / Transaksi', value: formatRp(s.avg_per_transaction),    hint: hint(s.avg_change) },
+    { label: 'Rata-rata per Transaksi', value: formatRp(s.avg_per_transaction),    hint: hint(s.avg_change) },
   ]
 })
 
@@ -484,7 +485,7 @@ const renderTrendChart = () => {
     },
     yAxis: {
       type: 'value',
-      axisLabel: { color: tc, fontSize: 10, formatter: (v) => v >= 1000000 ? `${(v/1000000).toFixed(1)}M` : `${(v/1000).toFixed(0)}K` },
+      axisLabel: { color: tc, fontSize: 10, formatter: (v) => formatCompact(v) },
       splitLine: { lineStyle: { color: gc, type: 'dashed' } },
       axisLine: { show: false },
     },
@@ -518,7 +519,7 @@ const renderDonutChart = () => {
 
   const data = (summary.value?.revenue_by_type || []).map(t => ({ name: t.label, value: t.revenue }))
   donutChart.setOption({
-    tooltip: { trigger: 'item', formatter: (p) => `${p.name}: ${formatRp(p.value)} (${p.percent}%)` },
+    tooltip: { trigger: 'item', formatter: (p) => `${p.name}: ${formatRp(p.value)} (${formatPercent(p.percent)})` },
     color: ['--blue-500', '--success'].map(cssVar),
     series: [{
       type: 'pie', radius: ['52%', '80%'], data,

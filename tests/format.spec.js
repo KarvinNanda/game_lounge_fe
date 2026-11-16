@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatRp, formatDateDisplay, formatDate } from '@/utils/format'
+import { formatRp, formatDateDisplay, formatDate, formatPercent, formatCompact } from '@/utils/format'
 
 describe('format', () => {
   it('formatRp uses Indonesian grouping and treats empty as 0', () => {
@@ -16,5 +16,17 @@ describe('format', () => {
   it('formatDate gives the short date, "-" when empty', () => {
     expect(formatDate('2026-10-07')).toBe('07 Okt 2026')
     expect(formatDate(null)).toBe('-')
+  })
+  it('formatPercent uses a decimal comma and at most one decimal', () => {
+    expect(formatPercent(15.2)).toBe('15,2%')
+    expect(formatPercent(84.83)).toBe('84,8%')
+    expect(formatPercent(74)).toBe('74%')
+    expect(formatPercent(null)).toBe('0%')
+  })
+  it('formatCompact shortens chart axis amounts the Indonesian way (jt, rb)', () => {
+    expect(formatCompact(1800000)).toBe('1,8 jt')
+    expect(formatCompact(1500000)).toBe('1,5 jt')
+    expect(formatCompact(900000)).toBe('900 rb')
+    expect(formatCompact(0)).toBe('0')
   })
 })

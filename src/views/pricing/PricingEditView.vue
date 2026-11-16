@@ -6,7 +6,7 @@
     </el-button>
 
     <!-- Header -->
-    <PageHeader :breadcrumb="`Pricing → ${storeName}`" :title="`Edit Pricing – ${storeName}`" description="Atur harga bermain untuk cabang ini.">
+    <PageHeader :breadcrumb="`Harga → ${storeName}`" :title="`Ubah Harga – ${storeName}`" description="Atur harga bermain untuk cabang ini.">
       <template #actions>
         <el-button v-if="can('pricing.edit')" type="primary" :loading="saving" @click="handleSaveAll">
           <el-icon><Check /></el-icon> Simpan & Publish
@@ -128,7 +128,7 @@
 
             <!-- Rules Summary -->
             <el-card shadow="never">
-              <div class="sh-title u-mb-3">3. Rule Pricing</div>
+              <div class="sh-title u-mb-3">3. Aturan Harga</div>
               <div v-for="rule in rulesSummary" :key="rule.title" class="rule-item">
                 <el-icon class="ok-icon"><CircleCheck /></el-icon>
                 <div>
@@ -308,7 +308,7 @@
               <el-table-column label="Aksi" width="100" align="right" fixed="right">
                 <template #default="{ row }">
                   <div class="row-actions">
-                    <el-tooltip v-if="can('pricing.edit')" content="Edit" placement="top">
+                    <el-tooltip v-if="can('pricing.edit')" content="Ubah" placement="top">
                       <el-button size="small" circle plain @click="openFlashSaleForm(row)">
                         <el-icon><Edit /></el-icon>
                       </el-button>
@@ -488,7 +488,7 @@
     <!-- ── Drawer: Flash Sale Form ── -->
     <el-drawer
       v-model="showFlashSaleForm"
-      :title="editingFS ? 'Edit Flash Sale' : 'Tambah Flash Sale'"
+      :title="editingFS ? 'Ubah Flash Sale' : 'Tambah Flash Sale'"
       direction="rtl"
       :size="isMobile ? '100%' : '480px'"
     >
@@ -631,7 +631,7 @@ const fsForm = reactive({
 
 const rulesSummary = [
   { title: 'Happy Hour', desc: 'Berlaku Weekday (Senin–Kamis) pada jam yang ditentukan, dihitung per jam.' },
-  { title: 'Normal Hour (Weekday)', desc: 'Di luar jam Happy Hour, menggunakan harga paket termurah.' },
+  { title: 'Jam Normal (Hari Kerja)', desc: 'Di luar jam Happy Hour, menggunakan harga paket termurah.' },
   { title: 'Weekend & Tanggal Merah', desc: 'Seluruh jam menggunakan harga paket normal.' },
 ]
 

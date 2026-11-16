@@ -21,7 +21,7 @@
           {{ event.description }}
         </p>
       </div>
-      <div class="info-row"><span>Customer</span><span>{{ event.customer_name }}</span></div>
+      <div class="info-row"><span>Pelanggan</span><span>{{ event.customer_name }}</span></div>
       <div class="info-row"><span>Tanggal</span><span>{{ formatDateDisplay(event.booking_date) }}</span></div>
       <div class="info-row">
         <span>Waktu</span>

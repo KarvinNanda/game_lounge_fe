@@ -2,12 +2,12 @@
   <div class="booking-page">
 
     <!-- ── Header ──────────────────────────────────────────── -->
-    <PageHeader breadcrumb="Dashboard > Bookings" title="Booking Dashboard" description="Kelola jadwal dan booking ruangan">
+    <PageHeader breadcrumb="Dashboard → Booking" title="Booking" description="Kelola jadwal dan booking ruangan">
       <template #actions>
         <el-dropdown v-if="can('bookings.create')" @command="handleNewBookingCommand" trigger="click">
           <el-button type="primary">
             <el-icon><Plus /></el-icon>
-            New Booking
+            Booking Baru
             <el-icon class="el-icon--right"><ArrowDown /></el-icon>
           </el-button>
           <template #dropdown>
@@ -16,7 +16,7 @@
                 <div class="u-flex u-gap-2 new-booking-option">
                   <el-icon size="18" class="u-text-action"><CalendarIcon /></el-icon>
                   <div>
-                    <div class="u-fw-semibold u-text-sm">Regular Booking</div>
+                    <div class="u-fw-semibold u-text-sm">Booking Reguler</div>
                     <div class="u-text-xs u-text-secondary">Booking per ruangan</div>
                   </div>
                 </div>
@@ -25,7 +25,7 @@
                 <div class="u-flex u-gap-2 new-booking-option">
                   <el-icon class="event-option-icon" size="18"><Star /></el-icon>
                   <div>
-                    <div class="u-fw-semibold u-text-sm">Event Booking</div>
+                    <div class="u-fw-semibold u-text-sm">Booking Event</div>
                     <div class="u-text-xs u-text-secondary">Booking 1 gedung penuh</div>
                   </div>
                 </div>
@@ -39,7 +39,7 @@
     <!-- ── New Booking Mode Banner ──────────────────────────── -->
     <div v-if="isNewBookingMode && !isNewBookingForm" class="new-booking-banner">
       <el-icon size="16"><InfoFilled /></el-icon>
-      <span>NEW BOOKING MODE — Klik slot kosong pada kalender untuk membuat booking baru.</span>
+      <span>MODE BOOKING BARU — Klik slot kosong pada kalender untuk membuat booking baru.</span>
       <el-button class="banner-cancel" size="small" text @click="toggleNewBookingMode">Batalkan</el-button>
     </div>
 

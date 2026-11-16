@@ -2,15 +2,15 @@
   <div>
     <!-- Header -->
     <PageHeader
-      :breadcrumb="`Store → Rooms → ${isEdit ? 'Edit' : 'Tambah'}`"
-      :title="isEdit ? 'Edit Room' : 'Tambah Room'"
+      :breadcrumb="`Manajemen Cabang → Tipe Ruangan → ${isEdit ? 'Ubah' : 'Tambah'}`"
+      :title="isEdit ? 'Ubah Tipe Ruangan' : 'Tambah Tipe Ruangan'"
       :description="isEdit ? 'Perbarui informasi tipe ruangan.' : 'Buat tipe ruangan baru sebagai standar di setiap store.'"
     />
 
     <div class="form-layout">
       <!-- Left: Info + Image -->
       <el-card shadow="never" class="form-card">
-        <div class="form-section-title">Informasi Room</div>
+        <div class="form-section-title">Informasi Ruangan</div>
 
         <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
           <el-form-item label="Nama Room" prop="name">
@@ -49,14 +49,14 @@
                 <el-icon class="u-text-success"><CircleCheck /></el-icon>
                 <div>
                   <div class="status-option-title">Aktif</div>
-                  <div class="status-option-desc">Dapat digunakan di store</div>
+                  <div class="status-option-desc">Dapat digunakan di cabang</div>
                 </div>
               </div>
               <div class="status-option" :class="{ active: !form.is_active }" @click="form.is_active = false">
                 <el-icon class="u-text-danger"><CircleClose /></el-icon>
                 <div>
                   <div class="status-option-title">Nonaktif</div>
-                  <div class="status-option-desc">Disembunyikan dari store</div>
+                  <div class="status-option-desc">Disembunyikan dari cabang</div>
                 </div>
               </div>
             </div>
@@ -64,7 +64,7 @@
         </el-form>
 
         <!-- Image Upload -->
-        <div class="form-section-title form-section-gap">Foto Room</div>
+        <div class="form-section-title form-section-gap">Foto Ruangan</div>
         <div class="image-upload-area" :class="{ 'has-image': imagePreview }" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
           <input class="file-input-hidden" ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" @change="onFileChange" />
           <template v-if="!imagePreview">
@@ -175,7 +175,7 @@
       <el-button @click="$router.push('/room-template')">Batal</el-button>
       <el-button type="primary" :loading="saving" @click="save">
         <el-icon><Finished /></el-icon>
-        {{ isEdit ? 'Simpan Perubahan' : 'Tambah Room' }}
+        {{ isEdit ? 'Simpan Perubahan' : 'Tambah Tipe Ruangan' }}
       </el-button>
     </div>
   </div>

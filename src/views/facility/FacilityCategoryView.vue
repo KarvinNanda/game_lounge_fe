@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Store → Facility Category" title="Facility Category" description="Kelola kategori untuk pengelompokan fasilitas.">
+    <PageHeader breadcrumb="Manajemen Cabang → Kategori Fasilitas" title="Kategori Fasilitas" description="Kelola kategori untuk pengelompokan fasilitas.">
       <template #actions>
         <el-button v-if="can('settings.branches')" type="primary" @click="openDrawer()">
           <el-icon><Plus /></el-icon> Tambah Kategori

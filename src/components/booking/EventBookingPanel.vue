@@ -35,7 +35,7 @@
       </el-form-item>
 
       <!-- Customer Search — sama dengan regular booking -->
-      <el-form-item label="Customer (Opsional)">
+      <el-form-item label="Pelanggan (Opsional)">
         <el-select
           v-model="eventForm.customer_id"
           filterable remote

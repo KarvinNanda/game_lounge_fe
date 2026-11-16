@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Store → Rooms" title="Rooms" description="Kelola tipe ruangan standar yang digunakan di setiap store.">
+    <PageHeader breadcrumb="Manajemen Cabang → Tipe Ruangan" title="Tipe Ruangan" description="Kelola tipe ruangan standar yang digunakan di setiap store.">
       <template #actions>
         <el-button v-if="can('rooms.create')" type="primary" @click="$router.push('/room-template/create')">
           <el-icon><Plus /></el-icon> Tambah Room
@@ -14,7 +14,7 @@
       { label: 'Total Room', value: stats.total },
       { label: 'Aktif', value: stats.active, tone: 'success' },
       { label: 'Nonaktif', value: stats.inactive, tone: 'danger' },
-      { label: 'Dipakai di Store', value: stats.used_in_stores, tone: 'info' },
+      { label: 'Dipakai di Cabang', value: stats.used_in_stores, tone: 'info' },
     ]" />
 
     <!-- Table -->
@@ -57,7 +57,7 @@
 
       <div class="table-wrap">
       <el-table :data="templateList" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada room template">
-        <el-table-column label="Room" min-width="240">
+        <el-table-column label="Tipe Ruangan" min-width="240">
           <template #default="{ row }">
             <div class="room-cell">
               <div class="room-thumb">
@@ -119,7 +119,7 @@
                   <el-icon><component :is="row.is_active ? 'VideoPause' : 'VideoPlay'" /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip v-if="can('rooms.edit')" content="Edit" placement="top">
+              <el-tooltip v-if="can('rooms.edit')" content="Ubah" placement="top">
                 <el-button size="small" circle plain @click="$router.push(`/room-template/${row.id}/edit`)">
                   <el-icon><Edit /></el-icon>
                 </el-button>

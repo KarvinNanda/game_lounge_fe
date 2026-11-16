@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <div class="confirm-row"><span>Room</span><strong>{{ form.room_name }}</strong></div>
+      <div class="confirm-row"><span>Ruangan</span><strong>{{ form.room_name }}</strong></div>
       <div class="confirm-row">
         <span>Tanggal</span>
         <span>{{ formatDateDisplay(form.booking_date) }}</span>
@@ -53,7 +53,7 @@
         <span>Payment</span>
         <span>
           <el-icon aria-hidden="true"><component :is="form.payment_method === 'play_credits' ? 'Coin' : 'Money'" /></el-icon>
-          {{ form.payment_method === 'play_credits' ? 'Play Credits' : 'Cash' }}
+          {{ form.payment_method === 'play_credits' ? 'Play Credits' : 'Tunai' }}
         </span>
       </div>
       <div v-if="form.voucher_code" class="confirm-row">

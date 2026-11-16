@@ -106,7 +106,7 @@ describe('AdminLayout', () => {
 
   it('group headers are buttons that toggle aria-expanded', async () => {
     const { wrapper } = await mountLayout('/dashboard')
-    const settings = groupButton(wrapper, 'Settings')
+    const settings = groupButton(wrapper, 'Pengaturan')
     expect(settings.attributes('aria-expanded')).toBe('false')
     await settings.trigger('click')
     expect(settings.attributes('aria-expanded')).toBe('true')
@@ -114,7 +114,7 @@ describe('AdminLayout', () => {
 
   it('opens the group that contains the current route', async () => {
     const { wrapper } = await mountLayout('/staff')
-    expect(groupButton(wrapper, 'Settings').attributes('aria-expanded')).toBe('true')
+    expect(groupButton(wrapper, 'Pengaturan').attributes('aria-expanded')).toBe('true')
   })
 
   it('on narrow screens the sidebar starts hidden and hides again after navigation', async () => {

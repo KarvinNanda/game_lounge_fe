@@ -141,19 +141,19 @@ describe('BookingView (characterization)', () => {
   it('Cancel Booking shows for future bookings and hides once started', async () => {
     const w = await mountView()
     await w.find('.booking-block').trigger('click')
-    expect(buttonByText(w, 'Cancel Booking')).toBeTruthy()
+    expect(buttonByText(w, 'Batalkan Booking')).toBeTruthy()
 
     m.getDashboard.mockImplementation(() => ok({ rooms: [{ ...structuredClone(ROOM),
       bookings: [{ ...FUTURE, booking_date: '2000-01-01' }] }] }))
     const w2 = await mountView()
     await w2.find('.booking-block').trigger('click')
-    expect(buttonByText(w2, 'Cancel Booking')).toBeUndefined()
+    expect(buttonByText(w2, 'Batalkan Booking')).toBeUndefined()
   })
 
   it('cancel booking sends the reason, closes the panel and reloads', async () => {
     const w = await mountView()
     await w.find('.booking-block').trigger('click')
-    await buttonByText(w, 'Cancel Booking').trigger('click')
+    await buttonByText(w, 'Batalkan Booking').trigger('click')
     await flushPromises()
     const reason = w.findAll('textarea').find((t) => t.attributes('placeholder')?.startsWith('Contoh: Customer'))
     await reason.setValue('Customer tidak jadi datang')
@@ -170,7 +170,7 @@ describe('BookingView (characterization)', () => {
     const w = await mountView()
     await w.find('.booking-block').trigger('click')
     const loads = m.getDashboard.mock.calls.length
-    await buttonByText(w, 'Mark as Completed').trigger('click')
+    await buttonByText(w, 'Tandai Selesai').trigger('click')
     await flushPromises()
     expect(m.completeBooking).toHaveBeenCalledWith('b1')
     expect(m.getDashboard.mock.calls.length).toBe(loads + 1)
@@ -180,7 +180,7 @@ describe('BookingView (characterization)', () => {
     const w = await mountView()
     w.findComponent({ name: 'ElDropdown' }).vm.$emit('command', 'regular')
     await flushPromises()
-    expect(w.text()).toContain('NEW BOOKING MODE')
+    expect(w.text()).toContain('MODE BOOKING BARU')
 
     await w.findAll('.room-row .empty-slot')[4].trigger('click') // 10:00 + 4 h
     expect(w.text()).toContain('BOOKING BARU')
@@ -251,7 +251,7 @@ describe('BookingView (characterization)', () => {
     const error = vi.spyOn(ElMessage, 'error').mockImplementation(() => {})
     const w = await mountView()
     await w.find('.booking-block').trigger('click')
-    await buttonByText(w, 'Cancel Booking').trigger('click')
+    await buttonByText(w, 'Batalkan Booking').trigger('click')
     await flushPromises()
     await w.findAll('textarea').find((t) => t.attributes('placeholder')?.startsWith('Contoh: Customer')).setValue('alasan panjang')
     await w.findAll('button').filter((b) => b.text().includes('Konfirmasi Batalkan')).at(-1).trigger('click')

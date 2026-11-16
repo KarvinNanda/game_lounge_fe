@@ -58,7 +58,7 @@ describe('role editor with FnB off', () => {
     await edit.trigger('click')
     await flushPromises()
 
-    expect(document.body.textContent).toContain('Edit Role')
+    expect(document.body.textContent).toContain('Ubah Role')
     expect(document.body.textContent).not.toContain('Orders (F&B)')
 
     const save = [...document.querySelectorAll('button')].find((b) => b.textContent.includes('Simpan Perubahan'))

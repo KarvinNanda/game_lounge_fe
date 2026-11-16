@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Settings → Profil" title="Profil Saya" description="Informasi akun yang sedang login." />
+    <PageHeader breadcrumb="Pengaturan → Profil" title="Profil Saya" description="Informasi akun yang sedang login." />
 
     <div class="profile-layout">
       <!-- Left: Identity Card -->

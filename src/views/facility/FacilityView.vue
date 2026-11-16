@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Store → Facilities" title="Facilities" description="Kelola daftar fasilitas yang tersedia di setiap store.">
+    <PageHeader breadcrumb="Manajemen Cabang → Fasilitas" title="Fasilitas" description="Kelola daftar fasilitas yang tersedia di setiap store.">
       <template #actions>
         <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/facility/create')">
           <el-icon><Plus /></el-icon> Tambah Fasilitas
@@ -124,7 +124,7 @@
                   <el-icon><component :is="row.is_active ? 'VideoPause' : 'VideoPlay'" /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip v-if="can('settings.branches')" content="Edit" placement="top">
+              <el-tooltip v-if="can('settings.branches')" content="Ubah" placement="top">
                 <el-button size="small" circle plain @click="$router.push(`/facility/${row.id}/edit`)">
                   <el-icon><Edit /></el-icon>
                 </el-button>

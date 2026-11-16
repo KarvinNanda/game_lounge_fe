@@ -22,7 +22,7 @@ describe('AdminRecoveryResetView with an invalid or used link', () => {
     expect(w.text()).toContain('Staff: Minta Super Admin untuk reset ulang.')
     expect(w.text()).toContain('Super Admin: Minta link baru lewat tombol di bawah.')
     // The label stays short: a longer one overflowed the card at 375px.
-    const button = w.findAll('button').find((b) => b.text().includes('Request Link Baru'))
-    expect(button.text()).toBe('Request Link Baru')
+    const button = w.findAll('button').find((b) => b.text().includes('Minta Link Baru'))
+    expect(button.text()).toBe('Minta Link Baru')
   })
 })

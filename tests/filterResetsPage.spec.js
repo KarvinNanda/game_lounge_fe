@@ -75,7 +75,7 @@ const CASES = [
   { view: 'Promotion', load: () => import('@/views/promotion/PromotionView.vue'), api: 'getVouchers', table: 0,
     triggers: ['select:Semua Status', 'select:Semua Jenis'] },
   { view: 'Customer', load: () => import('@/views/customer/CustomerView.vue'), api: 'getCustomers', table: 0,
-    triggers: ['select:Semua Status', 'select:Semua Gender'] },
+    triggers: ['select:Semua Status', 'select:Semua Jenis Kelamin'] },
   { view: 'PlayCredits packages', load: () => import('@/views/play_credits/PlayCreditsView.vue'), api: 'getPackages', table: 0,
     triggers: ['select:Semua Status@0'] },
   { view: 'PlayCredits members', load: () => import('@/views/play_credits/PlayCreditsView.vue'), api: 'getMemberCredits', table: 1,

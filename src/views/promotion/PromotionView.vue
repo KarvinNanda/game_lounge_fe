@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Dashboard > Promotion" title="Promotion / Voucher" description="Kelola voucher promo dan kirim ke customer (member only)">
+    <PageHeader breadcrumb="Dashboard → Promosi" title="Promosi / Voucher" description="Kelola voucher promo dan kirim ke customer (member only)">
       <template #actions>
         <el-button v-if="can('promotion.create')" type="primary" @click="openForm(null)">
           <el-icon><Plus /></el-icon> Buat Voucher Baru
@@ -161,7 +161,7 @@
                   <el-icon><View /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip v-if="can('promotion.edit')" content="Edit" placement="top">
+              <el-tooltip v-if="can('promotion.edit')" content="Ubah" placement="top">
                 <el-button size="small" circle plain @click="openForm(row)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
@@ -196,7 +196,7 @@
     ════════════════════════════════════════════════════════ -->
     <el-drawer
       v-model="formVisible"
-      :title="editingVoucher ? 'Edit Voucher' : 'Buat Voucher Baru'"
+      :title="editingVoucher ? 'Ubah Voucher' : 'Buat Voucher Baru'"
       direction="rtl"
       :size="isMobile ? '100%' : '480px'"
       :destroy-on-close="true"
@@ -512,7 +512,7 @@
             Riwayat Penggunaan ({{ selectedVoucher.usages.length }})
           </div>
           <el-table :data="selectedVoucher.usages.slice(0, 5)" size="small" max-height="200">
-            <el-table-column label="Customer" min-width="140">
+            <el-table-column label="Pelanggan" min-width="140">
               <template #default="{ row }">{{ row.customer?.name || '-' }}</template>
             </el-table-column>
             <el-table-column label="Diskon" width="120">

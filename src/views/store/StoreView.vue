@@ -1,17 +1,17 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Store → Stores" title="Stores" description="Kelola semua cabang Quantum Gaming.">
+    <PageHeader breadcrumb="Manajemen Cabang → Daftar Cabang" title="Daftar Cabang" description="Kelola semua cabang Quantum Gaming.">
       <template #actions>
         <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/store/create')">
-          <el-icon><Plus /></el-icon> Buat Store Baru
+          <el-icon><Plus /></el-icon> Buat Cabang Baru
         </el-button>
       </template>
     </PageHeader>
 
     <!-- Stats -->
     <StatStrip :items="[
-      { label: 'Total Store', value: stats.total },
+      { label: 'Total Cabang', value: stats.total },
       { label: 'Aktif', value: stats.active, tone: 'success' },
       { label: 'Nonaktif', value: stats.inactive, tone: 'danger' },
       { label: 'Total Ruangan', value: stats.total_rooms, tone: 'info' },
@@ -64,7 +64,7 @@
 
       <div class="table-wrap">
       <el-table :data="storeList" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada store">
-        <el-table-column label="Store" min-width="160">
+        <el-table-column label="Cabang" min-width="160">
           <template #default="{ row }">
             <div class="store-cell">
               <div class="store-thumb">
@@ -183,7 +183,7 @@
                   <el-icon><component :is="row.status === 'active' ? 'VideoPause' : 'VideoPlay'" /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip v-if="can('settings.branches')" content="Edit" placement="top">
+              <el-tooltip v-if="can('settings.branches')" content="Ubah" placement="top">
                 <el-button size="small" circle plain @click="$router.push(`/store/${row.id}/edit`)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
@@ -327,7 +327,7 @@ const toggleStatus = async (row) => {
   try {
     await updateStore(row.id, { status: next,name: row.name, address: row.address, whatsapp: row.whatsapp, photo_url: row.photo_url })
     row.status = next
-    ElMessage.success('Status store diperbarui')
+    ElMessage.success('Status cabang diperbarui')
   } catch (e) {
     notifyError(e, 'Gagal mengubah status')
   }
@@ -341,7 +341,7 @@ const deleteStore = async (row) => {
       { type: 'warning', confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }
     )
     await apiDelete(row.id)
-    ElMessage.success('Store berhasil dihapus')
+    ElMessage.success('Cabang berhasil dihapus')
     fetchStores()
   } catch {}
 }
