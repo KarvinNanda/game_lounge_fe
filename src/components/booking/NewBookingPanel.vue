@@ -16,7 +16,7 @@
     <el-form :model="newBookingForm" ref="newBookingFormRef" label-position="top" size="small">
 
       <!-- Customer Search -->
-      <el-form-item label="Customer (Opsional)" prop="customer_id">
+      <el-form-item label="Pelanggan (Opsional)" prop="customer_id">
         <el-select
           v-model="newBookingForm.customer_id"
           filterable remote :remote-method="searchCustomers"

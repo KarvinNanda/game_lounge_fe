@@ -2,9 +2,9 @@
   <div>
     <!-- Header -->
     <PageHeader
-      :breadcrumb="`Store → Facilities → ${isEdit ? 'Edit' : 'Tambah'}`"
-      :title="isEdit ? 'Edit Fasilitas' : 'Tambah Fasilitas'"
-      :description="isEdit ? 'Perbarui informasi fasilitas.' : 'Tambah fasilitas baru yang tersedia di store.'"
+      :breadcrumb="`Manajemen Cabang → Fasilitas → ${isEdit ? 'Ubah' : 'Tambah'}`"
+      :title="isEdit ? 'Ubah Fasilitas' : 'Tambah Fasilitas'"
+      :description="isEdit ? 'Perbarui informasi fasilitas.' : 'Tambah fasilitas baru yang tersedia di cabang.'"
     />
 
     <div class="form-layout">
@@ -23,7 +23,7 @@
             </el-select>
             <div class="field-hint">
               Belum ada kategori? Kelola di halaman
-              <router-link to="/facility-category" class="hint-link">Facility Category</router-link>.
+              <router-link to="/facility-category" class="hint-link">Kategori Fasilitas</router-link>.
             </div>
           </el-form-item>
 
@@ -59,7 +59,7 @@
                 <el-icon class="u-text-danger"><CircleClose /></el-icon>
                 <div>
                   <div class="status-option-title">Nonaktif</div>
-                  <div class="status-option-desc">Disembunyikan dari store</div>
+                  <div class="status-option-desc">Disembunyikan dari cabang</div>
                 </div>
               </div>
             </div>
@@ -70,7 +70,7 @@
       <!-- Right: Icon Upload -->
       <div>
         <el-card shadow="never" class="form-card">
-          <div class="form-section-title">Icon Fasilitas</div>
+          <div class="form-section-title">Ikon Fasilitas</div>
 
           <div class="icon-upload-area" :class="{ 'has-image': iconPreview }" @click="triggerFileInput" @dragover.prevent @drop.prevent="onDrop">
             <input class="file-input-hidden" ref="fileInput" type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" @change="onFileChange" />
@@ -94,13 +94,13 @@
                   <el-icon><Close /></el-icon>
                 </el-button>
               </div>
-              <p class="upload-hint u-mt-2">Klik untuk ganti icon</p>
+              <p class="upload-hint u-mt-2">Klik untuk ganti ikon</p>
             </template>
           </div>
 
           <div class="icon-tips">
-            <div class="tip-item"><el-icon class="u-text-action"><InfoFilled /></el-icon> Icon akan ditampilkan di daftar fasilitas room</div>
-            <div class="tip-item"><el-icon class="u-text-action"><InfoFilled /></el-icon> Gunakan background transparan untuk tampilan terbaik</div>
+            <div class="tip-item"><el-icon class="u-text-action"><InfoFilled /></el-icon> Ikon akan ditampilkan di daftar fasilitas ruangan</div>
+            <div class="tip-item"><el-icon class="u-text-action"><InfoFilled /></el-icon> Gunakan latar transparan untuk tampilan terbaik</div>
           </div>
         </el-card>
       </div>

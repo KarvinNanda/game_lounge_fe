@@ -2,8 +2,8 @@
   <div>
     <!-- Header -->
     <PageHeader
-      breadcrumb="Pricing → Panel"
-      title="Pricing Panel"
+      breadcrumb="Harga → Panel"
+      title="Panel Harga"
       description="Kelola harga bermain untuk setiap cabang. Perubahan harga akan otomatis tersinkron ke website booking."
     />
 
@@ -46,7 +46,7 @@
             {{ item.status === 'active' ? 'Aktif' : 'Draft' }}
           </el-tag>
           <div v-if="item.has_pricing" class="pricing-badge">
-            <el-icon class="u-text-xs"><Check /></el-icon> Pricing OK
+            <el-icon class="u-text-xs"><Check /></el-icon> Harga Siap
           </div>
         </div>
 
@@ -85,13 +85,13 @@
          
           @click="goToEdit(item)"
         >
-          <el-icon><Edit /></el-icon> Edit Pricing →
+          <el-icon><Edit /></el-icon> Ubah Harga →
         </el-button>
         <div class="card-action-note"
           v-else
          
         >
-          <el-icon><View /></el-icon> View Only
+          <el-icon><View /></el-icon> Hanya Lihat
         </div>
       </div>
     </div>

@@ -36,14 +36,14 @@ describe('BookingDetailPanel', () => {
   afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = '' })
 
   it('shows Cancel only with bookings.cancel and before the start time', async () => {
-    expect(button(await mountPanel(), 'Cancel Booking')).toBeTruthy()
-    expect(button(await mountPanel(STARTED), 'Cancel Booking')).toBeUndefined()
-    expect(button(await mountPanel(FUTURE, ['bookings.view', 'bookings.edit']), 'Cancel Booking')).toBeUndefined()
+    expect(button(await mountPanel(), 'Batalkan Booking')).toBeTruthy()
+    expect(button(await mountPanel(STARTED), 'Batalkan Booking')).toBeUndefined()
+    expect(button(await mountPanel(FUTURE, ['bookings.view', 'bookings.edit']), 'Batalkan Booking')).toBeUndefined()
   })
 
   it('cancel sends the reason and emits cancelled', async () => {
     const w = await mountPanel()
-    await button(w, 'Cancel Booking').trigger('click')
+    await button(w, 'Batalkan Booking').trigger('click')
     await flushPromises()
     await w.find('textarea').setValue('Customer tidak jadi datang')
     await button(w, 'Konfirmasi Batalkan').trigger('click')
@@ -54,7 +54,7 @@ describe('BookingDetailPanel', () => {
 
   it('cancel needs a reason of at least 5 characters', async () => {
     const w = await mountPanel()
-    await button(w, 'Cancel Booking').trigger('click')
+    await button(w, 'Batalkan Booking').trigger('click')
     await flushPromises()
     await w.find('textarea').setValue('abc')
     await button(w, 'Konfirmasi Batalkan').trigger('click')
@@ -65,7 +65,7 @@ describe('BookingDetailPanel', () => {
   it('complete asks for confirmation and emits completed', async () => {
     vi.spyOn(ElMessageBox, 'confirm').mockResolvedValue('confirm')
     const w = await mountPanel()
-    await button(w, 'Mark as Completed').trigger('click')
+    await button(w, 'Tandai Selesai').trigger('click')
     await flushPromises()
     expect(m.completeBooking).toHaveBeenCalledWith('b1')
     expect(w.emitted('completed')).toHaveLength(1)
@@ -85,7 +85,7 @@ describe('BookingDetailPanel', () => {
     expect(credits.findComponent(Icons.Coin).exists()).toBe(true)
     expect(credits.findComponent(Icons.Iphone).exists()).toBe(true)
     const cash = await mountPanel({ ...FUTURE, payment_method: 'cash' })
-    expect(cash.text()).toContain('Cash')
+    expect(cash.text()).toContain('Tunai')
     expect(cash.findComponent(Icons.Money).exists()).toBe(true)
   })
 })

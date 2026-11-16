@@ -47,11 +47,11 @@
 
   <!-- ── Status Legend ─────────────────────────────────────── -->
   <div class="legend-bar">
-    <div class="legend-item"><div class="dot dot--upcoming"></div>Upcoming</div>
-    <div class="legend-item"><div class="dot dot--ongoing"></div>Ongoing</div>
-    <div class="legend-item"><div class="dot dot--completed"></div>Completed</div>
-    <div class="legend-item"><div class="dot dot--cancelled"></div>Cancelled</div>
-    <div class="legend-item"><div class="dot dot--ending"></div>Ending Soon</div>
+    <div class="legend-item"><div class="dot dot--upcoming"></div>Akan Datang</div>
+    <div class="legend-item"><div class="dot dot--ongoing"></div>Berlangsung</div>
+    <div class="legend-item"><div class="dot dot--completed"></div>Selesai</div>
+    <div class="legend-item"><div class="dot dot--cancelled"></div>Dibatalkan</div>
+    <div class="legend-item"><div class="dot dot--ending"></div>Segera Selesai</div>
   </div>
 
   <!-- ── Holiday Warning Banner ────────────────────────────── -->

@@ -29,7 +29,7 @@
           <strong>Super Admin:</strong> Minta link baru lewat tombol di bawah.
         </p>
         <el-button type="primary" @click="$router.push('/admin-recovery')">
-          Request Link Baru
+          Minta Link Baru
         </el-button>
       </div>
 

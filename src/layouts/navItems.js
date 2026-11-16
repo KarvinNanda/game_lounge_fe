@@ -8,23 +8,23 @@ export const NAV_SECTIONS = [
     items: [{ to: '/dashboard', label: 'Dashboard', icon: 'TrendCharts' }],
   },
   {
-    label: 'Store',
-    group: { key: 'store', label: 'Store Management', icon: 'Shop' },
+    label: 'Cabang',
+    group: { key: 'store', label: 'Manajemen Cabang', icon: 'Shop' },
     items: [
-      { to: '/facility-category', label: 'Facility Category', perm: 'settings.branches' },
-      { to: '/facility', label: 'Facilities', perm: 'settings.branches' },
-      { to: '/room-template', label: 'Rooms', perm: 'rooms.view' },
-      { to: '/store', label: 'Stores', perm: 'settings.branches' },
+      { to: '/facility-category', label: 'Kategori Fasilitas', perm: 'settings.branches' },
+      { to: '/facility', label: 'Fasilitas', perm: 'settings.branches' },
+      { to: '/room-template', label: 'Tipe Ruangan', perm: 'rooms.view' },
+      { to: '/store', label: 'Daftar Cabang', perm: 'settings.branches' },
     ],
   },
   {
-    label: 'Business',
+    label: 'Bisnis',
     items: [
-      { to: '/bookings', label: 'Bookings', icon: 'Calendar', perm: 'bookings.view' },
-      { to: '/pricing', label: 'Pricing', icon: 'Money', perm: 'pricing.view' },
-      { to: '/customers', label: 'Customers', icon: 'User', perm: 'customers.view' },
+      { to: '/bookings', label: 'Booking', icon: 'Calendar', perm: 'bookings.view' },
+      { to: '/pricing', label: 'Harga', icon: 'Money', perm: 'pricing.view' },
+      { to: '/customers', label: 'Pelanggan', icon: 'User', perm: 'customers.view' },
       { to: '/play-credits', label: 'Play Credits', icon: 'Coin', perm: 'play_credits.view' },
-      { to: '/promotion', label: 'Promotion', icon: 'Ticket', perm: 'promotion.view' },
+      { to: '/promotion', label: 'Promosi', icon: 'Ticket', perm: 'promotion.view' },
       // Hidden until the FnB page is checked against the real API (paths were
       // fixed 2026-10-07). The /fnb route is still registered, so /fnb works
       // if typed directly.
@@ -32,11 +32,11 @@ export const NAV_SECTIONS = [
     ],
   },
   {
-    label: 'System',
-    group: { key: 'settings', label: 'Settings', icon: 'Setting' },
+    label: 'Sistem',
+    group: { key: 'settings', label: 'Pengaturan', icon: 'Setting' },
     items: [
       { to: '/staff', label: 'Staff', perm: 'settings.staff_role' },
-      { to: '/role', label: 'Roles', perm: 'settings.staff_role' },
+      { to: '/role', label: 'Role', perm: 'settings.staff_role' },
       { to: '/settings/notification-templates', label: 'Template Notifikasi', perm: 'settings.staff_role' },
       { to: '/settings/global-holidays', label: 'Tanggal Merah Global', perm: 'settings.branches' },
       { to: '/settings/banners', label: 'Kelola Banner', perm: 'settings.branches' },

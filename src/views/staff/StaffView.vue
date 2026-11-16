@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Settings → Staff" title="Staff" description="Kelola akun staff yang dapat mengakses sistem.">
+    <PageHeader breadcrumb="Pengaturan → Staff" title="Staff" description="Kelola akun staff yang dapat mengakses sistem.">
       <template #actions>
         <el-button v-if="can('settings.staff_role')" type="primary" @click="openDrawer()">
           <el-icon><Plus /></el-icon> Tambah Staff
@@ -133,7 +133,7 @@
                   <el-icon><Key /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-tooltip v-if="can('settings.staff_role')" content="Edit" placement="top">
+              <el-tooltip v-if="can('settings.staff_role')" content="Ubah" placement="top">
                 <el-button size="small" circle plain @click="openDrawer(row)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
@@ -167,7 +167,7 @@
     <!-- Drawer Add/Edit Staff -->
     <el-drawer
       v-model="drawerVisible"
-      :title="form.id ? 'Edit Staff' : 'Tambah Staff'"
+      :title="form.id ? 'Ubah Staff' : 'Tambah Staff'"
       direction="rtl"
       :size="isMobile ? '100%' : '420px'"
       :destroy-on-close="true"
@@ -199,7 +199,7 @@
             </el-select>
             <div class="field-hint">
               Kelola role di halaman
-              <router-link to="/role" class="hint-link">Roles</router-link>.
+              <router-link to="/role" class="hint-link">Role</router-link>.
             </div>
           </el-form-item>
 

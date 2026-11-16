@@ -2,7 +2,7 @@
   <div class="fnb-view">
 
     <!-- Header -->
-    <PageHeader breadcrumb="Dashboard > FnB" title="Food & Beverage" description="Kelola menu FnB dan pantau pesanan dari customer" />
+    <PageHeader breadcrumb="Dashboard → FnB" title="Food & Beverage" description="Kelola menu FnB dan pantau pesanan dari customer" />
 
     <!-- Tabs -->
     <el-tabs v-model="activeTab" class="fnb-tabs">
@@ -128,7 +128,7 @@
           </el-select>
           <template #actions>
             <el-button @click="fetchOrders" plain>
-              <el-icon><Refresh /></el-icon> Refresh
+              <el-icon><Refresh /></el-icon> Muat Ulang
             </el-button>
           </template>
         </FilterBar>

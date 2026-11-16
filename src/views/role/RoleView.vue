@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Settings → Roles" title="Roles" description="Kelola role dan hak akses untuk setiap jabatan staff.">
+    <PageHeader breadcrumb="Pengaturan → Role" title="Role" description="Kelola role dan hak akses untuk setiap jabatan staff.">
       <template #actions>
         <el-button v-if="can('settings.staff_role')" type="primary" @click="openDrawer()">
           <el-icon><Plus /></el-icon> Tambah Role
@@ -88,7 +88,7 @@
         <el-table-column label="Aksi" width="110" align="right" fixed="right">
           <template #default="{ row }">
             <div class="row-actions">
-              <el-tooltip v-if="can('settings.staff_role')" content="Edit" placement="top">
+              <el-tooltip v-if="can('settings.staff_role')" content="Ubah" placement="top">
                 <el-button size="small" circle plain @click="openDrawer(row)">
                   <el-icon><Edit /></el-icon>
                 </el-button>
@@ -112,7 +112,7 @@
     <!-- Drawer Add/Edit Role -->
     <el-drawer
       v-model="drawerVisible"
-      :title="form.id ? 'Edit Role' : 'Tambah Role'"
+      :title="form.id ? 'Ubah Role' : 'Tambah Role'"
       direction="rtl"
       :size="isMobile ? '100%' : '480px'"
       :destroy-on-close="true"
@@ -211,18 +211,18 @@ const rules = {
 
 // ── Permission Groups ──
 const ALL_PERMISSION_GROUPS = [
-  { key: 'dashboard', label: 'Dashboard', description: 'Akses ke halaman dashboard utama.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'dashboard.view', checked: false }] },
-  { key: 'bookings', label: 'Bookings', description: 'Kelola booking & pembayaran.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'bookings.view', checked: false }, { label: 'Create', value: 'bookings.create', checked: false }, { label: 'Edit', value: 'bookings.edit', checked: false }, { label: 'Cancel', value: 'bookings.cancel', checked: false }] },
-  { key: 'rooms', label: 'Rooms', description: 'Kelola data room & console.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'rooms.view', checked: false }, { label: 'Create', value: 'rooms.create', checked: false }, { label: 'Edit', value: 'rooms.edit', checked: false }, { label: 'Delete', value: 'rooms.delete', checked: false }] },
-  { key: 'schedule', label: 'Schedule', description: 'Kelola jadwal & kalender.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'schedule.view', checked: false }, { label: 'Edit', value: 'schedule.edit', checked: false }] },
-  { key: 'orders_fnb', label: 'Orders (F&B)', description: 'Kelola pesanan makanan & minuman.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'orders_fnb.view', checked: false }, { label: 'Edit', value: 'orders_fnb.edit', checked: false }] },
-  { key: 'customers', label: 'Customers', description: 'Kelola data pelanggan.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'customers.view', checked: false }, { label: 'Create', value: 'customers.create', checked: false }, { label: 'Edit', value: 'customers.edit', checked: false }] },
-  { key: 'membership', label: 'Membership', description: 'Kelola paket membership.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'membership.view', checked: false }, { label: 'Create', value: 'membership.create', checked: false }, { label: 'Edit', value: 'membership.edit', checked: false }] },
-  { key: 'play_credits', label: 'Play Credits', description: 'Kelola paket play credits.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'play_credits.view', checked: false }, { label: 'Create', value: 'play_credits.create', checked: false }, { label: 'Edit', value: 'play_credits.edit', checked: false }] },
-  { key: 'pricing', label: 'Pricing', description: 'Kelola harga & paket.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'pricing.view', checked: false }, { label: 'Edit', value: 'pricing.edit', checked: false }] },
-  { key: 'promotion', label: 'Promotion', description: 'Kelola promo & kupon.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'promotion.view', checked: false }, { label: 'Create', value: 'promotion.create', checked: false }, { label: 'Edit', value: 'promotion.edit', checked: false }] },
-  { key: 'payment_setting', label: 'Payment Setting', description: 'Kelola pengaturan pembayaran.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'payment_setting.view', checked: false }, { label: 'Edit', value: 'payment_setting.edit', checked: false }] },
-  { key: 'settings', label: 'Settings', description: 'Kelola pengaturan sistem.', checked: false, indeterminate: false, permissions: [{ label: 'Staff & Role', value: 'settings.staff_role', checked: false }, { label: 'Branches', value: 'settings.branches', checked: false }, { label: 'System Preference', value: 'settings.system_preference', checked: false }, { label: 'Activity Log', value: 'settings.activity_log', checked: false }] },
+  { key: 'dashboard', label: 'Dashboard', description: 'Akses ke halaman dashboard utama.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'dashboard.view', checked: false }] },
+  { key: 'bookings', label: 'Booking', description: 'Kelola booking & pembayaran.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'bookings.view', checked: false }, { label: 'Tambah', value: 'bookings.create', checked: false }, { label: 'Ubah', value: 'bookings.edit', checked: false }, { label: 'Batalkan', value: 'bookings.cancel', checked: false }] },
+  { key: 'rooms', label: 'Ruangan', description: 'Kelola data room & console.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'rooms.view', checked: false }, { label: 'Tambah', value: 'rooms.create', checked: false }, { label: 'Ubah', value: 'rooms.edit', checked: false }, { label: 'Hapus', value: 'rooms.delete', checked: false }] },
+  { key: 'schedule', label: 'Jadwal', description: 'Kelola jadwal & kalender.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'schedule.view', checked: false }, { label: 'Ubah', value: 'schedule.edit', checked: false }] },
+  { key: 'orders_fnb', label: 'Pesanan (F&B)', description: 'Kelola pesanan makanan & minuman.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'orders_fnb.view', checked: false }, { label: 'Ubah', value: 'orders_fnb.edit', checked: false }] },
+  { key: 'customers', label: 'Pelanggan', description: 'Kelola data pelanggan.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'customers.view', checked: false }, { label: 'Tambah', value: 'customers.create', checked: false }, { label: 'Ubah', value: 'customers.edit', checked: false }] },
+  { key: 'membership', label: 'Membership', description: 'Kelola paket membership.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'membership.view', checked: false }, { label: 'Tambah', value: 'membership.create', checked: false }, { label: 'Ubah', value: 'membership.edit', checked: false }] },
+  { key: 'play_credits', label: 'Play Credits', description: 'Kelola paket play credits.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'play_credits.view', checked: false }, { label: 'Tambah', value: 'play_credits.create', checked: false }, { label: 'Ubah', value: 'play_credits.edit', checked: false }] },
+  { key: 'pricing', label: 'Harga', description: 'Kelola harga & paket.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'pricing.view', checked: false }, { label: 'Ubah', value: 'pricing.edit', checked: false }] },
+  { key: 'promotion', label: 'Promosi', description: 'Kelola promo & kupon.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'promotion.view', checked: false }, { label: 'Tambah', value: 'promotion.create', checked: false }, { label: 'Ubah', value: 'promotion.edit', checked: false }] },
+  { key: 'payment_setting', label: 'Pengaturan Pembayaran', description: 'Kelola pengaturan pembayaran.', checked: false, indeterminate: false, permissions: [{ label: 'Lihat', value: 'payment_setting.view', checked: false }, { label: 'Ubah', value: 'payment_setting.edit', checked: false }] },
+  { key: 'settings', label: 'Pengaturan', description: 'Kelola pengaturan sistem.', checked: false, indeterminate: false, permissions: [{ label: 'Staff & Role', value: 'settings.staff_role', checked: false }, { label: 'Cabang', value: 'settings.branches', checked: false }, { label: 'Preferensi Sistem', value: 'settings.system_preference', checked: false }, { label: 'Log Aktivitas', value: 'settings.activity_log', checked: false }] },
 ]
 
 // Groups of switched-off features are hidden. A role's existing permissions in those

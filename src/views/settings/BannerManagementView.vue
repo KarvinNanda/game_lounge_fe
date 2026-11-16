@@ -2,7 +2,7 @@
   <div>
     <!-- Header -->
     <PageHeader
-      breadcrumb="Settings → Kelola Banner"
+      breadcrumb="Pengaturan → Kelola Banner"
       title="Kelola Banner"
       description="Banner slider yang tampil di halaman home customer. Drag untuk mengubah urutan, atau gunakan tombol panah."
     >
@@ -94,7 +94,7 @@
               @change="() => handleToggle(banner)"
               title="Aktif/Nonaktif"
             />
-            <el-button size="small" circle type="warning" plain @click="openForm(banner)" title="Edit banner">
+            <el-button size="small" circle type="warning" plain @click="openForm(banner)" title="Ubah banner">
               <el-icon><Edit /></el-icon>
             </el-button>
             <el-button size="small" circle type="danger" plain @click="handleDelete(banner)" title="Hapus banner">
@@ -110,7 +110,7 @@
     ════════════════════════════════════════════ -->
     <el-drawer
       v-model="formVisible"
-      :title="editingItem ? 'Edit Banner' : 'Tambah Banner Baru'"
+      :title="editingItem ? 'Ubah Banner' : 'Tambah Banner Baru'"
       direction="rtl"
       size="520px"
     >
@@ -133,7 +133,7 @@
             >
               <el-button size="small" plain>
                 <el-icon><Upload /></el-icon>
-                {{ form.image_url ? 'Ganti Gambar Banner' : 'Upload Gambar Banner' }}
+                {{ form.image_url ? 'Ganti Gambar Banner' : 'Unggah Gambar Banner' }}
               </el-button>
             </el-upload>
             <div class="u-text-xs u-text-muted u-mt-1">
@@ -158,7 +158,7 @@
             >
               <el-button size="small" plain>
                 <el-icon><Upload /></el-icon>
-                {{ form.detail_image_url ? 'Ganti Gambar Detail' : 'Upload Gambar Detail' }}
+                {{ form.detail_image_url ? 'Ganti Gambar Detail' : 'Unggah Gambar Detail' }}
               </el-button>
             </el-upload>
             <div class="u-text-xs u-text-muted u-mt-1">

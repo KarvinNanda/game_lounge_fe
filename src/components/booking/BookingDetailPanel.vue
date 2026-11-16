@@ -8,7 +8,7 @@
 
     <!-- Status badge -->
     <el-tag :type="getStatusTagType(booking.status)" class="u-mb-3">
-      {{ booking.status?.toUpperCase() }}
+      {{ bookingStatusLabel(booking.status).toUpperCase() }}
     </el-tag>
 
     <!-- Customer info -->
@@ -33,11 +33,11 @@
     <div class="info-section-title">INFORMASI BOOKING</div>
     <div class="info-grid">
       <div class="info-row">
-        <span>Booking ID</span>
+        <span>ID Booking</span>
         <strong class="booking-code">{{ booking.booking_code }}</strong>
       </div>
       <div class="info-row">
-        <span>Room</span>
+        <span>Ruangan</span>
         <span>{{ booking.room?.name }}</span>
       </div>
       <div class="info-row">
@@ -56,7 +56,7 @@
         <span>Payment</span>
         <span>
           <el-icon aria-hidden="true"><component :is="booking.payment_method === 'play_credits' ? 'Coin' : 'Money'" /></el-icon>
-          {{ booking.payment_method === 'play_credits' ? 'Play Credits' : 'Cash' }}
+          {{ booking.payment_method === 'play_credits' ? 'Play Credits' : 'Tunai' }}
         </span>
       </div>
     </div>
@@ -80,11 +80,11 @@
       <div class="info-section-title">AKSI CEPAT</div>
       <el-button class="action-btn" v-if="can('bookings.edit')" plain
         @click="openCompleteConfirm">
-        <el-icon><CircleCheck /></el-icon> Mark as Completed
+        <el-icon><CircleCheck /></el-icon> Tandai Selesai
       </el-button>
       <el-button class="action-btn-last" v-if="can('bookings.cancel') && !hasStarted(booking)" type="danger" plain
         @click="openCancelForm">
-        <el-icon><CircleClose /></el-icon> Cancel Booking
+        <el-icon><CircleClose /></el-icon> Batalkan Booking
       </el-button>
     </div>
 
@@ -133,6 +133,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import AuditTrail from '@/components/AuditTrail.vue'
+import { bookingStatusLabel } from '@/utils/bookingStatus'
 import { cancelBooking, completeBooking } from '@/api/booking/bookingApi'
 import { usePermission } from '@/composables/usePermission'
 import { hasStarted } from '@/utils/bookingTime'

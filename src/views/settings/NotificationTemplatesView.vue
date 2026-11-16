@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- ── Header ── -->
-    <PageHeader breadcrumb="Settings › Template Notifikasi" title="Template Notifikasi" description="Atur kata-kata pesan Email & WhatsApp yang dikirim ke customer." />
+    <PageHeader breadcrumb="Pengaturan → Template Notifikasi" title="Template Notifikasi" description="Atur kata-kata pesan Email & WhatsApp yang dikirim ke customer." />
 
     <!-- ── Info box ── -->
     <div class="info-banner">
@@ -58,7 +58,7 @@
     ════════════════════════════════════════════════════════ -->
     <el-drawer
       v-model="editorVisible"
-      :title="editingTemplate?.name || 'Edit Template'"
+      :title="editingTemplate?.name || 'Ubah Template'"
       direction="rtl"
       :size="isMobile ? '100%' : isTablet ? '90%' : '640px'"
       :destroy-on-close="true"

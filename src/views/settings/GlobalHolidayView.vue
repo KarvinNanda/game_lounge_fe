@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Settings → Tanggal Merah Global" title="Tanggal Merah Global" description="Kelola hari libur nasional yang berlaku di semua cabang.">
+    <PageHeader breadcrumb="Pengaturan → Tanggal Merah Global" title="Tanggal Merah Global" description="Kelola hari libur nasional yang berlaku di semua cabang.">
       <template #actions>
         <el-button v-if="can('settings.branches')" type="primary" @click="openDrawer()">
           <el-icon><Plus /></el-icon> Tambah Tanggal Merah
@@ -106,7 +106,7 @@
           <el-table-column label="Aksi" width="100" align="right" fixed="right">
             <template #default="{ row }">
               <div class="row-actions">
-                <el-tooltip v-if="can('settings.branches')" content="Edit" placement="top">
+                <el-tooltip v-if="can('settings.branches')" content="Ubah" placement="top">
                   <el-button size="small" circle plain @click="openDrawer(row)">
                     <el-icon><Edit /></el-icon>
                   </el-button>

@@ -2,8 +2,8 @@
   <div>
     <!-- Header -->
     <PageHeader
-      :breadcrumb="`Store → Stores → ${isEdit ? 'Edit Store' : 'Buat Store Baru'}`"
-      :title="isEdit ? 'Edit Store' : 'Buat Store Baru'"
+      :breadcrumb="`Manajemen Cabang → Daftar Cabang → ${isEdit ? 'Ubah Cabang' : 'Buat Cabang Baru'}`"
+      :title="isEdit ? 'Ubah Cabang' : 'Buat Cabang Baru'"
       description="Lengkapi informasi cabang secara bertahap."
     />
 
@@ -13,7 +13,7 @@
         <el-step :title="isMobile ? 'Informasi' : 'Informasi Cabang'" />
         <el-step :title="isMobile ? 'Jam' : 'Jam Operasional'" />
         <el-step title="Ruangan" />
-        <el-step :title="isMobile ? 'Review' : 'Review & Simpan'" />
+        <el-step :title="isMobile ? 'Tinjau' : 'Tinjau & Simpan'" />
       </el-steps>
     </el-card>
 
@@ -321,7 +321,7 @@
       <div class="step-header">
         <el-icon size="26" class="u-text-action"><Finished /></el-icon>
         <div>
-          <h3 class="step-title">Review & Konfirmasi</h3>
+          <h3 class="step-title">Tinjau & Konfirmasi</h3>
           <p class="step-desc">Periksa kembali sebelum menyimpan.</p>
         </div>
       </div>
@@ -351,7 +351,7 @@
       <div class="review-box u-mt-3">
         <div class="review-title">Ruangan — {{ selectedRooms.length }} tipe dipilih</div>
         <el-table :data="selectedRooms" size="small" class="u-mt-2">
-          <el-table-column label="Room" prop="name" min-width="160" />
+          <el-table-column label="Ruangan" prop="name" min-width="160" />
           <el-table-column label="Kapasitas" width="120"><template #default="{ row }">{{ row.capacity_min }}–{{ row.capacity_max }} orang</template></el-table-column>
           <el-table-column label="Jumlah Unit" width="110"><template #default="{ row }">{{ row.unit_count }} unit</template></el-table-column>
         </el-table>
@@ -374,7 +374,7 @@
           Lanjut <el-icon><ArrowRight /></el-icon>
         </el-button>
         <el-button v-if="currentStep === 3" type="primary" :loading="saving" @click="saveStore" :style="currentStep === 3 && isMobile ? { flex:'1' } : {}">
-          <el-icon><Check /></el-icon> {{ isMobile ? 'Simpan' : 'Simpan Store' }}
+          <el-icon><Check /></el-icon> {{ isMobile ? 'Simpan' : 'Simpan Cabang' }}
         </el-button>
       </div>
     </div>
@@ -525,10 +525,10 @@ const submit = async (status) => {
     const payload = await buildPayload(status)
     if (isEdit.value) { await updateStore(route.params.id, payload) }
     else { await createStore(payload) }
-    ElMessage.success('Store berhasil disimpan!')
+    ElMessage.success('Cabang berhasil disimpan!')
     router.push('/store')
   } catch (e) {
-    notifyError(e, 'Gagal menyimpan store')
+    notifyError(e, 'Gagal menyimpan cabang')
   } finally {
     saving.value = false
   }
