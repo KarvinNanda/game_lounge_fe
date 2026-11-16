@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import AdminLayout from '@/layouts/AdminLayout.vue'
+import { isFnbEnabled } from '@/config/features'
 
 const routes = [
   {
@@ -49,7 +50,8 @@ const routes = [
       { path: 'customers',                name: 'Customers',   meta: { permission: 'customers.view' },    component: () => import('@/views/customer/CustomerView.vue') },
       { path: 'play-credits',             name: 'PlayCredits', meta: { permission: 'play_credits.view' }, component: () => import('@/views/play_credits/PlayCreditsView.vue') },
       { path: 'promotion',                name: 'Promotion',   meta: { permission: 'promotion.view' },    component: () => import('@/views/promotion/PromotionView.vue') },
-      { path: 'fnb',                      name: 'FnB',         meta: { permission: 'orders_fnb.view' },          component: () => import('@/views/fnb/FnBView.vue') },
+      // Only when the backend serves /api/admin/fnb (FNB_ENABLED); otherwise every call 404s.
+      ...(isFnbEnabled() ? [{ path: 'fnb', name: 'FnB', meta: { permission: 'orders_fnb.view' }, component: () => import('@/views/fnb/FnBView.vue') }] : []),
 
       // SYSTEM — guarded by settings.staff_role
       { path: 'staff', name: 'Staff', meta: { permission: 'settings.staff_role' }, component: () => import('@/views/staff/StaffView.vue') },

@@ -191,6 +191,7 @@ import PageHeader from '@/components/ui/PageHeader.vue'
 import StatStrip from '@/components/ui/StatStrip.vue'
 import FilterBar from '@/components/ui/FilterBar.vue'
 import { getRoles, createRole, updateRole, deleteRole as apiDelete } from '@/api/role/roleApi'
+import { isFnbEnabled } from '@/config/features'
 import AuditTrail from '@/components/AuditTrail.vue'
 
 const { can } = usePermission()
@@ -209,8 +210,8 @@ const rules = {
 }
 
 // ── Permission Groups ──
-const permissionGroups = reactive([
-  { key: 'dashboard', label: 'Dashboard', description: 'Akses ke halaman dashboard utama.', checked: false, indeterminate: false, permissions: [{ label: 'View Dashboard', value: 'dashboard.view', checked: false }] },
+const ALL_PERMISSION_GROUPS = [
+  { key: 'dashboard', label: 'Dashboard', description: 'Akses ke halaman dashboard utama.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'dashboard.view', checked: false }] },
   { key: 'bookings', label: 'Bookings', description: 'Kelola booking & pembayaran.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'bookings.view', checked: false }, { label: 'Create', value: 'bookings.create', checked: false }, { label: 'Edit', value: 'bookings.edit', checked: false }, { label: 'Cancel', value: 'bookings.cancel', checked: false }] },
   { key: 'rooms', label: 'Rooms', description: 'Kelola data room & console.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'rooms.view', checked: false }, { label: 'Create', value: 'rooms.create', checked: false }, { label: 'Edit', value: 'rooms.edit', checked: false }, { label: 'Delete', value: 'rooms.delete', checked: false }] },
   { key: 'schedule', label: 'Schedule', description: 'Kelola jadwal & kalender.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'schedule.view', checked: false }, { label: 'Edit', value: 'schedule.edit', checked: false }] },
@@ -222,7 +223,16 @@ const permissionGroups = reactive([
   { key: 'promotion', label: 'Promotion', description: 'Kelola promo & kupon.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'promotion.view', checked: false }, { label: 'Create', value: 'promotion.create', checked: false }, { label: 'Edit', value: 'promotion.edit', checked: false }] },
   { key: 'payment_setting', label: 'Payment Setting', description: 'Kelola pengaturan pembayaran.', checked: false, indeterminate: false, permissions: [{ label: 'View', value: 'payment_setting.view', checked: false }, { label: 'Edit', value: 'payment_setting.edit', checked: false }] },
   { key: 'settings', label: 'Settings', description: 'Kelola pengaturan sistem.', checked: false, indeterminate: false, permissions: [{ label: 'Staff & Role', value: 'settings.staff_role', checked: false }, { label: 'Branches', value: 'settings.branches', checked: false }, { label: 'System Preference', value: 'settings.system_preference', checked: false }, { label: 'Activity Log', value: 'settings.activity_log', checked: false }] },
-])
+]
+
+// Groups of switched-off features are hidden. A role's existing permissions in those
+// groups are kept aside and sent back on save, so hiding a group never removes them.
+const HIDDEN_GROUP_KEYS = isFnbEnabled() ? [] : ['orders_fnb']
+const permissionGroups = reactive(ALL_PERMISSION_GROUPS.filter(g => !HIDDEN_GROUP_KEYS.includes(g.key)))
+const hiddenPermissionValues = ALL_PERMISSION_GROUPS
+  .filter(g => HIDDEN_GROUP_KEYS.includes(g.key))
+  .flatMap(g => g.permissions.map(p => p.value))
+let keptHiddenPermissions = []
 
 const selectAll = ref(false)
 
@@ -264,10 +274,12 @@ const resetPermissions = () => {
     g.permissions.forEach(p => p.checked = false)
   })
   selectAll.value = false
+  keptHiddenPermissions = []
 }
 
 const loadPermissions = (perms = []) => {
   resetPermissions()
+  keptHiddenPermissions = perms.filter(v => hiddenPermissionValues.includes(v))
   permissionGroups.forEach(g => {
     g.permissions.forEach(p => { p.checked = perms.includes(p.value) })
     const count = g.permissions.filter(p => p.checked).length
@@ -277,8 +289,10 @@ const loadPermissions = (perms = []) => {
   updateSelectAll()
 }
 
-const getSelectedPermissions = () =>
-  permissionGroups.flatMap(g => g.permissions.filter(p => p.checked).map(p => p.value))
+const getSelectedPermissions = () => [
+  ...permissionGroups.flatMap(g => g.permissions.filter(p => p.checked).map(p => p.value)),
+  ...keptHiddenPermissions,
+]
 
 // ── Stats ──
 const filteredRoles = computed(() => {
