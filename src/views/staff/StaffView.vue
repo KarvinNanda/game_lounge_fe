@@ -186,15 +186,10 @@
             <el-input v-model="form.phone" placeholder="Contoh: 0812-3456-7890" />
           </el-form-item>
 
-          <!-- Password hanya saat create -->
-          <template v-if="!form.id">
-            <el-form-item label="Password" prop="password">
-              <el-input v-model="form.password" type="password" placeholder="Minimal 6 karakter" show-password />
-            </el-form-item>
-            <el-form-item label="Konfirmasi Password" prop="password_confirm">
-              <el-input v-model="form.password_confirm" type="password" placeholder="Masukkan ulang password" show-password />
-            </el-form-item>
-          </template>
+          <!-- No password from the admin: the backend emails a 72-hour invitation link
+               and the new staff member sets their own password. -->
+          <el-alert v-if="!form.id" type="info" :closable="false" show-icon class="invite-note"
+            title="Staff akan menerima email undangan (berlaku 72 jam) untuk membuat password sendiri." />
 
           <!-- Staff Info -->
           <div class="drawer-section-title u-mt-4">Informasi Staff</div>
@@ -300,7 +295,6 @@ let debounceTimer = null
 
 const form = reactive({
   id: null, username: '', email: '', phone: '',
-  password: '', password_confirm: '',
   role_id: null, is_all_stores: true, store_ids: [],
   created_by: null, updated_by: null, created_at: null, updated_at: null,
 })
@@ -308,19 +302,6 @@ const form = reactive({
 const formRules = computed(() => ({
   username: [{ required: true, message: 'Username wajib diisi', trigger: 'blur' }],
   email: [{ required: true, type: 'email', message: 'Format email tidak valid', trigger: 'blur' }],
-  ...(form.id ? {} : {
-    password: [{ required: true, min: 6, message: 'Password minimal 6 karakter', trigger: 'blur' }],
-    password_confirm: [
-      { required: true, message: 'Konfirmasi password wajib diisi', trigger: 'blur' },
-      {
-        validator: (_, val, cb) => {
-          if (val !== form.password) cb(new Error('Password tidak cocok'))
-          else cb()
-        },
-        trigger: 'blur',
-      },
-    ],
-  }),
   role_id: [{ required: true, message: 'Role wajib dipilih', trigger: 'change' }],
 }))
 
@@ -382,8 +363,6 @@ const openDrawer = (row = null) => {
       username: row.username,
       email: row.email,
       phone: row.phone || '',
-      password: '',
-      password_confirm: '',
       role_id: row.role_id,
       is_all_stores: row.is_all_stores,
       store_ids: row.staff_stores?.map(ss => ss.store_id) || [],
@@ -395,7 +374,6 @@ const openDrawer = (row = null) => {
   } else {
     Object.assign(form, {
       id: null, username: '', email: '', phone: '',
-      password: '', password_confirm: '',
       role_id: null, is_all_stores: true, store_ids: [],
       created_by: null, updated_by: null, created_at: null, updated_at: null,
     })
@@ -415,14 +393,13 @@ const save = async () => {
         role_id: form.role_id,
         is_all_stores: form.is_all_stores,
         store_ids: form.is_all_stores ? [] : form.store_ids,
-        ...(form.id ? {} : { password: form.password }),
       }
       if (form.id) {
         await updateStaff(form.id, payload)
         ElMessage.success('Staff berhasil diperbarui')
       } else {
         await createStaff(payload)
-        ElMessage.success('Staff berhasil ditambahkan')
+        ElMessage.success('Staff ditambahkan. Undangan untuk membuat password telah dikirim ke email staff.')
       }
       drawerVisible.value = false
       fetchStaffs()
@@ -492,6 +469,8 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Space before the next section heading, larger than the gap between fields. */
+.invite-note { margin-bottom: var(--space-5); }
 
 .staff-cell { display:flex; align-items:center; gap:10px; }
 .staff-avatar { flex-shrink:0; background:var(--action); color:var(--text-on-action); font-weight:700; }
