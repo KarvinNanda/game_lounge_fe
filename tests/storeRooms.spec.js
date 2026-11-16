@@ -13,9 +13,9 @@ const TEMPLATES = [
 ]
 // Two Regular units (one inactive: the backend still counts it) and one VIP unit.
 const STORE_ROOMS = [
-  { id: 'a', is_active: true, room_template: { id: 1, name: 'Regular Room' } },
-  { id: 'b', is_active: false, room_template: { id: 1, name: 'Regular Room' } },
-  { id: 'c', is_active: true, room_template: { id: 2, name: 'VIP Room' } },
+  { id: 'a', name: 'Regular Room 1', is_active: true, room_template: { id: 1, name: 'Regular Room' } },
+  { id: 'b', name: 'Regular Room 2', is_active: false, room_template: { id: 1, name: 'Regular Room' } },
+  { id: 'c', name: 'VIP Room 1', is_active: true, room_template: { id: 2, name: 'VIP Room' } },
 ]
 
 describe('roomSetupRows', () => {
@@ -83,50 +83,90 @@ vi.mock('@/api/store/storeApi', () => ({
   toggleStoreRoom: vi.fn(),
 }))
 
-describe('StoreCreateView in edit mode', () => {
-  it('keeps the current unit counts on save (never fewer, never an empty list)', async () => {
+describe('StoreCreateView in edit mode: one card per room type', () => {
+  const STORE = { name: 'Quantum BSD', address: 'Jl. BSD', whatsapp: '0812', link_gmaps: 'https://maps.example', status: 'active', operating_hours: [] }
+
+  const mountEdit = async ({ templates, rooms } = {}) => {
     const { default: StoreCreateView } = await import('@/views/store/StoreCreateView.vue')
-    const { updateStore } = await import('@/api/store/storeApi')
+    const { getRoomTemplates } = await import('@/api/room_template/roomTemplateApi')
+    const { getStoreById, updateStore } = await import('@/api/store/storeApi')
+    if (templates) getRoomTemplates.mockResolvedValueOnce({ data: { data: templates } })
+    if (rooms) getStoreById.mockResolvedValueOnce({ data: { data: { ...STORE, rooms } } })
+    updateStore.mockClear()
     setActivePinia(createPinia())
     const w = mount(StoreCreateView, { global: { plugins: [ElementPlus], components: Icons } })
     await flushPromises()
-
-    expect(w.text()).toContain('Ruangan — 2 tipe dipilih')
-    // Existing types say what they already have, so the total is not read as "units to add".
-    expect(w.text()).toContain('Saat ini: 2')
-    expect(w.findAll('.existing-tag')).toHaveLength(2)
-    // The per-unit on/off list is visible without clicking a tab first.
-    expect(w.find('.room-mgmt-tabs .el-tabs__item.is-active').exists()).toBe(true)
-
+    return { w, updateStore }
+  }
+  const card = (w, name) => w.findAll('.room-type-card').find((c) => c.find('.room-type-name').text() === name)
+  const save = async (w) => {
     await w.findAll('button').find((b) => b.text().includes('Simpan & Keluar')).trigger('click')
     await flushPromises()
+  }
 
+  it('shows each type the branch has with its units and switches, without tabs', async () => {
+    const { w } = await mountEdit()
+    expect(w.find('.room-mgmt-tabs').exists()).toBe(false)
+    expect(w.findAll('.room-type-card').map((c) => c.find('.room-type-name').text())).toEqual(['Regular Room', 'VIP Room'])
+    const regular = card(w, 'Regular Room')
+    expect(regular.text()).toContain('Regular Room 1')
+    expect(regular.text()).toContain('Regular Room 2')
+    expect(regular.findAllComponents({ name: 'ElSwitch' })).toHaveLength(2)
+    expect(w.text()).toContain('Ruangan — 2 tipe dipilih')
+    expect(w.find('.room-summary-bar').text()).toContain('Total: 3 unit')
+    expect(card(w, 'Regular Room').find('.room-type-count').text()).toBe('2 unit')
+  })
+
+  it('keeps the current unit counts on save (never fewer, never an empty list)', async () => {
+    const { w, updateStore } = await mountEdit()
+    await save(w)
     expect(updateStore).toHaveBeenCalledTimes(1)
     expect(updateStore.mock.calls[0][1].rooms).toEqual([
       { room_template_id: 1, unit_count: 2 },
       { room_template_id: 2, unit_count: 1 },
     ])
   })
-  it('disables + for an inactive type the branch already has', async () => {
-    const { default: StoreCreateView } = await import('@/views/store/StoreCreateView.vue')
-    const { getRoomTemplates } = await import('@/api/room_template/roomTemplateApi')
-    const { getStoreById } = await import('@/api/store/storeApi')
-    getRoomTemplates.mockResolvedValueOnce({ data: { data: [
-      ...TEMPLATES, { id: 4, name: 'Old Room', capacity_min: 1, capacity_max: 2, is_active: false },
-    ] } })
-    getStoreById.mockResolvedValueOnce({ data: { data: {
-      name: 'Quantum BSD', address: 'Jl. BSD', whatsapp: '0812', link_gmaps: 'https://maps.example', status: 'active',
-      operating_hours: [], rooms: [...STORE_ROOMS, { id: 'd', is_active: true, room_template: { id: 4, name: 'Old Room' } }],
-    } } })
-    setActivePinia(createPinia())
-    const w = mount(StoreCreateView, { global: { plugins: [ElementPlus], components: Icons } })
-    await flushPromises()
 
-    const row = w.findAll('.el-table__row').find((r) => r.text().includes('Old Room'))
-    const plus = row.findAll('button').at(-1)
-    expect(plus.attributes('disabled')).toBeDefined()
-    expect(row.text()).toContain('Tipe nonaktif')
+  it('"Tambah unit" adds a pending unit and raises the target; "Batal" removes it', async () => {
+    const { w, updateStore } = await mountEdit()
+    const vip = () => card(w, 'VIP Room')
+    await vip().findAll('button').find((b) => b.text().includes('Tambah unit')).trigger('click')
+    await vip().findAll('button').find((b) => b.text().includes('Tambah unit')).trigger('click')
+    expect(vip().findAll('.room-unit-new')).toHaveLength(2)
+    // Saved units and pending ones are counted apart, matching the summary above.
+    expect(vip().find('.room-type-count').text()).toBe('1 unit · +2 baru')
+    await vip().findAll('.room-unit-new button').at(0).trigger('click')
+    expect(vip().findAll('.room-unit-new')).toHaveLength(1)
+    await save(w)
+    expect(updateStore.mock.calls[0][1].rooms).toContainEqual({ room_template_id: 2, unit_count: 2 })
   })
+
+  it('adds a new room type from "Tambah tipe ruangan" with one unit', async () => {
+    const { w, updateStore } = await mountEdit()
+    const picker = w.findAllComponents({ name: 'ElSelect' }).find((s) => s.props('placeholder') === 'Tambah tipe ruangan')
+    picker.vm.$emit('update:modelValue', 3)
+    picker.vm.$emit('change', 3)
+    await flushPromises()
+    expect(card(w, 'Family Room').findAll('.room-unit-new')).toHaveLength(1)
+    await save(w)
+    expect(updateStore.mock.calls[0][1].rooms).toContainEqual({ room_template_id: 3, unit_count: 1 })
+  })
+
+  it('an inactive type the branch has keeps its units, is marked, and cannot grow', async () => {
+    const { w, updateStore } = await mountEdit({
+      templates: [...TEMPLATES, { id: 4, name: 'Old Room', capacity_min: 1, capacity_max: 2, is_active: false }],
+      rooms: [...STORE_ROOMS, { id: 'd', name: 'Old Room 1', is_active: true, room_template: { id: 4, name: 'Old Room' } }],
+    })
+    const old = card(w, 'Old Room')
+    expect(old.text()).toContain('Old Room 1')
+    expect(old.text()).toContain('Tipe nonaktif')
+    expect(old.findAll('button').some((b) => b.text().includes('Tambah unit'))).toBe(false)
+    const picker = w.findAllComponents({ name: 'ElSelect' }).find((s) => s.props('placeholder') === 'Tambah tipe ruangan')
+    expect(picker.findAllComponents({ name: 'ElOption' }).map((o) => o.props('label'))).not.toContain('Old Room')
+    await save(w)
+    expect(updateStore.mock.calls[0][1].rooms).toContainEqual({ room_template_id: 4, unit_count: 1 })
+  })
+
   it('review shows opening hours as HH:mm, not with seconds', async () => {
     const { default: StoreCreateView } = await import('@/views/store/StoreCreateView.vue')
     const { getStoreById } = await import('@/api/store/storeApi')
