@@ -208,40 +208,40 @@
       </div>
 
       <el-table :data="transactions" v-loading="txLoading" size="small">
-        <el-table-column label="Tanggal" width="110">
+        <el-table-column label="Tanggal" width="100">
           <template #default="{ row }">
             <div class="u-text-xs u-fw-bold">{{ formatDate(row.date) }}</div>
             <div class="u-text-xs u-text-secondary">{{ row.time }}</div>
           </template>
         </el-table-column>
-        <el-table-column label="Tipe" width="110">
+        <el-table-column label="Tipe" width="100">
           <template #default="{ row }">
             <el-tag :type="row.type === 'booking' ? '' : 'success'" size="small">
               {{ row.type === 'booking' ? 'Booking' : 'Play Credits' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="Customer" min-width="140">
+        <el-table-column label="Customer" min-width="120">
           <template #default="{ row }">
             <span class="u-text-xs u-fw-bold">{{ row.customer_name }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Keterangan" min-width="160">
+        <el-table-column label="Keterangan" min-width="130">
           <template #default="{ row }">
             <span class="u-text-xs u-text-secondary">{{ row.description }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Cabang" min-width="120">
+        <el-table-column label="Cabang" min-width="110">
           <template #default="{ row }">
             <span class="u-text-xs u-fw-semibold">{{ row.store_name }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Jumlah" width="130">
+        <el-table-column label="Jumlah" width="120">
           <template #default="{ row }">
             <span class="tx-amount">{{ formatRp(row.amount) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="Status" width="90">
+        <el-table-column label="Status" width="110">
           <template #default="{ row }">
             <el-tag type="success" size="small">{{ row.status }}</el-tag>
           </template>
@@ -628,6 +628,9 @@ onUnmounted(() => {
   grid-template-columns: 1fr 340px;
   gap: 10px;
   flex-shrink: 0;
+  /* Each card takes its own height; stretching the shorter Revenue by Type card to the
+     trend chart's height left a large empty band under its total. */
+  align-items: start;
 }
 .trend-card :deep(.el-card__body) { padding: 12px; }
 .type-card :deep(.el-card__body) { padding: 12px; }
@@ -733,7 +736,12 @@ onUnmounted(() => {
   .charts-bottom { grid-template-columns: 1fr; }
 }
 @media (max-width:639px) {
-  .period-buttons { overflow-x: auto; padding-bottom: 2px; white-space: nowrap; }
+  /* Wrap the period chips instead of a nowrap row: a nowrap row set the filter bar's
+     min width to its content and pushed the selects past the screen edge. */
+  .period-buttons { flex-wrap: wrap; min-width: 0; gap: 6px; }
+  /* Element Plus spaces adjacent buttons with margin-left; on a wrapped row that
+     margin indents the first chip of the second line. The gap spaces them instead. */
+  .period-buttons .el-button + .el-button { margin-left: 0; }
   .donut-wrap { flex-direction: column; align-items: center; }
   .donut-chart { width: 120px; height: 120px; }
   .donut-legend { width: 100%; }
