@@ -139,6 +139,15 @@ img { max-width: 100%; }
   }
 }
 
+/* ── Icon buttons on phones: 36px ───────────────────────
+   Small round icon buttons (edit, delete, reorder, more) are 24px. That meets
+   WCAG 2.2 AA but is easy to miss with a thumb, and edit sits next to delete.
+   On phones they become 36px. Desktop keeps the compact 24px size. */
+@media (max-width: 639px) {
+  .el-button--small.is-circle { width: 36px; height: 36px; padding: 0; }
+  .el-button--small.is-circle .el-icon { font-size: 16px; }
+}
+
 /* ── Reduced motion ──────────────────────────────────────
    !important is required: it must beat every component's
    own transition, including Element Plus internals. */
