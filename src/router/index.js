@@ -60,7 +60,10 @@ const routes = [
       { path: 'settings/global-holidays', name: 'GlobalHolidays', meta: { permission: 'settings.branches' }, component: () => import('@/views/settings/GlobalHolidayView.vue') },
       { path: 'settings/banners', name: 'BannerManagement', meta: { permission: 'settings.branches' }, component: () => import('@/views/settings/BannerManagementView.vue') },
     ]
-  }
+  },
+  // Unknown URLs (including /fnb while FnB is off) used to render a blank page.
+  // Send them to the dashboard; the guard still sends logged-out users to /login.
+  { path: '/:pathMatch(.*)*', redirect: '/dashboard' },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })
