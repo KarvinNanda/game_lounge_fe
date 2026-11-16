@@ -59,7 +59,7 @@
                 <el-dropdown-menu>
                   <el-dropdown-item command="view"><el-icon><View /></el-icon> Lihat Detail</el-dropdown-item>
                   <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
-                  <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Resend Password</el-dropdown-item>
+                  <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Kirim ulang link atur password</el-dropdown-item>
                   <el-dropdown-item v-if="can('customers.edit')" command="delete" class="u-text-danger"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
@@ -157,7 +157,7 @@
                   <template #dropdown>
                     <el-dropdown-menu>
                       <el-dropdown-item v-if="can('customers.edit')" command="edit"><el-icon><Edit /></el-icon> Edit Customer</el-dropdown-item>
-                      <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Resend Password</el-dropdown-item>
+                      <el-dropdown-item command="resend"><el-icon><Message /></el-icon> Kirim ulang link atur password</el-dropdown-item>
                       <el-dropdown-item v-if="can('customers.edit')" command="delete" class="u-text-danger"><el-icon><Delete /></el-icon> Delete Customer</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
@@ -720,12 +720,12 @@ const handleResendPassword = async (row) => {
   }
   try {
     await ElMessageBox.confirm(
-      `Kirim ulang password ke ${row.email}?`,
+      `Kirim ulang link atur password ke ${row.email}? Link berlaku 72 jam dan hanya bisa dipakai sekali.`,
       'Konfirmasi',
       { type: 'info', confirmButtonText: 'Kirim', cancelButtonText: 'Batal' }
     )
     await resendPassword(row.id)
-    ElMessage.success('Password berhasil dikirim ulang')
+    ElMessage.success('Link atur password berhasil dikirim ulang')
   } catch {}
 }
 

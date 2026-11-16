@@ -12,5 +12,5 @@ export const updateCustomer = (id, payload) => api.put(`/customers/${id}`, paylo
 export const updateCustomerNotes = (id, payload) => api.patch(`/customers/${id}/notes`, payload)
 // Hapus customer
 export const deleteCustomer = (id) => api.delete(`/customers/${id}`)
-// Kirim ulang password ke email
+// Kirim ulang link atur password ke email (backend tidak lagi mengirim password)
 export const resendPassword = (id) => api.post(`/customers/${id}/resend-password`)
