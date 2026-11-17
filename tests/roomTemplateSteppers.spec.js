@@ -23,10 +23,10 @@ const positions = async (width) => {
 }
 
 describe('room type capacity steppers', () => {
-  it('keep the compact right-side arrows on desktop', async () => {
-    expect(await positions(1280)).toEqual(['right', 'right'])
-  })
-  it('use the larger - and + buttons on phones (right arrows are about 15px tall)', async () => {
+  // Right-side arrows are about 15px tall each. The - and + buttons work for a
+  // thumb and look the same on desktop, so both widths use them.
+  it('use the - and + buttons on desktop and on phones', async () => {
+    expect(await positions(1280)).toEqual(['', ''])
     expect(await positions(375)).toEqual(['', ''])
   })
 })

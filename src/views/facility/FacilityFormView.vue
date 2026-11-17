@@ -245,7 +245,8 @@ onMounted(async () => {
 /* Status toggle */
 .status-toggle { display:flex; gap:10px; }
 .status-option {
-  flex:1; display:flex; align-items:center; gap:10px;
+  /* Top-aligned: when one description wraps, both titles stay on the same line. */
+  flex:1; display:flex; align-items:flex-start; gap:10px;
   padding:12px 14px; border:1px solid var(--border-color);
   border-radius:8px; cursor:pointer; transition:all 0.2s;
 }
