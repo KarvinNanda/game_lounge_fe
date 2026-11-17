@@ -45,7 +45,7 @@ describe('EventBookingPanel', () => {
   it('full-day: previews with the opening hours and sends today\'s payload', async () => {
     const w = await mountPanel()
     await fillRequired(w)
-    await choose(w, '.el-radio-button', 'Full 1 Hari')
+    await choose(w, '.el-radio-button', 'Penuh 1 Hari')
     await flushPromises()
     expect(m.previewEventPrice).toHaveBeenLastCalledWith({ store_id: 's1', duration_type: 'full_day',
       booking_date: '2099-01-01', start_time: '10:00:00', end_time: '22:00:00' })
@@ -63,7 +63,7 @@ describe('EventBookingPanel', () => {
   it('per room type: sends the chosen room types', async () => {
     const w = await mountPanel()
     await fillRequired(w)
-    await choose(w, '.el-radio-button', 'Full 1 Hari')
+    await choose(w, '.el-radio-button', 'Penuh 1 Hari')
     await choose(w, '.el-radio-button', 'Per Tipe Ruangan')
     await choose(w, '.el-checkbox', 'VIP')
     await confirm(w).trigger('click')
@@ -80,7 +80,7 @@ describe('EventBookingPanel', () => {
   it('duration and scope options show icons instead of emoji, labels unchanged', async () => {
     const w = await mountPanel()
     const labels = w.findAll('.el-radio-button').map((b) => b.text().trim())
-    expect(labels).toEqual(expect.arrayContaining(['Per Jam', 'Full 1 Hari', 'Full 1 Gedung', 'Per Tipe Ruangan']))
+    expect(labels).toEqual(expect.arrayContaining(['Per Jam', 'Penuh 1 Hari', '1 Gedung Penuh', 'Per Tipe Ruangan']))
     expect(w.text()).not.toMatch(/[\u{1F300}-\u{1FAFF}]/u)
     for (const icon of [Icons.Clock, Icons.Calendar, Icons.House, Icons.List, Icons.Opportunity]) {
       expect(w.findComponent(icon).exists()).toBe(true)

@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Manajemen Cabang → Tipe Ruangan" title="Tipe Ruangan" description="Kelola tipe ruangan standar yang digunakan di setiap store.">
+    <PageHeader breadcrumb="Manajemen Cabang → Tipe Ruangan" title="Tipe Ruangan" description="Kelola tipe ruangan standar yang digunakan di setiap cabang.">
       <template #actions>
         <el-button v-if="can('rooms.create')" type="primary" @click="$router.push('/room-template/create')">
           <el-icon><Plus /></el-icon> Tambah Room

@@ -14,7 +14,7 @@
       </div>
       <p v-if="whatsapp || email"
          class="u-text-xs u-text-secondary u-mt-3">
-        Konfirmasi dikirim ke customer
+        Konfirmasi dikirim ke pelanggan
         <span v-if="email"> via email</span>
         <span v-if="whatsapp"> & WhatsApp</span>.
       </p>

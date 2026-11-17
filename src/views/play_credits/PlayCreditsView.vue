@@ -414,7 +414,7 @@
 
         <!-- Right: Preview -->
         <div>
-          <h4 class="u-text-sm u-fw-bold u-mb-3">Preview Paket</h4>
+          <h4 class="u-text-sm u-fw-bold u-mb-3">Pratinjau Paket</h4>
           <div class="package-preview">
             <!-- <div class="pkg-icon-wrap img-64-spaced">
               <img class="img-64-cover" v-if="pkgIconPreview" :src="pkgIconPreview"
@@ -904,7 +904,7 @@ const handleAssign = async () => {
     assignLoading.value = true
     try {
       await assignCredit(assignForm)
-      ElMessage.success('Credits berhasil di-assign ke customer')
+      ElMessage.success('Credits berhasil diberikan ke pelanggan')
       assignDialogVisible.value = false
       fetchMemberCredits()
     } catch (e) { notifyError(e, 'Gagal assign credits') }

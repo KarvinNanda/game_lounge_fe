@@ -89,3 +89,16 @@ describe('BookingDetailPanel', () => {
     expect(cash.findComponent(Icons.Money).exists()).toBe(true)
   })
 })
+
+describe('BookingDetailPanel action buttons stay inside the panel', () => {
+  // Element Plus adds `margin-left: 12px` to `.el-button + .el-button`. The second full-width
+  // button ("Batalkan Booking") then sticks out 12px past the panel unless the margin is reset.
+  it('the last full-width action button resets the sibling margin', async () => {
+    const { readFileSync } = await import('node:fs')
+    const src = readFileSync('src/components/booking/BookingDetailPanel.vue', 'utf8')
+    const rule = src.match(/\.action-btn-last\s*\{([^}]*)\}/)
+    expect(rule).not.toBeNull()
+    expect(rule[1]).toMatch(/width:\s*100%/)
+    expect(rule[1]).toMatch(/margin-left:\s*0/)
+  })
+})

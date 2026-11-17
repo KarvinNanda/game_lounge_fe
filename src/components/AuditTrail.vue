@@ -2,7 +2,7 @@
   <div class="audit-trail" v-if="hasAudit">
     <div class="at-title">
       <el-icon size="11"><Clock /></el-icon>
-      <span>Audit Trail</span>
+      <span>Riwayat Perubahan</span>
     </div>
     <div class="at-rows">
       <div v-if="createdBy || createdAt" class="at-row">

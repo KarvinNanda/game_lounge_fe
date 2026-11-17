@@ -14,7 +14,7 @@ const mountDialog = async (props = {}) => {
   return w
 }
 const btn = (w, text) => w.findAll('button').find((b) => b.text().includes(text))
-const notice = (w) => w.text().match(/Konfirmasi dikirim ke customer[^.]*\./)?.[0].replace(/\s+/g, ' ')
+const notice = (w) => w.text().match(/Konfirmasi dikirim ke pelanggan[^.]*\./)?.[0].replace(/\s+/g, ' ')
 
 describe('BookingSuccessDialog', () => {
   it('shows the booking code', async () => {
@@ -23,9 +23,9 @@ describe('BookingSuccessDialog', () => {
 
   it('says how the customer was notified', async () => {
     expect(notice(await mountDialog())).toBeUndefined()
-    expect(notice(await mountDialog({ email: 'a@b.c' }))).toBe('Konfirmasi dikirim ke customer via email.')
-    expect(notice(await mountDialog({ whatsapp: '08' }))).toBe('Konfirmasi dikirim ke customer & WhatsApp.')
-    expect(notice(await mountDialog({ email: 'a@b.c', whatsapp: '08' }))).toBe('Konfirmasi dikirim ke customer via email & WhatsApp.')
+    expect(notice(await mountDialog({ email: 'a@b.c' }))).toBe('Konfirmasi dikirim ke pelanggan via email.')
+    expect(notice(await mountDialog({ whatsapp: '08' }))).toBe('Konfirmasi dikirim ke pelanggan & WhatsApp.')
+    expect(notice(await mountDialog({ email: 'a@b.c', whatsapp: '08' }))).toBe('Konfirmasi dikirim ke pelanggan via email & WhatsApp.')
   })
 
   it('buttons emit view and again', async () => {

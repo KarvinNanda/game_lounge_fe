@@ -93,7 +93,7 @@
       <el-form-item label="Tipe Durasi *">
         <el-radio-group v-model="eventForm.duration_type" @change="previewEventPriceCalc">
           <el-radio-button value="hourly"><el-icon aria-hidden="true"><Clock /></el-icon> Per Jam</el-radio-button>
-          <el-radio-button value="full_day"><el-icon aria-hidden="true"><Calendar /></el-icon> Full 1 Hari</el-radio-button>
+          <el-radio-button value="full_day"><el-icon aria-hidden="true"><Calendar /></el-icon> Penuh 1 Hari</el-radio-button>
         </el-radio-group>
         <div class="field-hint">
           <template v-if="eventForm.duration_type === 'full_day'">
@@ -127,7 +127,7 @@
       <!-- Scope Ruangan -->
       <el-form-item label="Scope Ruangan *">
         <el-radio-group v-model="eventForm.booking_scope">
-          <el-radio-button value="full_venue"><el-icon aria-hidden="true"><House /></el-icon> Full 1 Gedung</el-radio-button>
+          <el-radio-button value="full_venue"><el-icon aria-hidden="true"><House /></el-icon> 1 Gedung Penuh</el-radio-button>
           <el-radio-button value="per_room_type"><el-icon aria-hidden="true"><List /></el-icon> Per Tipe Ruangan</el-radio-button>
         </el-radio-group>
       </el-form-item>

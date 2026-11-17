@@ -4,7 +4,7 @@
     <PageHeader
       :breadcrumb="`Manajemen Cabang → Tipe Ruangan → ${isEdit ? 'Ubah' : 'Tambah'}`"
       :title="isEdit ? 'Ubah Tipe Ruangan' : 'Tambah Tipe Ruangan'"
-      :description="isEdit ? 'Perbarui informasi tipe ruangan.' : 'Buat tipe ruangan baru sebagai standar di setiap store.'"
+      :description="isEdit ? 'Perbarui informasi tipe ruangan.' : 'Buat tipe ruangan baru sebagai standar di setiap cabang.'"
     />
 
     <div class="form-layout">
@@ -13,7 +13,7 @@
         <div class="form-section-title">Informasi Ruangan</div>
 
         <el-form :model="form" :rules="rules" ref="formRef" label-position="top">
-          <el-form-item label="Nama Room" prop="name">
+          <el-form-item label="Nama Tipe Ruangan" prop="name">
             <el-input v-model="form.name" placeholder="Contoh: VIP Room, Standard Room" maxlength="100" show-word-limit />
           </el-form-item>
 
@@ -138,7 +138,7 @@
 
         <!-- Preview Card -->
         <el-card shadow="never" class="form-card preview-card">
-          <div class="form-section-title">Preview</div>
+          <div class="form-section-title">Pratinjau</div>
           <div class="preview-room">
             <div class="preview-img-wrap">
               <img v-if="imagePreview" :src="imagePreview" class="preview-img" />
@@ -147,7 +147,7 @@
               </div>
             </div>
             <div class="preview-info">
-              <div class="preview-name">{{ form.name || 'Nama Room' }}</div>
+              <div class="preview-name">{{ form.name || 'Nama Tipe Ruangan' }}</div>
               <div class="preview-capacity">
                 <el-icon><User /></el-icon>
                 {{ form.capacity_min }}–{{ form.capacity_max }} orang
