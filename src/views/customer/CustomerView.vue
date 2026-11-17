@@ -420,6 +420,8 @@
           v-if="editingCustomer"
           :created-by="editingCustomer.created_by"
           :updated-by="editingCustomer.updated_by"
+          :created-by-name="editingCustomer.created_by_name"
+          :updated-by-name="editingCustomer.updated_by_name"
           :created-at="editingCustomer.created_at"
           :updated-at="editingCustomer.updated_at"
         />

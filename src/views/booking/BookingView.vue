@@ -69,6 +69,7 @@
         :event-bookings="eventBookings"
         :is-new-booking-mode="isNewBookingMode"
         :with-panel="!!selectedBooking || isNewBookingForm"
+        :selected-id="panelMode === 'detail' ? selectedBooking?.id : null"
         @change-date="changeDate"
         @slot-click="handleSlotClick"
         @booking-click="handleBookingClick"
@@ -274,6 +275,11 @@ onMounted(async () => {
   display: flex; gap: 14px;
   height: calc(100vh - 255px);
   min-height: 420px;
+}
+/* Phones: the panel is a full-screen sheet (panel.css), so the grid takes the
+   page width and its own height. */
+@media (max-width: 639px) {
+  .main-area { height: auto; min-height: 0; }
 }
 
 /* ── Right Panel ─────────────────────────────────────── */

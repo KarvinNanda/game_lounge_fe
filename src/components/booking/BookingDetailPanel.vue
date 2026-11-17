@@ -7,7 +7,7 @@
     </div>
 
     <!-- Status badge -->
-    <el-tag :type="getStatusTagType(booking.status)" class="u-mb-3">
+    <el-tag :type="getStatusTagType(booking.status)" class="status-tag u-mb-3">
       {{ bookingStatusLabel(booking.status).toUpperCase() }}
     </el-tag>
 
@@ -99,6 +99,8 @@
     <AuditTrail
       :created-by="booking.created_by"
       :updated-by="booking.updated_by"
+      :created-by-name="booking.created_by_name"
+      :updated-by-name="booking.updated_by_name"
       :created-at="booking.created_at"
       :updated-at="booking.updated_at"
     />
@@ -153,7 +155,8 @@ const cancelFormRef = ref()
 const cancelForm = reactive({ reason: '' })
 
 const getStatusTagType = (s) => ({
-  upcoming: '', ongoing: 'success', completed: 'info', cancelled: 'danger'
+  // Same colours as the grid legend. '' is not a valid el-tag type (it rendered grey).
+  upcoming: 'primary', ongoing: 'success', completed: 'info', cancelled: 'danger'
 }[s] || 'info')
 
 // ── Booking Detail Actions ────────────────────────────────────
@@ -202,12 +205,15 @@ const openCompleteConfirm = async () => {
   display: flex; align-items: center; gap: 7px; margin-top: 10px;
 }
 
+/* A pill, not a full-width bar (the panel is a flex column). */
+.status-tag { align-self: flex-start; }
+
 /* C3: former inline styles */
 .panel-title { font-size: var(--font-size-sm); font-weight: 700; letter-spacing: 0.5px; }
 .customer-card { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); padding: var(--space-3); background: var(--surface-page); border-radius: var(--radius-lg); }
 .customer-avatar { background: linear-gradient(135deg, var(--action), var(--action-hover)); font-weight: 700; }
 .customer-name { font-weight: 700; font-size: var(--font-size-base); }
-.booking-code { font-family: monospace; color: var(--action); }
+.booking-code { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: var(--action); }
 .cancel-note { margin-top: var(--space-3); background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-lg); padding: var(--space-2); font-size: var(--font-size-xs); color: var(--danger); }
 .action-btn { width: 100%; margin-bottom: var(--space-2); justify-content: flex-start; }
 .action-btn-last { width: 100%; margin-left: 0; justify-content: flex-start; }

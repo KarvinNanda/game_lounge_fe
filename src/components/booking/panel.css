@@ -33,3 +33,19 @@
 }
 .info-row > span:last-child,
 .info-row > strong { color: var(--text-primary); font-weight: 600; text-align: right; }
+
+/* Phones: the 426px side panel does not fit next to the grid, so it becomes a
+   full-screen sheet with its own close button. z-index stays below the mobile
+   sidebar (1000/1001 in AdminLayout) and below Element Plus popups (2000+). */
+@media (max-width: 639px) {
+  .right-panel {
+    position: fixed; inset: 0; z-index: 999;
+    width: 100%; min-width: 0;
+    border: none; border-radius: 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+  }
+  /* Values wrap under their label instead of being cut at the edge. */
+  .info-row { flex-wrap: wrap; }
+  .info-row > span:last-child,
+  .info-row > strong { overflow-wrap: anywhere; }
+}

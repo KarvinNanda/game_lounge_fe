@@ -28,6 +28,15 @@ const mountPanel = async (booking = FUTURE, permissions = ['bookings.view', 'boo
 }
 const button = (w, text) => w.findAll('button').find((b) => b.text().includes(text))
 
+describe('BookingDetailPanel status tag', () => {
+  it('uses the legend colours (upcoming is blue, not the grey of "Selesai")', async () => {
+    // Test utils stub el-tag's transition, so the class lands on the stub around the tag.
+    const tagOf = (w) => w.find('.status-tag .el-tag')
+    expect(tagOf(await mountPanel(FUTURE)).classes()).toContain('el-tag--primary')
+    expect(tagOf(await mountPanel({ ...FUTURE, status: 'completed' })).classes()).toContain('el-tag--info')
+  })
+})
+
 describe('BookingDetailPanel', () => {
   beforeEach(() => {
     m.cancelBooking.mockReset().mockResolvedValue({})

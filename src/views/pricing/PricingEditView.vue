@@ -535,6 +535,8 @@
         v-if="editingFS"
         :created-by="editingFS.created_by"
         :updated-by="editingFS.updated_by"
+        :created-by-name="editingFS.created_by_name"
+        :updated-by-name="editingFS.updated_by_name"
         :created-at="editingFS.created_at"
         :updated-at="editingFS.updated_at"
       />
