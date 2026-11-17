@@ -4,7 +4,7 @@
     <PageHeader
       breadcrumb="Pengaturan → Kelola Banner"
       title="Kelola Banner"
-      description="Banner slider yang tampil di halaman home customer. Drag untuk mengubah urutan, atau gunakan tombol panah."
+      description="Banner slider yang tampil di halaman beranda aplikasi pelanggan. Drag untuk mengubah urutan, atau gunakan tombol panah."
     >
       <template #actions>
         <el-button v-if="can('settings.branches')" type="primary" @click="openForm(null)">
@@ -184,7 +184,7 @@
             v-model="form.description"
             type="textarea"
             :rows="6"
-            placeholder="Tulis informasi detail yang muncul ketika customer klik banner ini.&#10;Contoh: fasilitas, syarat, harga lengkap, dll."
+            placeholder="Tulis informasi detail yang muncul ketika pelanggan mengklik banner ini.&#10;Contoh: fasilitas, syarat, harga lengkap, dll."
           />
           <div class="u-text-xs u-text-muted u-mt-1">
             Tampil di halaman detail ketika customer mengklik banner

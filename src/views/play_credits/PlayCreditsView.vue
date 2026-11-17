@@ -471,7 +471,7 @@
     <!-- ════════════════════════════════════════════════════════
          DRAWER: Assign Credits ke Customer
     ════════════════════════════════════════════════════════ -->
-    <el-drawer v-model="assignDialogVisible" title="Assign Play Credits ke Customer" direction="rtl" :size="isMobile ? '100%' : '440px'">
+    <el-drawer v-model="assignDialogVisible" title="Berikan Play Credits ke Pelanggan" direction="rtl" :size="isMobile ? '100%' : '440px'">
       <el-form :model="assignForm" :rules="assignRules" ref="assignFormRef" label-position="top">
         <el-form-item label="Pelanggan (Member) *" prop="customer_id">
           <el-select

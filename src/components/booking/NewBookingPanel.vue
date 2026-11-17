@@ -21,7 +21,7 @@
           v-model="newBookingForm.customer_id"
           filterable remote :remote-method="searchCustomers"
           :loading="customerSearchLoading"
-          placeholder="Cari nama / WhatsApp customer..."
+          placeholder="Cari nama / WhatsApp pelanggan..."
           class="u-w-full"
           @change="onCustomerChange"
           clearable
@@ -46,9 +46,9 @@
       </el-form-item>
 
       <!-- Nama Customer -->
-      <el-form-item label="Nama Customer *" prop="customer_name"
+      <el-form-item label="Nama Pelanggan *" prop="customer_name"
         :rules="[{ required: true, message: 'Nama wajib diisi', trigger: 'blur' }]">
-        <el-input v-model="newBookingForm.customer_name" placeholder="Nama customer" />
+        <el-input v-model="newBookingForm.customer_name" placeholder="Nama pelanggan" />
       </el-form-item>
 
       <!-- Kontak -->
@@ -375,7 +375,7 @@ const onCustomerChange = async (customerId) => {
 
 const openConfirmModal = () => {
   if (!newBookingForm.customer_name.trim()) {
-    ElMessage.warning('Nama customer wajib diisi')
+    ElMessage.warning('Nama pelanggan wajib diisi')
     return
   }
   if (!priceCalc.value) {

@@ -65,13 +65,13 @@ describe('NewBookingPanel', () => {
     const w = await mountPanel()
     await settlePrice()
     await button(w, 'Lanjutkan').trigger('click')
-    expect(warning).toHaveBeenCalledWith('Nama customer wajib diisi')
+    expect(warning).toHaveBeenCalledWith('Nama pelanggan wajib diisi')
   })
 
   it('creates the booking without duration_hours and emits created', async () => {
     const w = await mountPanel()
     await settlePrice()
-    await w.find('input[placeholder="Nama customer"]').setValue('Walk In')
+    await w.find('input[placeholder="Nama pelanggan"]').setValue('Walk In')
     await button(w, 'Lanjutkan').trigger('click')
     await flushPromises()
     await w.findAll('button').find((b) => b.text().includes('Konfirmasi Booking')).trigger('click')

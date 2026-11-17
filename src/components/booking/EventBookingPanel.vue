@@ -41,7 +41,7 @@
           filterable remote
           :remote-method="searchCustomers"
           :loading="customerSearchLoading"
-          placeholder="Cari nama / WhatsApp customer..."
+          placeholder="Cari nama / WhatsApp pelanggan..."
           class="u-w-full"
           clearable
           @change="onEventCustomerChange"
@@ -121,7 +121,7 @@
       <!-- Info full_day -->
       <div v-else class="info-box u-mb-3">
         <el-icon><InfoFilled /></el-icon>
-        <span>Jam akan otomatis disesuaikan dengan jam operasional store pada tanggal tersebut.</span>
+        <span>Jam akan otomatis disesuaikan dengan jam operasional cabang pada tanggal tersebut.</span>
       </div>
 
       <!-- Scope Ruangan -->

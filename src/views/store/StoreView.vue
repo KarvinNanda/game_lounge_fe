@@ -22,7 +22,7 @@
       <FilterBar>
         <el-input class="filter-search"
           v-model="search"
-          placeholder="Cari nama store atau lokasi..."
+          placeholder="Cari nama cabang atau lokasi..."
           prefix-icon="Search"
          
           clearable
@@ -67,7 +67,7 @@
       </div>
 
       <div class="table-wrap">
-      <el-table :data="storeList" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada store">
+      <el-table :data="storeList" v-loading="loading" size="small" class="u-w-full" empty-text="Belum ada cabang">
         <el-table-column label="Cabang" min-width="160">
           <template #default="{ row }">
             <div class="store-cell">

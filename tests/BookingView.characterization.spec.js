@@ -200,7 +200,7 @@ describe('BookingView (characterization)', () => {
     await w.findAll('.room-row .empty-slot')[4].trigger('click')
     vi.advanceTimersByTime(600)
     await flushPromises()
-    await w.find('input[placeholder="Nama customer"]').setValue('Walk In')
+    await w.find('input[placeholder="Nama pelanggan"]').setValue('Walk In')
     await buttonByText(w, 'Lanjutkan').trigger('click')
     await flushPromises()
     await buttonByText(w, 'Konfirmasi Booking').trigger('click')

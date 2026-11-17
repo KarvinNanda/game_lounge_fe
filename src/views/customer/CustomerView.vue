@@ -405,7 +405,7 @@
               v-model="form.notes"
               type="textarea"
               :rows="2"
-              placeholder="Catatan tentang customer ini..."
+              placeholder="Catatan tentang pelanggan ini..."
             />
           </el-form-item>
         </div>
@@ -649,7 +649,7 @@ const handleSubmit = async () => {
     try {
       if (editingCustomer.value) {
         await updateCustomer(editingCustomer.value.id, form)
-        ElMessage.success('Customer berhasil diupdate')
+        ElMessage.success('Pelanggan berhasil diperbarui')
         selectCustomer(editingCustomer.value)
       } else {
         await createCustomer(form)
@@ -710,7 +710,7 @@ const handleDelete = async (row) => {
       { type: 'warning', confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }
     )
     await deleteCustomer(row.id)
-    ElMessage.success('Customer berhasil dihapus')
+    ElMessage.success('Pelanggan berhasil dihapus')
     if (selectedCustomer.value?.id === row.id) selectedCustomer.value = null
     fetchCustomers()
   } catch {}
@@ -718,7 +718,7 @@ const handleDelete = async (row) => {
 
 const handleResendPassword = async (row) => {
   if (!row.email) {
-    ElMessage.warning('Customer tidak memiliki email')
+    ElMessage.warning('Pelanggan tidak memiliki email')
     return
   }
   try {

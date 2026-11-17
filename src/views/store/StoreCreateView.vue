@@ -220,7 +220,7 @@
             />
           </div>
           <div v-for="n in row.unit_count - row.existing_units" :key="`new-${n}`" class="room-unit-row room-unit-new">
-            <span class="room-unit-name">Unit baru {{ n }} <span class="room-unit-hint">(tersimpan saat store disimpan)</span></span>
+            <span class="room-unit-name">Unit baru {{ n }} <span class="room-unit-hint">(tersimpan saat cabang disimpan)</span></span>
             <el-button class="room-unit-cancel" plain type="danger" size="small" @click="removePendingUnit(row)">Batal</el-button>
           </div>
           <el-button v-if="row.can_add" link type="primary" class="room-add-unit" @click="row.unit_count++">
