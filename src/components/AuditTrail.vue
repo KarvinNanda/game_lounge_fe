@@ -46,10 +46,11 @@ const hasAudit = computed(() =>
 const formatDate = (val) => {
   if (!val) return ''
   try {
+    // id-ID writes times as 20.05; the rest of the app uses 20:05.
     return new Date(val).toLocaleString('id-ID', {
       day: '2-digit', month: 'short', year: 'numeric',
       hour: '2-digit', minute: '2-digit',
-    })
+    }).replace(/(\d{2})\.(\d{2})$/, '$1:$2')
   } catch {
     return val
   }
@@ -63,13 +64,13 @@ const formatDate = (val) => {
   background: var(--bg-main);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .at-title {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.8px;
   text-transform: uppercase;
@@ -79,10 +80,10 @@ const formatDate = (val) => {
 .at-rows { display: flex; flex-direction: column; gap: 5px; }
 .at-row  { display: flex; align-items: center; gap: 8px; }
 .at-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text-muted);
-  width: 44px;
+  width: 52px;
   flex-shrink: 0;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -91,7 +92,7 @@ const formatDate = (val) => {
 .at-user {
   font-weight: 700;
   color: var(--color-primary-light);
-  font-size: 11px;
+  font-size: 12px;
 }
-.at-date { color: var(--text-secondary); font-size: 11px; }
+.at-date { color: var(--text-secondary); font-size: 12px; }
 </style>

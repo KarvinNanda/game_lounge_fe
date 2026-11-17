@@ -213,7 +213,7 @@ const openCompleteConfirm = async () => {
 .customer-card { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-4); padding: var(--space-3); background: var(--surface-page); border-radius: var(--radius-lg); }
 .customer-avatar { background: linear-gradient(135deg, var(--action), var(--action-hover)); font-weight: 700; }
 .customer-name { font-weight: 700; font-size: var(--font-size-base); }
-.booking-code { font-family: monospace; color: var(--action); }
+.booking-code { font-variant-numeric: tabular-nums; letter-spacing: 0.02em; color: var(--action); }
 .cancel-note { margin-top: var(--space-3); background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-lg); padding: var(--space-2); font-size: var(--font-size-xs); color: var(--danger); }
 .action-btn { width: 100%; margin-bottom: var(--space-2); justify-content: flex-start; }
 .action-btn-last { width: 100%; justify-content: flex-start; }

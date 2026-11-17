@@ -125,7 +125,7 @@
 import { ref, computed, watch, nextTick } from 'vue'
 import { formatDateDisplay } from '@/utils/format'
 import {
-  SLOT_WIDTH, bookingBlockStyle, blockClass, selectedScrollLeft,
+  SLOT_WIDTH, bookingBlockStyle, blockClass, selectedScrollLeft, timeToOffset,
   eventBlockStyle, isEventInRoomGroup, groupRoomsByTemplate,
 } from '@/utils/bookingGrid'
 
@@ -165,9 +165,10 @@ const gridTotalWidth = computed(() => `calc(var(--room-col) + ${props.timeSlots.
 
 // ── Keep the selected booking visible ─────────────────────────
 const scrollWrapper = ref(null)
-const scrollToSelected = () => {
+// Scrolls only when the block is not fully visible next to the sticky room column.
+const scrollToBlock = (id) => {
   const wrapper = scrollWrapper.value
-  const block = wrapper?.querySelector(`[data-booking-id="${props.selectedId}"]`)
+  const block = wrapper?.querySelector(`[data-booking-id="${id}"]`)
   if (!block) return
   const stickyWidth = wrapper.querySelector('.room-label-cell')?.offsetWidth || 0
   wrapper.scrollLeft = selectedScrollLeft({
@@ -181,8 +182,9 @@ const scrollToSelected = () => {
 watch(() => [props.selectedId, props.withPanel], async () => {
   if (props.selectedId == null) return
   await nextTick() // the panel is in the DOM now, so the grid has its new width
-  scrollToSelected()
+  scrollToBlock(props.selectedId)
 })
+
 
 // ── Grid Logic ────────────────────────────────────────────────
 const getBookingsForRoom = (roomId) => {
@@ -190,6 +192,19 @@ const getBookingsForRoom = (roomId) => {
   const room = props.dashboardData.rooms.find(r => r.id === roomId)
   return room?.bookings || []
 }
+
+// The grid opens at the first hour. When the day's first booking in this tab is
+// later (off screen on phones), scroll to it so the row does not look empty.
+const firstBookingId = computed(() => {
+  const all = (activeRoomGroup.value?.rooms || []).flatMap((r) => getBookingsForRoom(r.id))
+  const first = [...all].sort((a, b) => timeToOffset(a.start_time, props.openHour) - timeToOffset(b.start_time, props.openHour))[0]
+  return first?.id ?? null
+})
+watch(firstBookingId, async (id) => {
+  if (id == null || props.selectedId != null) return
+  await nextTick()
+  scrollToBlock(id)
+}, { flush: 'post' })
 
 const getBookingBlockStyle = (bk) => bookingBlockStyle(bk, props.openHour)
 const getBlockClass = (bk) => blockClass(bk.status)
@@ -340,7 +355,7 @@ const getEventBlockStyle = (event) =>
 
 /* Grid footer */
 .grid-footer {
-  font-size: 11.5px; color: var(--text-secondary); font-weight: 600;
+  font-size: 12px; color: var(--text-secondary); font-weight: 600;
   display: flex; align-items: center; gap: 6px;
   padding-top: 8px; border-top: 1px solid var(--border-color); margin-top: 8px;
 }
@@ -386,6 +401,7 @@ const getEventBlockStyle = (event) =>
   .grid-area { --room-col: 104px; max-height: none; }
   .room-label-cell { padding: 8px 10px; }
   .room-sub { display: none; }
+  .room-type-tab { min-height: 36px; }
 }
 
 /* C3: former inline styles */

@@ -93,7 +93,7 @@ const emit = defineEmits(['update:date', 'update:store', 'update:room', 'change'
 <style scoped>
 /* ── Filter ──────────────────────────────────────────── */
 .filter-bar  { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
-.legend-bar  { display:flex; gap:16px; align-items:center; font-size:11.5px; color:var(--text-secondary); font-weight:600; margin-bottom:10px; flex-wrap:wrap; }
+.legend-bar  { display:flex; gap:6px 16px; align-items:center; font-size:11.5px; color:var(--text-secondary); font-weight:600; margin-bottom:10px; flex-wrap:wrap; }
 .legend-item { display:flex; align-items:center; gap:5px; }
 .dot         { width:10px; height:10px; border-radius:3px; }
 
@@ -144,9 +144,10 @@ const emit = defineEmits(['update:date', 'update:store', 'update:room', 'change'
 /* Phones: one full-width control per line, hours left-aligned under them.
    Placed last on purpose: it overrides the widths above. */
 @media (max-width: 639px) {
-  .filter-bar :deep(.filter-date),
+  .filter-bar :deep(.filter-date) { width: 100%; }
+  /* Branch and room share a row: each value is short. */
   .filter-store,
-  .filter-room { width: 100%; }
+  .filter-room { width: calc(50% - 5px); }
   .legend { margin-left: 0; width: 100%; }
 }
 </style>

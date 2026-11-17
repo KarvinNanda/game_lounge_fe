@@ -78,4 +78,32 @@ describe('BookingGrid', () => {
     const w = mountGrid()
     expect(w.find('.grid-container').attributes('style')).toContain(`calc(var(--room-col) + ${slots.length * 100}px)`)
   })
+
+  it('scrolls to the first booking of the tab when it starts off screen, but not with a booking open', async () => {
+    // jsdom has no layout: give elements sizes through the prototype, restored afterwards.
+    const proto = HTMLElement.prototype
+    const saved = ['offsetLeft', 'offsetWidth', 'clientWidth'].map((k) => [k, Object.getOwnPropertyDescriptor(proto, k)])
+    const size = (k, fn) => Object.defineProperty(proto, k, { configurable: true, get: fn })
+    size('offsetLeft', function () { return { early: 600, late: 1000 }[this.dataset.bookingId] ?? 0 })
+    size('offsetWidth', function () { return this.dataset.bookingId ? 96 : this.classList.contains('room-label-cell') ? 145 : 0 })
+    size('clientWidth', function () { return this.classList.contains('grid-scroll-wrapper') ? 300 : 0 })
+    try {
+      const late = { ...BK, id: 'late', start_time: '20:00:00', end_time: '22:00:00' }
+      const early = { ...BK, id: 'early', start_time: '16:00:00', end_time: '17:00:00' }
+      const w = mountGrid({ dashboardData: { rooms: [{ ...VIP, bookings: [] }] } })
+      await w.setProps({ dashboardData: { rooms: [{ ...VIP, bookings: [late, early] }] } })
+      await new Promise((r) => setTimeout(r))
+      expect(w.find('.grid-scroll-wrapper').element.scrollLeft).toBe(600 - 24)
+
+      const open = mountGrid({ dashboardData: { rooms: [{ ...VIP, bookings: [] }] }, selectedId: 'late', withPanel: true })
+      const wrapper = open.find('.grid-scroll-wrapper').element
+      wrapper.scrollLeft = 0
+      await open.setProps({ dashboardData: { rooms: [{ ...VIP, bookings: [early] }] } })
+      await new Promise((r) => setTimeout(r))
+      expect(wrapper.scrollLeft).toBe(0)
+    } finally {
+      for (const [k, d] of saved) d ? Object.defineProperty(proto, k, d) : delete proto[k]
+    }
+  })
 })
+
