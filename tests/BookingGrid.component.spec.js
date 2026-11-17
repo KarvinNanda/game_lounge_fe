@@ -102,7 +102,7 @@ describe('BookingGrid', () => {
       await new Promise((r) => setTimeout(r))
       expect(wrapper.scrollLeft).toBe(0)
     } finally {
-      for (const [k, d] of saved) d ? Object.defineProperty(proto, k, d) : delete proto[k]
+      for (const [k, d] of saved) { if (d) Object.defineProperty(proto, k, d); else delete proto[k] }
     }
   })
 })
