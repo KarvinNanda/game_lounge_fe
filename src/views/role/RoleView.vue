@@ -164,6 +164,8 @@
           v-if="form.id"
           :created-by="form.created_by"
           :updated-by="form.updated_by"
+          :created-by-name="form.created_by_name"
+          :updated-by-name="form.updated_by_name"
           :created-at="form.created_at"
           :updated-at="form.updated_at"
         />

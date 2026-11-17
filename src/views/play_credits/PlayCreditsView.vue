@@ -453,6 +453,8 @@
           v-if="editingPackage"
           :created-by="editingPackage.created_by"
           :updated-by="editingPackage.updated_by"
+          :created-by-name="editingPackage.created_by_name"
+          :updated-by-name="editingPackage.updated_by_name"
           :created-at="editingPackage.created_at"
           :updated-at="editingPackage.updated_at"
         />

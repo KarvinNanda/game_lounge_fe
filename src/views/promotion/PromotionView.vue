@@ -418,6 +418,8 @@
           v-if="editingVoucher"
           :created-by="editingVoucher.created_by"
           :updated-by="editingVoucher.updated_by"
+          :created-by-name="editingVoucher.created_by_name"
+          :updated-by-name="editingVoucher.updated_by_name"
           :created-at="editingVoucher.created_at"
           :updated-at="editingVoucher.updated_at"
         />

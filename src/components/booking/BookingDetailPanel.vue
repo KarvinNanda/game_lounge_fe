@@ -7,7 +7,7 @@
     </div>
 
     <!-- Status badge -->
-    <el-tag :type="getStatusTagType(booking.status)" class="u-mb-3">
+    <el-tag :type="getStatusTagType(booking.status)" class="status-tag u-mb-3">
       {{ bookingStatusLabel(booking.status).toUpperCase() }}
     </el-tag>
 
@@ -99,6 +99,8 @@
     <AuditTrail
       :created-by="booking.created_by"
       :updated-by="booking.updated_by"
+      :created-by-name="booking.created_by_name"
+      :updated-by-name="booking.updated_by_name"
       :created-at="booking.created_at"
       :updated-at="booking.updated_at"
     />
@@ -153,7 +155,8 @@ const cancelFormRef = ref()
 const cancelForm = reactive({ reason: '' })
 
 const getStatusTagType = (s) => ({
-  upcoming: '', ongoing: 'success', completed: 'info', cancelled: 'danger'
+  // Same colours as the grid legend. '' is not a valid el-tag type (it rendered grey).
+  upcoming: 'primary', ongoing: 'success', completed: 'info', cancelled: 'danger'
 }[s] || 'info')
 
 // ── Booking Detail Actions ────────────────────────────────────
@@ -201,6 +204,9 @@ const openCompleteConfirm = async () => {
   font-size: 12px; font-weight: 700; color: var(--warning);
   display: flex; align-items: center; gap: 7px; margin-top: 10px;
 }
+
+/* A pill, not a full-width bar (the panel is a flex column). */
+.status-tag { align-self: flex-start; }
 
 /* C3: former inline styles */
 .panel-title { font-size: var(--font-size-sm); font-weight: 700; letter-spacing: 0.5px; }

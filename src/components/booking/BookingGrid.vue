@@ -26,8 +26,8 @@
     </div>
 
     <!-- Grid Container -->
-    <div v-loading="loading" class="grid-scroll-wrapper">
-      <div class="grid-container" :style="{ width: gridTotalWidth + 'px' }">
+    <div ref="scrollWrapper" v-loading="loading" class="grid-scroll-wrapper">
+      <div class="grid-container" :style="{ width: gridTotalWidth }">
 
         <!-- Time Header -->
         <div class="grid-row header-row">
@@ -74,7 +74,7 @@
             <div class="room-label-cell">
               <div>
                 <div class="u-fw-semibold u-text-xs">{{ room.name }}</div>
-                <div class="u-text-xs u-text-muted">{{ room.room_template?.name }}</div>
+                <div class="room-sub u-text-xs u-text-muted">{{ room.room_template?.name }}</div>
               </div>
             </div>
 
@@ -96,7 +96,8 @@
               <div
                 v-for="bk in getBookingsForRoom(room.id)" :key="bk.id"
                 class="booking-block"
-                :class="[getBlockClass(bk), { 'ending-soon': bk.is_ending_soon }]"
+                :class="[getBlockClass(bk), { 'ending-soon': bk.is_ending_soon, 'is-selected': bk.id === selectedId }]"
+                :data-booking-id="bk.id"
                 :style="getBookingBlockStyle(bk)"
                 @click.stop="emit('booking-click', bk)"
               >
@@ -121,10 +122,10 @@
 <script setup>
 // Booking calendar: room-type tabs, date navigation, booking and event
 // blocks. Owns only view state (active tab); every action is an event.
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { formatDateDisplay } from '@/utils/format'
 import {
-  SLOT_WIDTH, bookingBlockStyle, blockClass,
+  SLOT_WIDTH, bookingBlockStyle, blockClass, selectedScrollLeft,
   eventBlockStyle, isEventInRoomGroup, groupRoomsByTemplate,
 } from '@/utils/bookingGrid'
 
@@ -138,6 +139,9 @@ const props = defineProps({
   eventBookings: { type: Array, default: () => [] },
   isNewBookingMode: { type: Boolean, default: false },
   withPanel: { type: Boolean, default: false },
+  // Booking shown in the detail panel: highlighted, and scrolled into view
+  // because opening the panel narrows the grid.
+  selectedId: { type: [String, Number], default: null },
 })
 const emit = defineEmits(['change-date', 'slot-click', 'booking-click', 'event-click'])
 
@@ -156,7 +160,29 @@ watch(() => [props.store, props.date], () => {
   activeRoomTab.value = null
 })
 
-const gridTotalWidth = computed(() => 140 + props.timeSlots.length * SLOT_WIDTH)
+// The room column width lives in CSS (--room-col, narrower on phones).
+const gridTotalWidth = computed(() => `calc(var(--room-col) + ${props.timeSlots.length * SLOT_WIDTH}px)`)
+
+// ── Keep the selected booking visible ─────────────────────────
+const scrollWrapper = ref(null)
+const scrollToSelected = () => {
+  const wrapper = scrollWrapper.value
+  const block = wrapper?.querySelector(`[data-booking-id="${props.selectedId}"]`)
+  if (!block) return
+  const stickyWidth = wrapper.querySelector('.room-label-cell')?.offsetWidth || 0
+  wrapper.scrollLeft = selectedScrollLeft({
+    scrollLeft: wrapper.scrollLeft,
+    viewWidth: wrapper.clientWidth,
+    stickyWidth,
+    blockLeft: stickyWidth + block.offsetLeft, // offsetLeft is inside the slots area
+    blockWidth: block.offsetWidth,
+  })
+}
+watch(() => [props.selectedId, props.withPanel], async () => {
+  if (props.selectedId == null) return
+  await nextTick() // the panel is in the DOM now, so the grid has its new width
+  scrollToSelected()
+})
 
 // ── Grid Logic ────────────────────────────────────────────────
 const getBookingsForRoom = (roomId) => {
@@ -178,7 +204,10 @@ const getEventBlockStyle = (event) =>
 <style scoped>
 /* ── Grid area ───────────────────────────────────────── */
 .grid-area {
+  --room-col: 145px;
   flex: 1; display: flex; flex-direction: column;
+  /* As tall as its rows (no empty card under two rooms), at most the page area. */
+  align-self: flex-start; max-height: 100%;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px; padding: 14px;
@@ -186,7 +215,7 @@ const getEventBlockStyle = (event) =>
 }
 
 .grid-scroll-wrapper {
-  flex: 1; overflow: auto;
+  flex: 0 1 auto; min-height: 0; overflow: auto;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-main);
@@ -214,7 +243,7 @@ const getEventBlockStyle = (event) =>
 
 /* Room label */
 .room-label-cell {
-  width: 145px; min-width: 145px; padding: 8px 12px;
+  width: var(--room-col); min-width: var(--room-col); padding: 8px 12px;
   display: flex; align-items: center;
   background: var(--bg-card);
   border-right: 2px solid var(--border-color);
@@ -322,7 +351,7 @@ const getEventBlockStyle = (event) =>
 .event-overlay-container {
   position: absolute;
   top: 36px; /* offset header row height */
-  left: 145px; /* offset room label cell width */
+  left: var(--room-col); /* offset room label cell width */
   right: 0;
   bottom: 0;
   pointer-events: none;
@@ -350,6 +379,14 @@ const getEventBlockStyle = (event) =>
 .event-block-name  { font-size: 13px; font-weight: 500; color: var(--event-text); text-align: center; padding: 0 8px; }
 .event-block-time  { font-size: 11px; color: var(--event-text-muted); }
 
+.booking-block.is-selected { outline: 2px solid var(--text-primary); outline-offset: 1px; }
+
+/* Phones: a narrower room column so more hours fit; the tab above already names the type. */
+@media (max-width: 639px) {
+  .grid-area { --room-col: 104px; max-height: none; }
+  .room-label-cell { padding: 8px 10px; }
+  .room-sub { display: none; }
+}
 
 /* C3: former inline styles */
 .grid-date-title { font-weight: 700; font-size: var(--font-size-base); display: flex; align-items: center; gap: var(--space-1); }

@@ -89,3 +89,12 @@ describe('BookingDetailPanel', () => {
     expect(cash.findComponent(Icons.Money).exists()).toBe(true)
   })
 })
+
+describe('BookingDetailPanel status tag', () => {
+  it('uses the legend colours (upcoming is blue, not the grey of "Selesai")', async () => {
+    // Test utils stub el-tag's transition, so the class lands on the stub around the tag.
+    const tagOf = (w) => w.find('.status-tag .el-tag')
+    expect(tagOf(await mountPanel(FUTURE)).classes()).toContain('el-tag--primary')
+    expect(tagOf(await mountPanel({ ...FUTURE, status: 'completed' })).classes()).toContain('el-tag--info')
+  })
+})

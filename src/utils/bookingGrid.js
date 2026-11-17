@@ -76,3 +76,16 @@ export const groupRoomsByTemplate = (rooms) => {
   }
   return Object.values(groups)
 }
+
+/**
+ * scrollLeft for the grid so a booking block is fully visible to the right of
+ * the sticky room column. Returns the current scrollLeft when it already is.
+ * blockLeft is the block's x in grid content coordinates (room column included).
+ */
+export const selectedScrollLeft = ({ scrollLeft, viewWidth, stickyWidth, blockLeft, blockWidth }) => {
+  const visibleStart = scrollLeft + stickyWidth
+  const visibleEnd = scrollLeft + viewWidth
+  if (blockLeft >= visibleStart && blockLeft + blockWidth <= visibleEnd) return scrollLeft
+  const CONTEXT = 24 // a little of the previous hour stays visible
+  return Math.max(0, blockLeft - stickyWidth - CONTEXT)
+}

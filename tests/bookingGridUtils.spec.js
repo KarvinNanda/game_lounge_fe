@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   SLOT_WIDTH, buildTimeSlots, timeToOffset, bookingBlockStyle, blockClass,
-  eventBlockStyle, isEventInRoomGroup, groupRoomsByTemplate,
+  eventBlockStyle, isEventInRoomGroup, groupRoomsByTemplate, selectedScrollLeft,
 } from '@/utils/bookingGrid'
 
 describe('bookingGrid', () => {
@@ -40,3 +40,22 @@ describe('bookingGrid', () => {
     expect(groups.map((g) => [g.templateName, g.rooms.length])).toEqual([['VIP', 2], ['Other', 1]])
   })
 })
+
+describe('selectedScrollLeft (keep the selected booking visible when the panel narrows the grid)', () => {
+  // 600px wide viewport, 145px sticky room column, block 200px wide.
+  const view = { viewWidth: 600, stickyWidth: 145, blockWidth: 200 }
+  it('leaves the scroll alone when the block is fully visible', () => {
+    expect(selectedScrollLeft({ ...view, scrollLeft: 0, blockLeft: 145 + 100 })).toBe(0)
+  })
+  it('scrolls a block that is cut at the right edge to just after the room column', () => {
+    // 16:00 with opening 10:00 = 600px into the hours
+    expect(selectedScrollLeft({ ...view, scrollLeft: 0, blockLeft: 145 + 600 })).toBe(600 - 24)
+  })
+  it('scrolls back to a block hidden under the sticky room column', () => {
+    expect(selectedScrollLeft({ ...view, scrollLeft: 500, blockLeft: 145 + 400 })).toBe(400 - 24)
+  })
+  it('never returns a negative scroll', () => {
+    expect(selectedScrollLeft({ ...view, scrollLeft: 300, blockLeft: 145 + 10 })).toBe(0)
+  })
+})
+

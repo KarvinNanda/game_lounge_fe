@@ -5,17 +5,17 @@
       <span>Audit Trail</span>
     </div>
     <div class="at-rows">
-      <div v-if="createdBy || createdAt" class="at-row">
+      <div v-if="createdUser || createdAt" class="at-row">
         <span class="at-label">Dibuat</span>
         <span class="at-value">
-          <span v-if="createdBy" class="at-user">{{ createdBy }}</span>
+          <span v-if="createdUser" class="at-user">{{ createdUser }}</span>
           <span v-if="createdAt" class="at-date">{{ formatDate(createdAt) }}</span>
         </span>
       </div>
-      <div v-if="updatedBy || updatedAt" class="at-row">
+      <div v-if="updatedUser || updatedAt" class="at-row">
         <span class="at-label">Diubah</span>
         <span class="at-value">
-          <span v-if="updatedBy" class="at-user">{{ updatedBy }}</span>
+          <span v-if="updatedUser" class="at-user">{{ updatedUser }}</span>
           <span v-if="updatedAt" class="at-date">{{ formatDate(updatedAt) }}</span>
         </span>
       </div>
@@ -25,16 +25,22 @@
 
 <script setup>
 import { computed } from 'vue'
+import { auditUser } from '@/utils/audit'
 
 const props = defineProps({
-  createdBy:  { type: String, default: null },
-  updatedBy:  { type: String, default: null },
+  createdBy:  { type: [String, Object], default: null },
+  updatedBy:  { type: [String, Object], default: null },
+  createdByName: { type: String, default: null },
+  updatedByName: { type: String, default: null },
   createdAt:  { type: String, default: null },
   updatedAt:  { type: String, default: null },
 })
 
+const createdUser = computed(() => auditUser(props.createdBy, props.createdByName))
+const updatedUser = computed(() => auditUser(props.updatedBy, props.updatedByName))
+
 const hasAudit = computed(() =>
-  props.createdBy || props.updatedBy || props.createdAt || props.updatedAt
+  createdUser.value || updatedUser.value || props.createdAt || props.updatedAt
 )
 
 const formatDate = (val) => {

@@ -64,4 +64,18 @@ describe('BookingGrid', () => {
     expect(style).toContain('left: 400px')
     expect(style).toContain('width: 96px')
   })
+
+  it('highlights the booking shown in the detail panel, and only that one', async () => {
+    const w = mountGrid({ selectedId: 'b1', withPanel: true })
+    const block = w.find('.booking-block')
+    expect(block.classes()).toContain('is-selected')
+    expect(block.attributes('data-booking-id')).toBe('b1')
+    await w.setProps({ selectedId: null })
+    expect(w.find('.booking-block').classes()).not.toContain('is-selected')
+  })
+
+  it('sizes the grid from the CSS room column, so phones can narrow it', () => {
+    const w = mountGrid()
+    expect(w.find('.grid-container').attributes('style')).toContain(`calc(var(--room-col) + ${slots.length * 100}px)`)
+  })
 })

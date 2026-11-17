@@ -141,4 +141,12 @@ const emit = defineEmits(['update:date', 'update:store', 'update:room', 'change'
 .dot--cancelled { background: var(--el-color-danger); }
 .dot--ending { background: var(--warning); box-shadow: 0 0 0 2px rgba(245,158,11,0.3); }
 .holiday-hours { margin-left: var(--space-2); opacity: 0.85; }
+/* Phones: one full-width control per line, hours left-aligned under them.
+   Placed last on purpose: it overrides the widths above. */
+@media (max-width: 639px) {
+  .filter-bar :deep(.filter-date),
+  .filter-store,
+  .filter-room { width: 100%; }
+  .legend { margin-left: 0; width: 100%; }
+}
 </style>
