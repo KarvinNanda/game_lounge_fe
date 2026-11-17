@@ -220,7 +220,7 @@
             />
           </div>
           <div v-for="n in row.unit_count - row.existing_units" :key="`new-${n}`" class="room-unit-row room-unit-new">
-            <span class="room-unit-name">Unit baru {{ n }} <span class="room-unit-hint">(tersimpan saat store disimpan)</span></span>
+            <span class="room-unit-name">Unit baru {{ n }} <span class="room-unit-hint">(tersimpan saat cabang disimpan)</span></span>
             <el-button class="room-unit-cancel" plain type="danger" size="small" @click="removePendingUnit(row)">Batal</el-button>
           </div>
           <el-button v-if="row.can_add" link type="primary" class="room-add-unit" @click="row.unit_count++">
@@ -392,6 +392,7 @@ import { getRoomTemplates } from '@/api/room_template/roomTemplateApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
 import { roomSetupRows, roomsPayload } from '@/utils/storeRooms'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import { hhmm } from '@/utils/format'
 
 const router = useRouter()
 const route = useRoute()
@@ -429,7 +430,6 @@ const infoRules = {
 const selectedRooms = computed(() => roomTemplates.value.filter(r => r.selected))
 
 // The API returns times as HH:mm:ss; show HH:mm. Display only, the payload is unchanged.
-const hhmm = (t) => (t || '').slice(0, 5)
 // Room types are listed A-Z in both modes.
 const byName = (a, b) => a.name.localeCompare(b.name)
 

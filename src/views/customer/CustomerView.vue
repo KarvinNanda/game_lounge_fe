@@ -405,7 +405,7 @@
               v-model="form.notes"
               type="textarea"
               :rows="2"
-              placeholder="Catatan tentang customer ini..."
+              placeholder="Catatan tentang pelanggan ini..."
             />
           </el-form-item>
         </div>
@@ -649,7 +649,7 @@ const handleSubmit = async () => {
     try {
       if (editingCustomer.value) {
         await updateCustomer(editingCustomer.value.id, form)
-        ElMessage.success('Customer berhasil diupdate')
+        ElMessage.success('Pelanggan berhasil diperbarui')
         selectCustomer(editingCustomer.value)
       } else {
         await createCustomer(form)
@@ -710,7 +710,7 @@ const handleDelete = async (row) => {
       { type: 'warning', confirmButtonText: 'Hapus', cancelButtonText: 'Batal' }
     )
     await deleteCustomer(row.id)
-    ElMessage.success('Customer berhasil dihapus')
+    ElMessage.success('Pelanggan berhasil dihapus')
     if (selectedCustomer.value?.id === row.id) selectedCustomer.value = null
     fetchCustomers()
   } catch {}
@@ -718,7 +718,7 @@ const handleDelete = async (row) => {
 
 const handleResendPassword = async (row) => {
   if (!row.email) {
-    ElMessage.warning('Customer tidak memiliki email')
+    ElMessage.warning('Pelanggan tidak memiliki email')
     return
   }
   try {
@@ -969,7 +969,7 @@ onMounted(async () => {
 .m-card-icon img { width:100%; height:100%; object-fit:cover; }
 .m-card-body { flex:1; min-width:0; }
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:var(--font-size-xs); color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 
 /* C3: former inline styles */
@@ -981,7 +981,7 @@ onMounted(async () => {
 .m-card-end-row { align-items: center; flex-direction: row; gap: var(--space-1); }
 .no-shrink { flex-shrink: 0; }
 .wa-dot { color: var(--brand-whatsapp); }
-.m-card-actions { display: flex; gap: var(--space-1); }
+.m-card-actions { display: flex; gap: var(--space-2); }
 .tag-list { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-top: var(--space-1); }
 .no-mb { margin-bottom: 0; }
 .notes-actions { display: flex; gap: var(--space-1); margin-top: var(--space-2); justify-content: flex-end; }

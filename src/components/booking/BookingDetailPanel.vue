@@ -116,7 +116,7 @@
         <el-form :model="cancelForm" ref="cancelFormRef">
           <el-form-item prop="reason" :rules="[{ required: true, min: 5, message: 'Alasan minimal 5 karakter', trigger: 'blur' }]">
             <el-input v-model="cancelForm.reason" type="textarea" :rows="3"
-              placeholder="Contoh: Customer tidak jadi hadir, request pembatalan dari customer..." />
+              placeholder="Contoh: Pelanggan tidak jadi hadir, permintaan pembatalan dari pelanggan..." />
           </el-form-item>
         </el-form>
         <template #footer>

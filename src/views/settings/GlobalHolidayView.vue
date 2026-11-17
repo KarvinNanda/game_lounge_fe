@@ -377,12 +377,12 @@ onMounted(fetchHolidays)
 }
 .m-card-body  { flex:1; min-width:0; }
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.m-card-meta  { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+.m-card-meta  { font-size:var(--font-size-xs); color:var(--text-secondary); margin-top:2px; }
 .m-card-end   { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 
 /* C3: former inline styles */
 .filter-search { width: 260px; }
-.m-card-actions { display: flex; gap: var(--space-1); }
+.m-card-actions { display: flex; gap: var(--space-2); }
 .table-empty { text-align: center; padding: calc(var(--space-4) * 2); color: var(--text-muted); font-size: var(--font-size-sm); }
 .holiday-name { font-weight: 600; font-size: var(--font-size-sm); color: var(--text-primary); }
 .holiday-date { font-size: var(--font-size-sm); color: var(--text-secondary); font-variant-numeric: tabular-nums; }

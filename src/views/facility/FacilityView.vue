@@ -67,6 +67,10 @@
           <div class="m-card-end">
             <el-tag :type="row.is_active ? 'success' : 'danger'" size="small">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</el-tag>
             <div class="m-card-actions">
+              <el-button v-if="can('settings.branches')" size="small" circle plain
+                :type="row.is_active ? 'warning' : 'success'"
+                :aria-label="row.is_active ? 'Nonaktifkan' : 'Aktifkan'"
+                @click="toggleActive(row)"><el-icon><component :is="row.is_active ? 'VideoPause' : 'VideoPlay'" /></el-icon></el-button>
               <el-button v-if="can('settings.branches')" size="small" circle plain @click="$router.push(`/facility/${row.id}/edit`)"><el-icon><Edit /></el-icon></el-button>
               <el-button v-if="can('settings.branches')" size="small" circle plain type="danger" @click="deleteFacility(row)"><el-icon><Delete /></el-icon></el-button>
             </div>
@@ -303,8 +307,9 @@ onMounted(() => {
 }
 .m-card-icon img { width:100%; height:100%; object-fit:cover; }
 .m-card-body { flex:1; min-width:0; }
-.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+/* Three 36px actions leave the name about 100px: wrap to two lines instead of cutting it. */
+.m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; line-clamp:2; overflow:hidden; overflow-wrap:anywhere; }
+.m-card-meta { font-size:var(--font-size-xs); color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 
 /* C3: former inline styles */
@@ -312,5 +317,5 @@ onMounted(() => {
 .filter-category { width: 160px; }
 .filter-status { width: 140px; }
 .m-card-img { width: 28px; height: 28px; object-fit: contain; }
-.m-card-actions { display: flex; gap: var(--space-1); }
+.m-card-actions { display: flex; gap: var(--space-2); }
 </style>

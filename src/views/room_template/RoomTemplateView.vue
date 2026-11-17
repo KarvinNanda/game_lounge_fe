@@ -273,10 +273,10 @@ onMounted(fetchTemplates)
 .m-card-icon img { width:100%; height:100%; object-fit:cover; }
 .m-card-body { flex:1; min-width:0; }
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:var(--font-size-xs); color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 
 /* C3: former inline styles */
 .filter-search { width: 260px; }
-.m-card-actions { display: flex; gap: var(--space-1); }
+.m-card-actions { display: flex; gap: var(--space-2); }
 </style>

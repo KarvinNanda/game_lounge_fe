@@ -15,10 +15,13 @@ describe('FilterBar', () => {
   })
 
   // jsdom has no layout: pin the rule that beats the views' inline widths on phones.
-  it('stretches inputs, selects and date pickers to full width under 640px', () => {
+  it('under 640px: inputs and date pickers take a full row, selects share a row two by two', () => {
     const css = readFileSync('src/components/ui/FilterBar.vue', 'utf8')
     const mobile = css.slice(css.indexOf('@media (max-width: 639px)'))
-    expect(mobile).toMatch(/:slotted\(\.el-input\)[\s\S]*width: 100% !important/)
+    expect(mobile).toMatch(/:slotted\(\.el-input\)[^{]*\{\s*width: 100% !important/)
+    expect(mobile).toMatch(/:slotted\(\.el-select\)\s*\{\s*width: auto !important; flex: 1 1 calc\(50% - var\(--space-2\)\)/)
+    // One wrapping row for fields and actions, so Reset can sit next to the last select.
+    expect(mobile).toMatch(/\.ui-filter-bar__fields, \.ui-filter-bar__actions \{ display: contents; \}/)
     // Date pickers render no scoped root, so :slotted never reaches them.
     expect(mobile).toMatch(/\.ui-filter-bar__fields :deep\(\.el-date-editor\)\s*\{\s*width: 100% !important/)
   })

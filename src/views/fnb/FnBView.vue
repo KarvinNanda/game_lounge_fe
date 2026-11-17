@@ -2,7 +2,7 @@
   <div class="fnb-view">
 
     <!-- Header -->
-    <PageHeader breadcrumb="Dashboard → FnB" title="Food & Beverage" description="Kelola menu FnB dan pantau pesanan dari customer" />
+    <PageHeader breadcrumb="Dashboard → FnB" title="Food & Beverage" description="Kelola menu FnB dan pantau pesanan dari pelanggan" />
 
     <!-- Tabs -->
     <el-tabs v-model="activeTab" class="fnb-tabs">

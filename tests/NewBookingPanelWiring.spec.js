@@ -41,7 +41,7 @@ const pickMember = async (w) => {
   await flushPromises()
 }
 const createWalkIn = async (w) => {
-  await w.find('input[placeholder="Nama customer"]').setValue('Walk In')
+  await w.find('input[placeholder="Nama pelanggan"]').setValue('Walk In')
   await button(w, 'Lanjutkan').trigger('click')
   await flushPromises()
   await button(w, 'Konfirmasi Booking').trigger('click')
@@ -79,7 +79,7 @@ describe('NewBookingPanel wiring', () => {
   it('closing the confirm dialog through el-dialog (X / Esc) closes it in the panel', async () => {
     const w = await mountPanel()
     await settlePrice()
-    await w.find('input[placeholder="Nama customer"]').setValue('Walk In')
+    await w.find('input[placeholder="Nama pelanggan"]').setValue('Walk In')
     await button(w, 'Lanjutkan').trigger('click')
     await flushPromises()
     const dialog = w.findComponent(BookingConfirmDialog)
@@ -120,7 +120,7 @@ describe('NewBookingPanel wiring', () => {
     await createWalkIn(w)
     await button(w, '+ Booking Lain').trigger('click')
     await flushPromises()
-    expect(w.find('input[placeholder="Nama customer"]').element.value).toBe('')
+    expect(w.find('input[placeholder="Nama pelanggan"]').element.value).toBe('')
     expect(button(w, 'Lanjutkan').attributes('disabled')).toBeDefined()
     expect(w.emitted('view-booking')).toBeUndefined()
   })

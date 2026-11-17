@@ -102,7 +102,6 @@
             v-model="facilitySearch"
             placeholder="Cari fasilitas..."
             prefix-icon="Search"
-            size="small"
             clearable
             class="u-mb-3"
           />
@@ -333,8 +332,9 @@ onMounted(async () => {
 .capacity-row { display:flex; align-items:flex-end; gap:8px; }
 .capacity-field { display:flex; flex-direction:column; gap:4px; flex:1; }
 .cap-label { font-size:11px; color:var(--text-secondary); }
-.capacity-sep { font-size:16px; color:var(--text-muted); padding-bottom:8px; }
-.cap-unit { font-size:13px; color:var(--text-secondary); padding-bottom:8px; }
+/* Bottom-aligned with the 32px steppers: a 32px line box centres the text on them. */
+.capacity-sep { font-size:16px; color:var(--text-muted); line-height:32px; }
+.cap-unit { font-size:13px; color:var(--text-secondary); line-height:32px; }
 
 /* Status toggle */
 .status-toggle { display:flex; gap:10px; }
@@ -366,12 +366,15 @@ onMounted(async () => {
 .image-remove-btn { position:absolute; top:8px; right:8px; }
 
 /* Facility list */
-.facility-list { max-height:280px; overflow-y:auto; display:flex; flex-direction:column; gap:2px; }
+/* Rows are 36px (2px gap): 360px shows ten whole rows before it scrolls. */
+.facility-list { max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:2px; }
 .facility-item {
-  display:flex; align-items:center; gap:8px;
-  padding:8px 10px; border-radius:6px; cursor:pointer;
+  display:flex; align-items:center; gap:8px; min-height:36px;
+  padding:4px 10px; border-radius:6px; cursor:pointer;
   transition:background 0.15s; user-select:none;
 }
+/* el-checkbox is 32px tall by default, which made each row about 50px. */
+.facility-item :deep(.el-checkbox) { height:auto; }
 .facility-item:hover { background:var(--bg-card-hover); }
 .facility-item.selected { background:rgba(124,58,237,0.1); }
 .fac-icon-wrap {

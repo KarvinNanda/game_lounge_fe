@@ -471,7 +471,7 @@
     <!-- ════════════════════════════════════════════════════════
          DRAWER: Assign Credits ke Customer
     ════════════════════════════════════════════════════════ -->
-    <el-drawer v-model="assignDialogVisible" title="Assign Play Credits ke Customer" direction="rtl" :size="isMobile ? '100%' : '440px'">
+    <el-drawer v-model="assignDialogVisible" title="Berikan Play Credits ke Pelanggan" direction="rtl" :size="isMobile ? '100%' : '440px'">
       <el-form :model="assignForm" :rules="assignRules" ref="assignFormRef" label-position="top">
         <el-form-item label="Pelanggan (Member) *" prop="customer_id">
           <el-select
@@ -1029,7 +1029,7 @@ onMounted(async () => {
 .m-card-icon img { width:100%; height:100%; object-fit:cover; }
 .m-card-body { flex:1; min-width:0; }
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:var(--font-size-xs); color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 
 /* C3: former inline styles */
@@ -1072,7 +1072,7 @@ onMounted(async () => {
 .filter-row { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-bottom: var(--space-3); }
 .tag-list { display: flex; gap: var(--space-1); flex-wrap: wrap; }
 .row-gap-sm { display: flex; gap: var(--space-1); }
-.m-card-actions { display: flex; gap: var(--space-1); }
+.m-card-actions { display: flex; gap: var(--space-2); }
 .drawer-footer { display: flex; gap: var(--space-2); margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); }
 .summary-row { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
 .stack { display: flex; flex-direction: column; gap: var(--space-2); }

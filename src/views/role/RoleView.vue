@@ -422,13 +422,13 @@ onMounted(fetchRoles)
 .m-card-icon img { width:100%; height:100%; object-fit:cover; }
 .m-card-body { flex:1; min-width:0; }
 .m-card-title { font-size:13px; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.m-card-meta { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.m-card-meta { font-size:var(--font-size-xs); color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .m-card-end { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex-shrink:0; }
 
 /* C3: former inline styles */
 .filter-search { width: 260px; }
 .m-card-icon-role { background: rgba(124,58,237,0.15); color: var(--action); }
-.m-card-actions { display: flex; gap: var(--space-1); }
+.m-card-actions { display: flex; gap: var(--space-2); }
 .perm-section { margin-top: var(--space-5); }
 .perm-count { margin-left: auto; font-size: var(--font-size-xs); font-weight: 400; }
 </style>
