@@ -155,7 +155,7 @@ describe('BookingView (characterization)', () => {
     await w.find('.booking-block').trigger('click')
     await buttonByText(w, 'Batalkan Booking').trigger('click')
     await flushPromises()
-    const reason = w.findAll('textarea').find((t) => t.attributes('placeholder')?.startsWith('Contoh: Customer'))
+    const reason = w.findAll('textarea').find((t) => t.attributes('placeholder')?.startsWith('Contoh: Pelanggan'))
     await reason.setValue('Customer tidak jadi datang')
     const loads = m.getDashboard.mock.calls.length
     await w.findAll('button').filter((b) => b.text().includes('Konfirmasi Batalkan')).at(-1).trigger('click')
@@ -253,7 +253,7 @@ describe('BookingView (characterization)', () => {
     await w.find('.booking-block').trigger('click')
     await buttonByText(w, 'Batalkan Booking').trigger('click')
     await flushPromises()
-    await w.findAll('textarea').find((t) => t.attributes('placeholder')?.startsWith('Contoh: Customer')).setValue('alasan panjang')
+    await w.findAll('textarea').find((t) => t.attributes('placeholder')?.startsWith('Contoh: Pelanggan')).setValue('alasan panjang')
     await w.findAll('button').filter((b) => b.text().includes('Konfirmasi Batalkan')).at(-1).trigger('click')
     await flushPromises()
     expect(error).not.toHaveBeenCalled()
