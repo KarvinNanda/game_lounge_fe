@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatRp, formatDateDisplay, formatDate, formatPercent, formatCompact } from '@/utils/format'
+import { formatRp, formatDateDisplay, formatDate, formatPercent, formatCompact, hhmm } from '@/utils/format'
 
 describe('format', () => {
   it('formatRp uses Indonesian grouping and treats empty as 0', () => {
@@ -28,5 +28,10 @@ describe('format', () => {
     expect(formatCompact(1500000)).toBe('1,5 jt')
     expect(formatCompact(900000)).toBe('900 rb')
     expect(formatCompact(0)).toBe('0')
+  })
+  it('hhmm drops the seconds the API sends, empty stays empty', () => {
+    expect(hhmm('10:00:00')).toBe('10:00')
+    expect(hhmm('09:30')).toBe('09:30')
+    expect(hhmm(null)).toBe('')
   })
 })

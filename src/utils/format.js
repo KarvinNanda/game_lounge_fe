@@ -26,3 +26,6 @@ export const formatCompact = (v) => {
   if (Math.abs(n) >= 1_000) return `${(n / 1_000).toLocaleString('id-ID', { maximumFractionDigits: 0 })} rb`
   return n.toLocaleString('id-ID')
 }
+
+// "10:00:00" from the API reads as "10:00". Empty stays empty.
+export const hhmm = (t) => (t || '').slice(0, 5)
