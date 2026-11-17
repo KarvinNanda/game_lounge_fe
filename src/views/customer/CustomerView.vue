@@ -110,7 +110,7 @@
           <el-table-column label="KUNJUNGAN TERAKHIR" width="130">
             <template #default="{ row }">
               <div class="u-text-xs">
-                <div>{{ row.last_visit_date || '-' }}</div>
+                <div>{{ formatDate(row.last_visit_date) }}</div>
                 <div class="u-text-secondary">{{ row.last_visit_time || '' }}</div>
               </div>
             </template>
