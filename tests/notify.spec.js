@@ -24,6 +24,12 @@ describe('notifyError', () => {
     expect(ElMessage.error).toHaveBeenCalledWith('Pilih cabang (store_id)')
   })
 
+  it('adds a short request code so staff can report the exact error', () => {
+    const err = { response: { status: 500, data: { message: 'Gagal menyimpan cabang' }, headers: { 'x-request-id': '1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d' } } }
+    notifyError(err, 'Gagal')
+    expect(ElMessage.error).toHaveBeenCalledWith('Gagal menyimpan cabang (Kode: 1a2b3c4d)')
+  })
+
   it('falls back to the view text when the server sent no message', () => {
     notifyError(httpError(500), 'Gagal memuat')
     expect(ElMessage.error).toHaveBeenCalledWith('Gagal memuat')

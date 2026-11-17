@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
+import { newRequestId } from '@/utils/requestId'
 
 // Semua rute admin berada di bawah prefix /api/admin (cookie staff_token
 // ber-Path=/api/admin — tidak pernah terkirim ke rute customer/public)
@@ -26,6 +27,14 @@ export const publicApi = axios.create({
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 })
+
+// One X-Request-ID per request, on both clients, so errors can be traced in the backend log.
+const addRequestId = (config) => {
+  config.headers['X-Request-ID'] = newRequestId()
+  return config
+}
+api.interceptors.request.use(addRequestId)
+publicApi.interceptors.request.use(addRequestId)
 
 api.interceptors.response.use(
   (response) => response,
