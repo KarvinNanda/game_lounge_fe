@@ -211,7 +211,6 @@ const openCompleteConfirm = async () => {
 .cancel-note { margin-top: var(--space-3); background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); border-radius: var(--radius-lg); padding: var(--space-2); font-size: var(--font-size-xs); color: var(--danger); }
 .action-btn { width: 100%; margin-bottom: var(--space-2); justify-content: flex-start; }
 .action-btn-last { width: 100%; margin-left: 0; justify-content: flex-start; }
-.action-btn .el-icon, .action-btn-last .el-icon { margin-right: var(--space-2); }
 .notes-box { font-size: var(--font-size-xs); color: var(--text-secondary); background: var(--surface-page); padding: var(--space-2); border-radius: var(--radius-md); }
 .value-strong { color: var(--text-primary); }
 </style>
