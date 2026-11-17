@@ -21,12 +21,12 @@
             <div class="capacity-row">
               <div class="capacity-field">
                 <label class="cap-label">Min</label>
-                <el-input-number v-model="form.capacity_min" :min="1" :max="form.capacity_max" class="u-w-full" controls-position="right" />
+                <el-input-number v-model="form.capacity_min" :min="1" :max="form.capacity_max" class="u-w-full" />
               </div>
               <div class="capacity-sep">—</div>
               <div class="capacity-field">
                 <label class="cap-label">Max</label>
-                <el-input-number v-model="form.capacity_max" :min="form.capacity_min" class="u-w-full" controls-position="right" />
+                <el-input-number v-model="form.capacity_max" :min="form.capacity_min" class="u-w-full" />
               </div>
               <span class="cap-unit">orang</span>
             </div>
@@ -339,14 +339,16 @@ onMounted(async () => {
 /* Status toggle */
 .status-toggle { display:flex; gap:10px; }
 .status-option {
-  flex:1; display:flex; align-items:center; gap:10px;
+  /* Top-aligned: when one description wraps, both titles stay on the same line. */
+  flex:1; display:flex; align-items:flex-start; gap:10px;
   padding:10px 12px; border:1px solid var(--border-color);
   border-radius:8px; cursor:pointer; transition:all 0.2s;
 }
 .status-option:hover { border-color:var(--color-primary); }
 .status-option.active { border-color:var(--color-primary); background:rgba(124,58,237,0.08); }
-.status-option-title { font-size:13px; font-weight:600; color:var(--text-primary); }
-.status-option-desc { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+.status-option-title { font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.4; }
+/* line-height: el-form-item content sets 32px, which split the text into far-apart lines. */
+.status-option-desc { font-size:12px; color:var(--text-secondary); margin-top:1px; line-height:1.4; }
 
 /* Image upload */
 .image-upload-area {

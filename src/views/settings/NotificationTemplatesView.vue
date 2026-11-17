@@ -18,7 +18,12 @@
         v-for="tmpl in templates"
         :key="tmpl.notification_key"
         class="template-card"
+        role="button"
+        tabindex="0"
+        :aria-label="`Ubah template ${tmpl.name}`"
         @click="openEditor(tmpl)"
+        @keydown.enter.prevent="openEditor(tmpl)"
+        @keydown.space.prevent="openEditor(tmpl)"
       >
         <div class="card-icon" :style="{ background: getIconBg(tmpl.notification_key) }">
           <el-icon size="20" :style="{ color: getIconColor(tmpl.notification_key) }">
@@ -30,7 +35,7 @@
           <div class="card-name">{{ tmpl.name }}</div>
           <div class="card-desc">{{ tmpl.description }}</div>
           <div class="card-channels">
-            <el-tag size="small" :type="tmpl.is_email_active ? 'info' : 'danger'">
+            <el-tag size="small" :type="tmpl.is_email_active ? 'success' : 'danger'">
               <el-icon class="channel-icon"><Message /></el-icon>
               Email {{ tmpl.is_email_active ? 'Aktif' : 'Nonaktif' }}
             </el-tag>
@@ -41,7 +46,7 @@
           </div>
         </div>
 
-        <div class="card-edit-hint">
+        <div class="card-edit-hint" aria-hidden="true">
           <el-icon><EditPen /></el-icon>
           <span v-if="!isMobile">Edit</span>
         </div>

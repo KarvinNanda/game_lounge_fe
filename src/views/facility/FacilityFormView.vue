@@ -245,14 +245,16 @@ onMounted(async () => {
 /* Status toggle */
 .status-toggle { display:flex; gap:10px; }
 .status-option {
-  flex:1; display:flex; align-items:center; gap:10px;
+  /* Top-aligned: when one description wraps, both titles stay on the same line. */
+  flex:1; display:flex; align-items:flex-start; gap:10px;
   padding:12px 14px; border:1px solid var(--border-color);
   border-radius:8px; cursor:pointer; transition:all 0.2s;
 }
 .status-option:hover { border-color:var(--color-primary); }
 .status-option.active { border-color:var(--color-primary); background:rgba(124,58,237,0.08); }
-.status-option-title { font-size:13px; font-weight:600; color:var(--text-primary); }
-.status-option-desc { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+.status-option-title { font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.4; }
+/* line-height: el-form-item content sets 32px, which split the text into far-apart lines. */
+.status-option-desc { font-size:12px; color:var(--text-secondary); margin-top:1px; line-height:1.4; }
 
 /* Icon upload */
 .icon-upload-area {

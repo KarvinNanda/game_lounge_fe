@@ -702,7 +702,6 @@ onMounted(async () => {
 .room-unit-new .room-unit-name { color:var(--el-color-success); }
 .room-unit-hint { font-weight:400; font-size:12px; color:var(--text-secondary); }
 .room-add-unit { margin-top:var(--space-1); }
-.room-add-unit :deep(.el-icon) { margin-right:var(--space-1); }
 /* Phones: a 36px target like the other small buttons, instead of a bare text link. */
 @media (max-width:639px) { .room-unit-cancel { min-height:36px; padding:0 var(--space-3); } }
 .room-add-type { width:100%; max-width:320px; margin-top:var(--space-3); }
