@@ -16,8 +16,15 @@ describe('auditUser', () => {
     expect(auditUser(ID, 'Rina')).toBe('Rina')
     expect(auditUser({ id: ID, name: 'Rina' })).toBe('Rina')
     expect(auditUser({ id: ID, username: 'rina' })).toBe('rina')
-    expect(auditUser('system')).toBe('system')
+    expect(auditUser('kasir01')).toBe('kasir01')
     expect(auditUser(null)).toBeNull()
+  })
+
+  it('shows rows made by the seed script or a job as "Sistem"', () => {
+    expect(auditUser('seed', 'seed')).toBe('Sistem')
+    expect(auditUser('seed')).toBe('Sistem')
+    expect(auditUser('system')).toBe('Sistem')
+    expect(auditUser('admin', 'admin')).toBe('admin')
   })
 })
 

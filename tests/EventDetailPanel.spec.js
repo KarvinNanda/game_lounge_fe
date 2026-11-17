@@ -56,3 +56,22 @@ describe('EventDetailPanel', () => {
     expect(w.emitted('close')).toHaveLength(1)
   })
 })
+
+describe('EventDetailPanel status and audit trail', () => {
+  afterEach(() => { document.body.innerHTML = '' })
+
+  it('shows the status in Indonesian, not the raw API value', async () => {
+    const w = await mountPanel({ ...EVENT, status: 'upcoming' })
+    expect(w.find('.status-tag').text()).toContain('AKAN DATANG')
+    expect(w.text()).not.toContain('UPCOMING')
+  })
+
+  it('shows who created the event once the API sends a name, and never a raw id', async () => {
+    const id = '37e0d3d6-a712-4786-89e2-add3d6c80c5a'
+    const named = await mountPanel({ ...EVENT, created_by: id, created_by_name: 'Siti Rahmawati', created_at: '2026-11-16T13:05:00Z' })
+    expect(named.find('.at-user').text()).toBe('Siti Rahmawati')
+    const bare = await mountPanel({ ...EVENT, created_by: id, created_at: '2026-11-16T13:05:00Z' })
+    expect(bare.text()).not.toContain(id)
+    expect(bare.find('.audit-trail').exists()).toBe(true)
+  })
+})

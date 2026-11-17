@@ -6,8 +6,8 @@
       <el-button circle text @click="emit('close')"><el-icon><Close /></el-icon></el-button>
     </div>
 
-    <el-tag type="warning" class="u-mb-3">
-      <el-icon><Star /></el-icon> {{ event.status?.toUpperCase() }}
+    <el-tag type="warning" class="status-tag u-mb-3">
+      <el-icon><Star /></el-icon> {{ bookingStatusLabel(event.status).toUpperCase() }}
     </el-tag>
 
     <div class="info-section-title">INFORMASI EVENT</div>
@@ -46,6 +46,15 @@
       {{ event.cancel_reason }}
     </div>
 
+    <AuditTrail
+      :created-by="event.created_by"
+      :updated-by="event.updated_by"
+      :created-by-name="event.created_by_name"
+      :updated-by-name="event.updated_by_name"
+      :created-at="event.created_at"
+      :updated-at="event.updated_at"
+    />
+
       <!-- ════════════════════════════════════════════════════════
            DIALOG: Cancel Event Booking
       ════════════════════════════════════════════════════════ -->
@@ -79,6 +88,8 @@ import { ElMessage } from 'element-plus'
 import { cancelEventBooking } from '@/api/booking/eventBookingApi'
 import { notifyError } from '@/utils/notify'
 import { formatRp, formatDateDisplay } from '@/utils/format'
+import { bookingStatusLabel } from '@/utils/bookingStatus'
+import AuditTrail from '@/components/AuditTrail.vue'
 
 const props = defineProps({
   event: { type: Object, required: true },
@@ -134,6 +145,9 @@ const handleCancelEvent = async () => {
   font-size: 12px;
   color: var(--color-danger);
 }
+
+/* A pill, not a full-width bar (the panel is a flex column). */
+.status-tag { align-self: flex-start; }
 
 /* C3: former inline styles */
 .panel-title { font-size: var(--font-size-base); font-weight: 700; }
