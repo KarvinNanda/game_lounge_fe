@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- ── Header ── -->
-    <PageHeader breadcrumb="Pengaturan → Template Notifikasi" title="Template Notifikasi" description="Atur kata-kata pesan Email & WhatsApp yang dikirim ke customer." />
+    <PageHeader breadcrumb="Pengaturan → Template Notifikasi" title="Template Notifikasi" description="Atur kata-kata pesan Email & WhatsApp yang dikirim ke pelanggan." />
 
     <!-- ── Info box ── -->
     <div class="info-banner">
@@ -193,16 +193,16 @@
         <!-- ── Preview ── -->
         <div class="preview-section">
           <div class="preview-header">
-            <span class="preview-title">Preview dengan Data Contoh</span>
+            <span class="preview-title">Pratinjau dengan Data Contoh</span>
             <el-button size="small" plain :loading="previewing" @click="handlePreview">
-              <el-icon><View /></el-icon> Preview
+              <el-icon><View /></el-icon> Pratinjau
             </el-button>
           </div>
           <div v-if="previewRendered" class="preview-box">
             <pre class="preview-pre">{{ previewRendered }}</pre>
           </div>
           <div v-else class="preview-placeholder">
-            Klik "Preview" untuk melihat tampilan pesan dengan data contoh
+            Klik "Pratinjau" untuk melihat tampilan pesan dengan data contoh
           </div>
         </div>
 

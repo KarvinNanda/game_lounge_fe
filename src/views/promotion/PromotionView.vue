@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Dashboard → Promosi" title="Promosi / Voucher" description="Kelola voucher promo dan kirim ke customer (member only)">
+    <PageHeader breadcrumb="Dashboard → Promosi" title="Promosi / Voucher" description="Kelola voucher promo dan kirim ke pelanggan (khusus member)">
       <template #actions>
         <el-button v-if="can('promotion.create')" type="primary" @click="openForm(null)">
           <el-icon><Plus /></el-icon> Buat Voucher Baru

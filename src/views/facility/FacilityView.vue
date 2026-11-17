@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Header -->
-    <PageHeader breadcrumb="Manajemen Cabang → Fasilitas" title="Fasilitas" description="Kelola daftar fasilitas yang tersedia di setiap store.">
+    <PageHeader breadcrumb="Manajemen Cabang → Fasilitas" title="Fasilitas" description="Kelola daftar fasilitas yang tersedia di setiap cabang.">
       <template #actions>
         <el-button v-if="can('settings.branches')" type="primary" @click="$router.push('/facility/create')">
           <el-icon><Plus /></el-icon> Tambah Fasilitas
@@ -87,7 +87,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="Icon" min-width="120">
+        <el-table-column label="Ikon" min-width="120">
           <template #default="{ row }">
             <div class="facility-icon">
                 <img v-if="row.icon_url" :src="getImageUrl(row.icon_url)" :alt="row.name" />

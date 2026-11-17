@@ -50,7 +50,7 @@
       </div>
 
       <div class="confirm-row">
-        <span>Payment</span>
+        <span>Pembayaran</span>
         <span>
           <el-icon aria-hidden="true"><component :is="form.payment_method === 'play_credits' ? 'Coin' : 'Money'" /></el-icon>
           {{ form.payment_method === 'play_credits' ? 'Play Credits' : 'Tunai' }}
