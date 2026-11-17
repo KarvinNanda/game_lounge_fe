@@ -14,7 +14,10 @@
 .ui-filter-bar__fields, .ui-filter-bar__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .ui-filter-bar__fields { flex: 1 1 auto; min-width: 0; }
 @media (max-width: 639px) {
-  .ui-filter-bar { flex-direction: column; align-items: stretch; }
+  /* Fields and actions flow as one wrapping row, so Reset can share a row
+     with the last select instead of taking a row of its own. */
+  .ui-filter-bar { flex-wrap: wrap; align-items: center; }
+  .ui-filter-bar__fields, .ui-filter-bar__actions { display: contents; }
   /* Fields carry fixed widths from the views' scoped classes; on phones they
      follow the bar instead. !important beats those view classes. Date pickers
      render no scoped root, so :slotted never reaches them; :deep does.
@@ -23,7 +26,7 @@
   /* Selects share a row two by two (their values are short); a select left
      alone on its row fills it. */
   :slotted(.el-select) { width: auto !important; flex: 1 1 calc(50% - var(--space-2)); min-width: calc(50% - var(--space-2)); }
-  /* Reset keeps its own size at the end of the row instead of a full-width bar. */
-  .ui-filter-bar__actions { justify-content: flex-end; }
+  /* Actions keep their own size, pushed to the end of their row. */
+  :slotted(.el-button) { margin-left: auto; }
 }
 </style>

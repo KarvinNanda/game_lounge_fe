@@ -332,8 +332,9 @@ onMounted(async () => {
 .capacity-row { display:flex; align-items:flex-end; gap:8px; }
 .capacity-field { display:flex; flex-direction:column; gap:4px; flex:1; }
 .cap-label { font-size:11px; color:var(--text-secondary); }
-.capacity-sep { font-size:16px; color:var(--text-muted); padding-bottom:8px; }
-.cap-unit { font-size:13px; color:var(--text-secondary); padding-bottom:8px; }
+/* Bottom-aligned with the 32px steppers: a 32px line box centres the text on them. */
+.capacity-sep { font-size:16px; color:var(--text-muted); line-height:32px; }
+.cap-unit { font-size:13px; color:var(--text-secondary); line-height:32px; }
 
 /* Status toggle */
 .status-toggle { display:flex; gap:10px; }

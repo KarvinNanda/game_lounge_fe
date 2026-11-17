@@ -20,6 +20,8 @@ describe('FilterBar', () => {
     const mobile = css.slice(css.indexOf('@media (max-width: 639px)'))
     expect(mobile).toMatch(/:slotted\(\.el-input\)[^{]*\{\s*width: 100% !important/)
     expect(mobile).toMatch(/:slotted\(\.el-select\)\s*\{\s*width: auto !important; flex: 1 1 calc\(50% - var\(--space-2\)\)/)
+    // One wrapping row for fields and actions, so Reset can sit next to the last select.
+    expect(mobile).toMatch(/\.ui-filter-bar__fields, \.ui-filter-bar__actions \{ display: contents; \}/)
     // Date pickers render no scoped root, so :slotted never reaches them.
     expect(mobile).toMatch(/\.ui-filter-bar__fields :deep\(\.el-date-editor\)\s*\{\s*width: 100% !important/)
   })
