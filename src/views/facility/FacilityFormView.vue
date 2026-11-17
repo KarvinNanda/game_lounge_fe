@@ -251,8 +251,9 @@ onMounted(async () => {
 }
 .status-option:hover { border-color:var(--color-primary); }
 .status-option.active { border-color:var(--color-primary); background:rgba(124,58,237,0.08); }
-.status-option-title { font-size:13px; font-weight:600; color:var(--text-primary); }
-.status-option-desc { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+.status-option-title { font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.4; }
+/* line-height: el-form-item content sets 32px, which split the text into far-apart lines. */
+.status-option-desc { font-size:12px; color:var(--text-secondary); margin-top:1px; line-height:1.4; }
 
 /* Icon upload */
 .icon-upload-area {

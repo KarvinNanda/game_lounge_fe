@@ -41,6 +41,12 @@ describe('theme.css', () => {
     expect(theme).not.toMatch(/\.el-table \.el-table__cell\s*\{/)
   })
 
+  it('spaces a slot icon from its label in buttons, without spacing anything twice', () => {
+    expect(theme).toMatch(/\.el-button > span \{ gap: 6px; \}/)
+    expect(theme).toContain('.el-button > span > .el-icon--right { margin-left: 0; }')
+    expect(theme).toContain('.el-button > span > [class*=el-icon] + span { margin-left: 0; }')
+  })
+
   it('never uses transition: all', () => {
     expect(theme).not.toMatch(/transition:\s*all/)
   })

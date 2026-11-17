@@ -21,12 +21,12 @@
             <div class="capacity-row">
               <div class="capacity-field">
                 <label class="cap-label">Min</label>
-                <el-input-number v-model="form.capacity_min" :min="1" :max="form.capacity_max" class="u-w-full" controls-position="right" />
+                <el-input-number v-model="form.capacity_min" :min="1" :max="form.capacity_max" class="u-w-full" :controls-position="stepperPosition" />
               </div>
               <div class="capacity-sep">—</div>
               <div class="capacity-field">
                 <label class="cap-label">Max</label>
-                <el-input-number v-model="form.capacity_max" :min="form.capacity_min" class="u-w-full" controls-position="right" />
+                <el-input-number v-model="form.capacity_max" :min="form.capacity_min" class="u-w-full" :controls-position="stepperPosition" />
               </div>
               <span class="cap-unit">orang</span>
             </div>
@@ -191,9 +191,13 @@ import { createRoomTemplate, updateRoomTemplate, getRoomTemplateById } from '@/a
 import { getFacilities } from '@/api/facility/facilityApi'
 import { uploadImage, getImageUrl } from '@/utils/imageHelper'
 import PageHeader from '@/components/ui/PageHeader.vue'
+import { useBreakpoint } from '@/composables/useBreakpoint'
 
 const router = useRouter()
 const route = useRoute()
+// Right-side arrows are about 15px tall each: fine with a mouse, too small for a thumb.
+const { isMobile } = useBreakpoint()
+const stepperPosition = computed(() => (isMobile.value ? '' : 'right'))
 const isEdit = computed(() => !!route.params.id)
 
 const formRef = ref()
@@ -345,8 +349,9 @@ onMounted(async () => {
 }
 .status-option:hover { border-color:var(--color-primary); }
 .status-option.active { border-color:var(--color-primary); background:rgba(124,58,237,0.08); }
-.status-option-title { font-size:13px; font-weight:600; color:var(--text-primary); }
-.status-option-desc { font-size:11px; color:var(--text-secondary); margin-top:1px; }
+.status-option-title { font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.4; }
+/* line-height: el-form-item content sets 32px, which split the text into far-apart lines. */
+.status-option-desc { font-size:12px; color:var(--text-secondary); margin-top:1px; line-height:1.4; }
 
 /* Image upload */
 .image-upload-area {

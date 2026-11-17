@@ -81,7 +81,7 @@
             <div class="facility-cell">
               <div>
                 <div class="cell-name">{{ row.name }}</div>
-                <div class="cell-desc" v-if="row.description">{{ row.description }}</div>
+                <div class="cell-desc" v-if="row.description" :title="row.description">{{ row.description }}</div>
               </div>
             </div>
           </template>
@@ -258,6 +258,7 @@ onMounted(() => {
 /* Table */
 
 .facility-cell { display: flex; align-items: center; gap: 12px; }
+.facility-cell > div { min-width: 0; }
 .facility-icon {
   width: 36px; height: 36px;
   background: var(--bg-main);
@@ -268,7 +269,11 @@ onMounted(() => {
 .facility-icon img { width: 24px; height: 24px; object-fit: contain; }
 
 .cell-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
-.cell-desc { font-size: 12px; color: var(--text-secondary); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px; }
+/* Up to two lines at the column's own width (a fixed 200px cut text while the column had room). */
+.cell-desc {
+  font-size: 12px; color: var(--text-secondary); margin-top: 1px;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+}
 
 .row-actions { display: flex; gap: 4px; justify-content: flex-end; }
 

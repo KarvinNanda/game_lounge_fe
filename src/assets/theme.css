@@ -139,6 +139,17 @@ img { max-width: 100%; }
   }
 }
 
+/* ── Icon and label inside a button ──────────────────────
+   Element Plus spaces an icon only when it comes from the `icon` prop. This app
+   puts <el-icon> in the slot, which left the icon touching the label
+   ("+Booking Baru"). The inner span is already inline-flex, so a gap spaces
+   every icon/label pair. The margins Element Plus adds for the same purpose are
+   reset so nothing is spaced twice. */
+.el-button > span { gap: 6px; }
+.el-button > span > .el-icon--right { margin-left: 0; }
+.el-button > span > .el-icon--left { margin-right: 0; }
+.el-button > span > [class*=el-icon] + span { margin-left: 0; }
+
 /* ── Icon buttons on phones: 36px ───────────────────────
    Small round icon buttons (edit, delete, reorder, more) are 24px. That meets
    WCAG 2.2 AA but is easy to miss with a thumb, and edit sits next to delete.
